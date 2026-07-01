@@ -142,6 +142,10 @@
             <span class="error-label" data-en="Description:" data-th="คำอธิบาย:">Description:</span>
             <span id="error-description" data-en="Retrieving error details..." data-th="กำลังดึงข้อมูลข้อผิดพลาด...">Retrieving error details...</span>
           </p>
+          <p id="technical-details-container" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--border-color, #eaeaea); padding-top: 1rem;">
+            <span class="error-label" data-en="Technical Details:" data-th="ข้อมูลทางเทคนิค:">Technical Details:</span>
+            <span id="error-technical" style="font-family: monospace; font-size: 0.9em; display: block; margin-top: 0.5rem; color: #718096; word-break: break-all; line-height: 1.4;">-</span>
+          </p>
         </div>
 
         <div class="page-hero__cta" style="margin-top: 2.5rem;">
@@ -244,31 +248,100 @@
   <script>
     (function parseAuth0Errors() {
       const errorTranslations = {
-        "access_denied": {
-          en: "Access was denied. Please contact support or try logging in again.",
-          th: "การเข้าถึงระบบถูกปฏิเสธ กรุณาติดต่อฝ่ายสนับสนุนหรือลองเข้าสู่ระบบใหม่อีกครั้ง"
+        // OAuth 2.0 / RFC 6749 Standard Error Codes
+        "invalid_request": {
+          en: "The request is missing a required parameter, includes an unsupported parameter, or is otherwise malformed.",
+          th: "คำขอขาดพารามิเตอร์ที่จำเป็น หรือมีรูปแบบคำขอที่ไม่ถูกต้องสมบูรณ์"
         },
-        "unauthorized": {
-          en: "You are not authorized to access the student dashboard.",
-          th: "คุณไม่มีสิทธิ์ในการเข้าใช้งานพอร์ทัลนักเรียน"
+        "invalid_client": {
+          en: "Client authentication failed. Invalid client ID or credentials.",
+          th: "การยืนยันตัวตนของไคลเอนต์ล้มเหลว ไคลเอนต์ไอดีหรือข้อมูลรับรองไม่ถูกต้อง"
         },
+        "invalid_grant": {
+          en: "The authorization code, session, or credentials are invalid, expired, or revoked.",
+          th: "รหัสการเข้าถึง เซสชัน หรือข้อมูลยืนยันตัวตนไม่ถูกต้อง หมดอายุ หรือถูกยกเลิกแล้ว"
+        },
+        "unauthorized_client": {
+          en: "The client is not authorized to request an authorization code using this method.",
+          th: "ไคลเอนต์นี้ไม่ได้รับสิทธิ์ในการร้องขอรหัสยืนยันตัวตนด้วยวิธีนี้"
+        },
+        "unsupported_grant_type": {
+          en: "The authorization grant type is not supported by the authorization server.",
+          th: "ไม่รองรับประเภทการยืนยันสิทธิ์ (Grant Type) นี้โดยเซิร์ฟเวอร์"
+        },
+        "invalid_scope": {
+          en: "The requested scope is invalid, unknown, or malformed.",
+          th: "ขอบเขตการเข้าถึง (Scope) ที่ร้องขอไม่ถูกต้อง ไม่รู้จัก หรือไม่สมบูรณ์"
+        },
+        "server_error": {
+          en: "The authentication server encountered an unexpected error.",
+          th: "เซิร์ฟเวอร์ยืนยันตัวตนเกิดข้อผิดพลาดภายในที่ไม่คาดคิด"
+        },
+        "temporarily_unavailable": {
+          en: "The authorization server is temporarily offline for maintenance or overloaded.",
+          th: "เซิร์ฟเวอร์ไม่สามารถให้บริการได้ชั่วคราวเนื่องจากอยู่ระหว่างปรับปรุงหรือทำงานหนักเกินไป"
+        },
+
+        // OpenID Connect (OIDC) Standard Codes
         "login_required": {
           en: "Session expired or login is required to proceed.",
-          th: "เซสชันของคุณหมดอายุ หรือจำเป็นต้องเข้าสู่ระบบเพื่อดำเนินการต่อ"
+          th: "เซสชันหมดอายุ หรือจำเป็นต้องเข้าสู่ระบบเพื่อดำเนินการต่อ"
         },
         "consent_required": {
-          en: "Authorization consent is required to proceed.",
-          th: "จำเป็นต้องยืนยันการอนุญาตสิทธิ์เพื่อดำเนินการต่อ"
+          en: "User authorization consent is required to proceed.",
+          th: "จำเป็นต้องได้รับการยินยอมการอนุญาตสิทธิ์จากผู้ใช้เพื่อดำเนินการต่อ"
         },
-        "invalid_request": {
-          en: "The authentication request is invalid or malformed.",
-          th: "คำขอในการตรวจสอบสิทธิ์ไม่ถูกต้องหรือไม่สมบูรณ์"
+        "interaction_required": {
+          en: "User interaction is required to complete authentication.",
+          th: "จำเป็นต้องมีการตอบสนองจากผู้ใช้งานเพื่อทำการเข้าสู่ระบบให้เสร็จสมบูรณ์"
+        },
+
+        // Auth0 Common & Custom Codes
+        "access_denied": {
+          en: "Access was denied. Please make sure you have the correct permissions.",
+          th: "การเข้าถึงระบบถูกปฏิเสธ กรุณาตรวจสอบว่าคุณได้รับสิทธิ์การเข้าใช้งานที่ถูกต้อง"
+        },
+        "too_many_attempts": {
+          en: "Your account is temporarily locked due to too many failed login attempts.",
+          th: "บัญชีของคุณถูกล็อกชั่วคราวเนื่องจากพยายามเข้าสู่ระบบล้มเหลวหลายครั้งเกินไป"
+        },
+        "invalid_password": {
+          en: "The password does not comply with the connection's complexity requirements.",
+          th: "รหัสผ่านไม่เป็นไปตามข้อกำหนดความปลอดภัยที่ตั้งไว้"
+        },
+        "password_strength_error": {
+          en: "The password is too weak. Please use a stronger password.",
+          th: "รหัสผ่านของคุณง่ายเกินไป กรุณาใช้รหัสผ่านที่มีความปลอดภัยสูงกว่านี้"
+        },
+        "user_exists": {
+          en: "A user with this identity or email address already exists.",
+          th: "มีผู้ใช้งานที่ใช้อีเมลหรือบัญชีนี้ในระบบอยู่แล้ว"
+        },
+        "username_exists": {
+          en: "This username is already taken.",
+          th: "ชื่อผู้ใช้งานนี้ถูกใช้ไปแล้วโดยบุคคลอื่น"
+        },
+        "invalid_user_password": {
+          en: "Incorrect username or password.",
+          th: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"
+        },
+        "mfa_required": {
+          en: "Multi-factor authentication (MFA) verification is required to log in.",
+          th: "จำเป็นต้องมีการยืนยันตัวตนหลายปัจจัย (MFA) เพื่อเข้าสู่ระบบ"
+        },
+        "mfa_invalid_code": {
+          en: "The multi-factor authentication (MFA) verification code is incorrect or expired.",
+          th: "รหัสยืนยันตัวตนหลายปัจจัย (MFA) ไม่ถูกต้องหรือหมดอายุแล้ว"
+        },
+        "mfa_registration_required": {
+          en: "You must enroll in multi-factor authentication (MFA) before logging in.",
+          th: "คุณต้องลงทะเบียนการยืนยันตัวตนหลายปัจจัย (MFA) ก่อนเข้าใช้งานระบบ"
         }
       };
 
       const params = new URLSearchParams(window.location.search);
       const errorCode = params.get('error') || 'unknown_error';
-      const errorDesc = params.get('error_description') || 'An unexpected error occurred during authentication.';
+      const errorDesc = params.get('error_description');
 
       const codeEl = document.getElementById('error-code');
       const descEl = document.getElementById('error-description');
@@ -287,10 +360,24 @@
           const savedLang = localStorage.getItem('litalk-lang') || 'en';
           descEl.textContent = errorTranslations[key][savedLang];
         } else {
-          // If custom/unknown error description, show the raw description
-          descEl.setAttribute('data-en', errorDesc);
-          descEl.setAttribute('data-th', errorDesc);
-          descEl.textContent = errorDesc;
+          // If custom/unknown error code, show a generic failure description
+          const defaultEn = "An authentication error occurred. Please try again.";
+          const defaultTh = "เกิดข้อผิดพลาดในการยืนยันตัวตน กรุณาลองใหม่อีกครั้ง";
+          descEl.setAttribute('data-en', defaultEn);
+          descEl.setAttribute('data-th', defaultTh);
+          
+          const savedLang = localStorage.getItem('litalk-lang') || 'en';
+          descEl.textContent = savedLang === 'th' ? defaultTh : defaultEn;
+        }
+      }
+
+      // If a detailed error description is provided (e.g. from Auth0), show the Technical Details block
+      if (errorDesc) {
+        const techContainer = document.getElementById('technical-details-container');
+        const techEl = document.getElementById('error-technical');
+        if (techContainer && techEl) {
+          techContainer.style.display = 'block';
+          techEl.textContent = errorDesc;
         }
       }
     })();
