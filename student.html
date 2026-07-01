@@ -89,6 +89,13 @@
             --transition-all: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             --tabs-dur: 250ms;
             --tabs-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+            /* Panel Reveal Variables */
+            --panel-open-dur: 400ms;
+            --panel-close-dur: 350ms;
+            --panel-translate-y: -12px;
+            --panel-blur: 2px;
+            --panel-ease: cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         body {
@@ -469,6 +476,147 @@
         }
 
         .btn-logout-header:hover {
+            background-color: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: var(--accent-danger);
+        }
+
+        /* Hamburger Button */
+        .nav-hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            width: 24px;
+            height: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 0;
+            z-index: 101;
+            justify-content: center;
+        }
+
+        .nav-hamburger span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background-color: var(--text-primary);
+            border-radius: 2px;
+            transition: var(--transition-all);
+        }
+
+        .nav-hamburger.open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .nav-hamburger.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .nav-hamburger.open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* Mobile Drawer for Student Portal */
+        .nav-drawer {
+            display: flex;
+            visibility: hidden;
+            flex-direction: column;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 24px;
+            gap: 16px;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            box-shadow: var(--shadow-lg);
+            z-index: 99;
+        }
+
+        .t-panel-slide {
+            transform: translateY(var(--panel-translate-y));
+            opacity: 0;
+            filter: blur(var(--panel-blur));
+            pointer-events: none;
+            transition:
+                transform var(--panel-close-dur) var(--panel-ease),
+                opacity   var(--panel-close-dur) var(--panel-ease),
+                filter    var(--panel-close-dur) var(--panel-ease),
+                visibility var(--panel-close-dur) var(--panel-ease);
+            will-change: transform, opacity, filter;
+        }
+
+        .t-panel-slide[data-open="true"] {
+            visibility: visible;
+            transform: translateY(0);
+            opacity: 1;
+            filter: blur(0);
+            pointer-events: auto;
+            transition:
+                transform var(--panel-open-dur) var(--panel-ease),
+                opacity   var(--panel-open-dur) var(--panel-ease),
+                filter    var(--panel-open-dur) var(--panel-ease),
+                visibility 0s linear;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .t-panel-slide { transition: none !important; }
+        }
+
+        .drawer-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition-all);
+        }
+
+        .drawer-link:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--brand-primary);
+        }
+
+        .drawer-divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 4px 0;
+        }
+
+        .drawer-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .drawer-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition-all);
+            border: 1px solid var(--border-color);
+            background: none;
+            color: var(--text-secondary);
+        }
+
+        .drawer-action-btn:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .drawer-action-btn.logout-btn-mobile:hover {
             background-color: rgba(239, 68, 68, 0.08);
             border-color: rgba(239, 68, 68, 0.2);
             color: var(--accent-danger);
@@ -1140,6 +1288,14 @@
         }
 
         @media (max-width: 768px) {
+            .nav-actions {
+                display: none;
+            }
+
+            .nav-hamburger {
+                display: flex;
+            }
+
             .welcome-hero {
                 flex-direction: column;
                 align-items: flex-start;
@@ -1262,16 +1418,40 @@
         <!-- Navigation -->
         <nav class="navbar">
             <div class="nav-container">
-                <div class="nav-brand">
+                <a href="/" class="nav-brand" style="text-decoration: none;">
                     <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
                     <span class="nav-brand-text">Student Portal</span>
-                </div>
+                </a>
                 <div class="nav-actions">
                     <!-- Theme switch inside dashboard -->
                     <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-toggle-icon-dash" class="fas fa-moon"></i>
                     </button>
                     <button class="btn-logout-header" onclick="logout()" id="logout-btn">
+                        <i class="fas fa-arrow-right-from-bracket"></i>
+                        <span>ออกจากระบบ</span>
+                    </button>
+                </div>
+                <!-- Hamburger Button -->
+                <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="student-mobile-drawer">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+
+            <!-- Mobile Drawer -->
+            <div class="nav-drawer t-panel-slide" id="student-mobile-drawer" data-open="false" role="navigation" aria-label="Mobile navigation">
+                <a href="/" class="drawer-link"><i class="fas fa-home"></i> หน้าหลัก</a>
+                <a href="programs" class="drawer-link"><i class="fas fa-book"></i> หลักสูตรทั้งหมด</a>
+                <a href="about" class="drawer-link"><i class="fas fa-info-circle"></i> เกี่ยวกับเรา</a>
+                <div class="drawer-divider"></div>
+                <div class="drawer-actions">
+                    <button class="drawer-action-btn theme-toggle-btn-mobile" onclick="toggleTheme()" aria-label="Toggle Theme">
+                        <i id="theme-toggle-icon-mobile" class="fas fa-moon"></i>
+                        <span id="theme-text-mobile">โหมดมืด</span>
+                    </button>
+                    <button class="drawer-action-btn logout-btn-mobile" onclick="logout()" id="logout-btn-mobile">
                         <i class="fas fa-arrow-right-from-bracket"></i>
                         <span>ออกจากระบบ</span>
                     </button>
@@ -1387,11 +1567,64 @@
 
         const gasAppUrl = 'https://script.google.com/macros/s/AKfycbyyiEM4NUx-leLse4535upWTtf6q68o4dTFIkO2FS0mml3J3kkIhM7WO27BoAP4aJ-BMg/exec';
 
+        // Helper functions for cookie management
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Lax; Secure";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax; Secure";
+        }
+
         window.onload = async () => {
             // Theme setup for icons
             const activeTheme = document.documentElement.getAttribute('data-theme');
             updateThemeIcons(activeTheme);
 
+            // 1. Check for URL parameter ?id=[student_id]
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlStudentId = urlParams.get('id');
+            let studentId = null;
+
+            if (urlStudentId) {
+                studentId = urlStudentId;
+                setCookie('student_id', studentId, 30); // Save cookie for 30 days
+                // Clean the address bar by removing the query parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                // 2. Check for cookie
+                studentId = getCookie('student_id');
+            }
+
+            // If we have a student ID from URL param or cookie, login immediately and bypass Auth0 check
+            if (studentId) {
+                document.getElementById('student-dashboard').style.display = 'block';
+                requestAnimationFrame(() => updateMobileTabs(false));
+                document.getElementById('theme-toggle-container').style.display = 'none';
+
+                fetchStudentData(studentId);
+                initStudentHamburger();
+                return;
+            }
+
+            // 3. Fallback to standard Auth0 check if no direct ID is present
             if (location.search.includes("state=") && (location.search.includes("code=") || location.search.includes("error="))) {
                 await auth0Client.handleRedirectCallback();
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -1406,8 +1639,13 @@
                 // Hide top level toggle as dashboard has its own theme toggle
                 document.getElementById('theme-toggle-container').style.display = 'none';
 
-                const studentId = user.email ? user.email.split('@')[0] : (user.nickname || user.name);
-                fetchStudentData(studentId);
+                const auth0StudentId = user.email ? user.email.split('@')[0] : (user.nickname || user.name);
+                setCookie('student_id', auth0StudentId, 30); // Store student ID in cookie
+
+                fetchStudentData(auth0StudentId);
+
+                // Initialize mobile hamburger drawer
+                initStudentHamburger();
             } else {
                 document.getElementById('login-section').style.display = 'block';
                 document.getElementById('theme-toggle-container').style.display = 'block';
@@ -1415,7 +1653,15 @@
         };
 
         const login = async () => { await auth0Client.loginWithRedirect(); };
-        const logout = () => { auth0Client.logout({ logoutParams: { returnTo: window.location.href.split('?')[0] } }); };
+        const logout = async () => {
+            deleteCookie('student_id');
+            const isAuthenticated = await auth0Client.isAuthenticated();
+            if (isAuthenticated) {
+                auth0Client.logout({ logoutParams: { returnTo: window.location.href.split('?')[0] } });
+            } else {
+                window.location.href = window.location.href.split('?')[0];
+            }
+        };
 
         // Theme Toggle Logic
         function toggleTheme() {
@@ -1429,9 +1675,63 @@
         function updateThemeIcons(theme) {
             const loginIcon = document.getElementById('theme-toggle-icon');
             const dashIcon = document.getElementById('theme-toggle-icon-dash');
+            const mobileIcon = document.getElementById('theme-toggle-icon-mobile');
+            const mobileText = document.getElementById('theme-text-mobile');
 
             if (loginIcon) loginIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             if (dashIcon) dashIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            if (mobileIcon) mobileIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            if (mobileText) mobileText.innerText = theme === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด';
+        }
+
+        function initStudentHamburger() {
+            const hamburger = document.getElementById('nav-hamburger');
+            const drawer = document.getElementById('student-mobile-drawer');
+            if (!hamburger || !drawer) return;
+
+            // Reset state
+            hamburger.classList.remove('open');
+            drawer.setAttribute('data-open', 'false');
+            hamburger.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+
+            // Toggle function
+            window.toggleMobileDrawer = (forceClose = false) => {
+                const isOpen = forceClose ? false : !hamburger.classList.contains('open');
+                hamburger.classList.toggle('open', isOpen);
+                drawer.setAttribute('data-open', String(isOpen));
+                hamburger.setAttribute('aria-expanded', String(isOpen));
+                document.body.style.overflow = isOpen ? 'hidden' : '';
+            };
+
+            hamburger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMobileDrawer();
+            });
+
+            // Close drawer when clicking links
+            const drawerLinks = drawer.querySelectorAll('.drawer-link');
+            drawerLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    toggleMobileDrawer(true);
+                });
+            });
+
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!hamburger.contains(e.target) && !drawer.contains(e.target)) {
+                    if (hamburger.classList.contains('open')) {
+                        toggleMobileDrawer(true);
+                    }
+                }
+            });
+
+            // Close on resize if switching to desktop view
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    toggleMobileDrawer(true);
+                }
+            });
         }
 
         // Helper function to parse Thai/International dates robustly for sorting
