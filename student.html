@@ -865,10 +865,21 @@
             color: var(--text-primary);
         }
 
-        .timeline-feedback h1 { font-size: 1.3rem; }
-        .timeline-feedback h2 { font-size: 1.2rem; }
-        .timeline-feedback h3 { font-size: 1.1rem; }
-        .timeline-feedback h4 { font-size: 1.0rem; }
+        .timeline-feedback h1 {
+            font-size: 1.3rem;
+        }
+
+        .timeline-feedback h2 {
+            font-size: 1.2rem;
+        }
+
+        .timeline-feedback h3 {
+            font-size: 1.1rem;
+        }
+
+        .timeline-feedback h4 {
+            font-size: 1.0rem;
+        }
 
         .timeline-footer {
             margin-top: 16px;
@@ -1337,7 +1348,7 @@
         })();
 
         const auth0Client = new auth0.Auth0Client({
-            domain: 'litalkeducation.us.auth0.com',
+            domain: 'auth.litalkeducation.com',
             clientId: 'NmKUxriv62IDG9yQQ3CZqkVp2ujkjdbp',
             authorizationParams: { redirect_uri: window.location.href.split('?')[0] }
         });
