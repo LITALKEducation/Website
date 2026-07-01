@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication Error — LITALK Education</title>
+  <meta name="description" content="เกิดข้อผิดพลาดในการยืนยันตัวตน - LITALK Education">
+  <link class="favicon-link" rel="icon" href="img/LITALK-Icon.png" type="image/png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .error-details {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background: var(--bg-surface-elevated, #f9f9f9);
+      border-radius: 12px;
+      border: 1px solid var(--border-color, #eaeaea);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+    [data-theme="dark"] .error-details {
+      background: #1a1a1a;
+      border-color: #2a2a2a;
+    }
+    .error-details p {
+      margin: 0.5rem 0;
+      font-size: 0.95rem;
+    }
+    .error-label {
+      font-weight: 600;
+      color: var(--text-color, #1a1a1a);
+    }
+    .error-value {
+      font-family: monospace;
+      color: #e53e3e;
+      background: rgba(229, 62, 62, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body class="page-enter">
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <header role="banner">
+    <nav class="nav" id="main-nav" aria-label="Main navigation">
+      <div class="container">
+        <div class="nav__inner">
+
+          <!-- Logo -->
+          <a href="/" class="nav__logo" aria-label="LITALK Home">
+            <img src="img/LITALK-Black.png" alt="LITALK Education" width="120" height="28">
+          </a>
+
+          <!-- Links -->
+          <ul class="nav__links" role="list">
+            <li><a href="programs" class="nav__link" data-en="Programs" data-th="หลักสูตร">Programs</a></li>
+            <li><a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a></li>
+            <li><a href="/#teachers" class="nav__link" data-en="Teachers" data-th="อาจารย์">Teachers</a></li>
+            <li><a href="/#blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a></li>
+            <li><a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
+          </ul>
+
+          <!-- Actions -->
+          <div class="nav__actions">
+            <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
+              <span class="t-tabs-pill" aria-hidden="true"></span>
+              <button class="lang-btn t-tab active" data-lang-target="en" id="lang-en" aria-pressed="true">EN</button>
+              <button class="lang-btn t-tab" data-lang-target="th" id="lang-th" aria-pressed="false">TH</button>
+            </div>
+            <a href="/#contact" class="btn btn--primary btn--sm" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
+          </div>
+
+          <!-- Hamburger -->
+          <button class="nav__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-drawer">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Mobile Drawer -->
+      <div class="nav__drawer" id="mobile-drawer" role="navigation" aria-label="Mobile navigation">
+        <a href="programs" class="nav__link" data-en="Programs" data-th="หลักสูตร">Programs</a>
+        <a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a>
+        <a href="/#teachers" class="nav__link" data-en="Teachers" data-th="อาจารย์">Teachers</a>
+        <a href="/#blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a>
+        <a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a>
+        <div class="nav__actions">
+          <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
+            <span class="t-tabs-pill" aria-hidden="true"></span>
+            <button class="lang-btn t-tab active" data-lang-target="en" aria-pressed="true">EN</button>
+            <button class="lang-btn t-tab" data-lang-target="th" aria-pressed="false">TH</button>
+          </div>
+          <a href="/#contact" class="btn btn--primary btn--sm" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+
+    <!-- ============================================================
+         ERROR PAGE HERO
+         ============================================================ -->
+    <section class="page-hero" aria-labelledby="error-heading">
+      <div class="container">
+        <nav class="page-hero__breadcrumb" aria-label="Breadcrumb">
+          <a href="/" data-en="Home" data-th="หน้าหลัก">Home</a>
+          <span class="sep" aria-hidden="true">/</span>
+          <span data-en="Authentication Error" data-th="ข้อผิดพลาดในการยืนยันตัวตน">Authentication Error</span>
+        </nav>
+        <span class="page-hero__label" data-en="Authentication Error" data-th="ข้อผิดพลาดในการยืนยันตัวตน">Authentication Error</span>
+        <h1 class="page-hero__title" id="error-heading">
+          <span data-en="Login Failed" data-th="เข้าสู่ระบบไม่สำเร็จ">Login Failed</span>
+        </h1>
+        <p class="page-hero__sub" data-en="An error occurred while trying to log in. Please review the details below or try again." data-th="เกิดข้อผิดพลาดขณะพยายามเข้าสู่ระบบ กรุณาตรวจสอบรายละเอียดด้านล่างหรือลองใหม่อีกครั้ง">
+          An error occurred while trying to log in. Please review the details below or try again.
+        </p>
+
+        <div class="error-details animate">
+          <p>
+            <span class="error-label" data-en="Error Code:" data-th="รหัสข้อผิดพลาด:">Error Code:</span>
+            <span class="error-value" id="error-code">loading_error</span>
+          </p>
+          <p>
+            <span class="error-label" data-en="Description:" data-th="คำอธิบาย:">Description:</span>
+            <span id="error-description" data-en="Retrieving error details..." data-th="กำลังดึงข้อมูลข้อผิดพลาด...">Retrieving error details...</span>
+          </p>
+        </div>
+
+        <div class="page-hero__cta" style="margin-top: 2.5rem;">
+          <a href="student" class="btn btn--primary btn--lg" data-en="Back to Student Portal" data-th="กลับไปยังพอร์ทัลนักเรียน">Back to Student Portal</a>
+          <a href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener noreferrer" class="btn btn--outline btn--lg">
+            <i class="fab fa-line" style="margin-right: 8px;"></i>
+            <span data-en="Contact Support on Line" data-th="ติดต่อฝ่ายสนับสนุนทาง Line">Contact Support on Line</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer" role="contentinfo" aria-label="Site footer">
+    <div class="container">
+      <div class="footer__top">
+
+        <!-- Brand -->
+        <div class="footer__brand">
+          <img src="img/LITALK-Black.png" alt="LITALK Education" width="120" height="28">
+          <p class="footer__tagline" data-en="Building confident English communicators, one lesson at a time." data-th="สร้างนักสื่อสารภาษาอังกฤษที่มั่นใจ ทีละบทเรียน">
+            Building confident English communicators, one lesson at a time.
+          </p>
+          <!-- Social Icons -->
+          <div class="footer__socials" aria-label="Social media">
+            <a href="https://www.facebook.com/LITALKOfficial" class="footer__social-icon" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="https://www.instagram.com/LITALKOfficial" class="footer__social-icon" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://x.com/LITALKOfficial" class="footer__social-icon" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-x-twitter"></i>
+            </a>
+            <a href="https://lin.ee/n4zLBXa" class="footer__social-icon" aria-label="Line OA" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-line"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Programs -->
+        <div>
+          <h3 class="footer__col-title" data-en="Programs" data-th="หลักสูตร">Programs</h3>
+          <ul class="footer__links" role="list">
+            <li><a href="programs#starter" class="footer__link" data-en="Starter" data-th="ผู้เริ่มต้น">Starter</a></li>
+            <li><a href="programs#communicator" class="footer__link" data-en="Communicator" data-th="นักสื่อสาร">Communicator</a></li>
+            <li><a href="programs#pro" class="footer__link" data-en="Pro English" data-th="Pro English">Pro English</a></li>
+            <li><a href="programs#custom" class="footer__link" data-en="Custom Package" data-th="แพ็คเกจกำหนดเอง">Custom Package</a></li>
+          </ul>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <h3 class="footer__col-title" data-en="Company" data-th="บริษัท">Company</h3>
+          <ul class="footer__links" role="list">
+            <li><a href="about" class="footer__link" data-en="About Us" data-th="เกี่ยวกับเรา">About Us</a></li>
+            <li><a href="/#teachers" class="footer__link" data-en="Our Teachers" data-th="อาจารย์">Our Teachers</a></li>
+            <li><a href="student" class="footer__link" data-en="Student Portal" data-th="พอร์ทัลนักเรียน">Student Portal</a></li>
+            <li><a href="/#contact" class="footer__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
+          </ul>
+        </div>
+
+        <!-- Resources -->
+        <div>
+          <h3 class="footer__col-title" data-en="Resources" data-th="ทรัพยากร">Resources</h3>
+          <ul class="footer__links" role="list">
+            <li><a href="/#blog" class="footer__link" data-en="Blog" data-th="บทความ">Blog</a></li>
+            <li><a href="/#faq" class="footer__link" data-en="FAQ" data-th="คำถามที่พบบ่อย">FAQ</a></li>
+            <li><a href="#" class="footer__link" data-en="Privacy Policy" data-th="นโยบายความเป็นส่วนตัว">Privacy Policy</a></li>
+            <li><a href="#" class="footer__link" data-en="Terms of Service" data-th="ข้อกำหนดการใช้งาน">Terms of Service</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer__bottom">
+        <span data-en="© 2026 LITALK Education. All rights reserved." data-th="© 2026 LITALK Education สงวนลิขสิทธิ์ทุกประการ">© 2026 LITALK Education. All rights reserved.</span>
+        <div class="footer__bottom-right">
+          <div class="footer__bottom-social" aria-label="Follow LITALK">
+            <a href="https://www.facebook.com/LITALKOfficial" target="_blank" rel="noopener noreferrer" aria-label="Facebook">FB</a>
+            <a href="https://www.instagram.com/LITALKOfficial" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a>
+            <a href="https://x.com/LITALKOfficial" target="_blank" rel="noopener noreferrer" aria-label="X">X</a>
+            <a href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener noreferrer" aria-label="Line OA">LINE</a>
+          </div>
+          <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
+            <span class="t-tabs-pill" aria-hidden="true"></span>
+            <button class="lang-btn t-tab active" data-lang-target="en" aria-pressed="true">EN</button>
+            <button class="lang-btn t-tab" data-lang-target="th" aria-pressed="false">TH</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script to parse Auth0 params before main.js translates -->
+  <script>
+    (function parseAuth0Errors() {
+      const errorTranslations = {
+        "access_denied": {
+          en: "Access was denied. Please contact support or try logging in again.",
+          th: "การเข้าถึงระบบถูกปฏิเสธ กรุณาติดต่อฝ่ายสนับสนุนหรือลองเข้าสู่ระบบใหม่อีกครั้ง"
+        },
+        "unauthorized": {
+          en: "You are not authorized to access the student dashboard.",
+          th: "คุณไม่มีสิทธิ์ในการเข้าใช้งานพอร์ทัลนักเรียน"
+        },
+        "login_required": {
+          en: "Session expired or login is required to proceed.",
+          th: "เซสชันของคุณหมดอายุ หรือจำเป็นต้องเข้าสู่ระบบเพื่อดำเนินการต่อ"
+        },
+        "consent_required": {
+          en: "Authorization consent is required to proceed.",
+          th: "จำเป็นต้องยืนยันการอนุญาตสิทธิ์เพื่อดำเนินการต่อ"
+        },
+        "invalid_request": {
+          en: "The authentication request is invalid or malformed.",
+          th: "คำขอในการตรวจสอบสิทธิ์ไม่ถูกต้องหรือไม่สมบูรณ์"
+        }
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const errorCode = params.get('error') || 'unknown_error';
+      const errorDesc = params.get('error_description') || 'An unexpected error occurred during authentication.';
+
+      const codeEl = document.getElementById('error-code');
+      const descEl = document.getElementById('error-description');
+
+      if (codeEl) {
+        codeEl.textContent = errorCode;
+      }
+
+      if (descEl) {
+        const key = errorCode.toLowerCase();
+        if (errorTranslations[key]) {
+          descEl.setAttribute('data-en', errorTranslations[key].en);
+          descEl.setAttribute('data-th', errorTranslations[key].th);
+          
+          // Get the currently saved language from localStorage (fallback to 'en')
+          const savedLang = localStorage.getItem('litalk-lang') || 'en';
+          descEl.textContent = errorTranslations[key][savedLang];
+        } else {
+          // If custom/unknown error description, show the raw description
+          descEl.setAttribute('data-en', errorDesc);
+          descEl.setAttribute('data-th', errorDesc);
+          descEl.textContent = errorDesc;
+        }
+      }
+    })();
+  </script>
+
+  <!-- JavaScript -->
+  <script src="main.js" defer></script>
+
+</body>
+
+</html>

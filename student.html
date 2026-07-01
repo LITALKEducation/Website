@@ -1625,9 +1625,22 @@
             }
 
             // 3. Fallback to standard Auth0 check if no direct ID is present
+            const urlError = urlParams.get('error');
+            if (urlError) {
+                const urlErrorDesc = urlParams.get('error_description') || 'An authentication error occurred';
+                window.location.href = `error.html?error=${encodeURIComponent(urlError)}&error_description=${encodeURIComponent(urlErrorDesc)}`;
+                return;
+            }
+
             if (location.search.includes("state=") && (location.search.includes("code=") || location.search.includes("error="))) {
-                await auth0Client.handleRedirectCallback();
-                window.history.replaceState({}, document.title, window.location.pathname);
+                try {
+                    await auth0Client.handleRedirectCallback();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch (err) {
+                    console.error("Auth0 Callback Error:", err);
+                    window.location.href = `error.html?error=callback_error&error_description=${encodeURIComponent(err.message)}`;
+                    return;
+                }
             }
 
             const isAuthenticated = await auth0Client.isAuthenticated();
