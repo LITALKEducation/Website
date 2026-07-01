@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Programs — LITALK Education</title>
+  <meta name="description" content="Explore LITALK's English learning programs. Choose from Starter, Communicator, Pro English, or a fully Custom Package starting at ฿120/hour. No commitment required.">
+  <meta property="og:title" content="Programs — LITALK Education">
+  <meta property="og:description" content="Flexible, structured English programs for every learner. From ฿120/hour with no monthly commitment.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="page-enter">
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <header role="banner">
+    <nav class="nav" id="main-nav" aria-label="Main navigation">
+      <div class="container">
+        <div class="nav__inner">
+
+          <a href="/" class="nav__logo" aria-label="LITALK Home">
+            <img src="img/LITALK-Black.png" alt="LITALK Education" width="120" height="28">
+          </a>
+
+          <ul class="nav__links" role="list">
+            <li><a href="programs" class="nav__link nav__link--active" data-en="Programs" data-th="หลักสูตร">Programs</a></li>
+            <li><a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a></li>
+            <li><a href="/#teachers" class="nav__link" data-en="Teachers" data-th="อาจารย์">Teachers</a></li>
+            <li><a href="/#blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a></li>
+            <li><a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
+          </ul>
+
+          <div class="nav__actions">
+            <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
+              <span class="t-tabs-pill" aria-hidden="true"></span>
+              <button class="lang-btn t-tab active" data-lang-target="en" aria-pressed="true">EN</button>
+              <button class="lang-btn t-tab" data-lang-target="th" aria-pressed="false">TH</button>
+            </div>
+            <a href="/#contact" class="btn btn--primary btn--sm" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
+          </div>
+
+          <button class="nav__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-drawer">
+            <span></span><span></span><span></span>
+          </button>
+
+        </div>
+      </div>
+
+      <div class="nav__drawer" id="mobile-drawer" role="navigation" aria-label="Mobile navigation">
+        <a href="programs" class="nav__link nav__link--active" data-en="Programs" data-th="หลักสูตร">Programs</a>
+        <a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a>
+        <a href="/#teachers" class="nav__link" data-en="Teachers" data-th="อาจารย์">Teachers</a>
+        <a href="/#blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a>
+        <a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a>
+        <div class="nav__actions">
+          <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
+            <span class="t-tabs-pill" aria-hidden="true"></span>
+            <button class="lang-btn t-tab active" data-lang-target="en" aria-pressed="true">EN</button>
+            <button class="lang-btn t-tab" data-lang-target="th" aria-pressed="false">TH</button>
+          </div>
+          <a href="/#contact" class="btn btn--primary btn--sm" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main-content">
+
+    <!-- ============================================================
+         PAGE HERO
+         ============================================================ -->
+    <section class="page-hero" aria-labelledby="programs-page-heading">
+      <div class="container">
+        <nav class="page-hero__breadcrumb" aria-label="Breadcrumb">
+          <a href="/" data-en="Home" data-th="หน้าหลัก">Home</a>
+          <span class="sep" aria-hidden="true">/</span>
+          <span data-en="Programs" data-th="หลักสูตร">Programs</span>
+        </nav>
+        <span class="page-hero__label" data-en="Learning Programs" data-th="หลักสูตรการเรียน">Learning Programs</span>
+        <h1 class="page-hero__title" id="programs-page-heading">
+          <span data-en="Choose your path." data-th="เลือกเส้นทางของคุณ">Choose your path.</span>
+        </h1>
+        <p class="page-hero__sub" data-en="Structured programs designed to take you from wherever you are to where you want to be — clearly, confidently, and at your own pace." data-th="หลักสูตรที่มีโครงสร้างชัดเจน ออกแบบมาเพื่อพาคุณจากที่ที่คุณอยู่ไปยังที่ที่คุณต้องการ อย่างชัดเจน มั่นใจ และในจังหวะของคุณเอง">
+          Structured programs designed to take you from wherever you are to where you want to be — clearly, confidently, and at your own pace.
+        </p>
+        <div class="page-hero__cta">
+          <a href="#plans" class="btn btn--primary btn--lg" data-en="See All Plans" data-th="ดูทุกแผน">See All Plans</a>
+          <a href="/#contact" class="btn btn--outline btn--lg" data-en="Free Trial Lesson" data-th="บทเรียนทดลองฟรี">Free Trial Lesson</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ALL PROGRAMS
+         ============================================================ -->
+    <section class="section" id="plans" aria-labelledby="plans-heading">
+      <div class="container">
+        <div class="text-center animate">
+          <span class="section-label" data-en="All Plans" data-th="ทุกแผน">All Plans</span>
+          <h2 class="section-heading" id="plans-heading" data-en="Find the right fit." data-th="ค้นหาสิ่งที่เหมาะสม">Find the right fit.</h2>
+          <p class="section-sub" data-en="All programs include access to our student portal, personalised learning, and support from expert teachers." data-th="ทุกโปรแกรมรวมถึงการเข้าถึงพอร์ทัลนักเรียน การเรียนรู้ส่วนตัว และการสนับสนุนจากอาจารย์ผู้เชี่ยวชาญ">
+            All programs include access to our student portal, personalised learning, and support from expert teachers.
+          </p>
+        </div>
+
+        <div class="programs__grid" role="list">
+
+          <!-- Starter -->
+          <div class="program-card t-tilt animate animate--delay-1" id="starter" role="listitem">
+            <div class="t-tilt-card">
+              <div class="program-card__tag" data-en="Foundation" data-th="พื้นฐาน">Foundation</div>
+              <h3 class="program-card__name" data-en="Starter" data-th="ผู้เริ่มต้น">Starter</h3>
+              <p class="program-card__desc" data-en="Perfect for beginners. Build your foundation in grammar, vocabulary, and everyday conversation." data-th="เหมาะสำหรับผู้เริ่มต้น สร้างพื้นฐานไวยากรณ์ คำศัพท์ และการสนทนาในชีวิตประจำวัน">
+                Perfect for beginners. Build your foundation in grammar, vocabulary, and everyday conversation.
+              </p>
+              <div class="program-card__price">
+                <span class="program-card__price-num">฿2,900</span>
+                <span class="program-card__price-unit" data-en="/ month" data-th="/ เดือน">/ month</span>
+              </div>
+              <ul class="program-card__features" role="list">
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="8 lessons per month" data-th="8 บทเรียนต่อเดือน">8 lessons per month</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Grammar & vocabulary fundamentals" data-th="ไวยากรณ์และคำศัพท์พื้นฐาน">Grammar & vocabulary fundamentals</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Everyday conversational English" data-th="ภาษาอังกฤษสนทนาในชีวิตประจำวัน">Everyday conversational English</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Student portal access" data-th="เข้าถึงพอร์ทัลนักเรียน">Student portal access</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Progress tracking & homework" data-th="ติดตามความก้าวหน้าและการบ้าน">Progress tracking & homework</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="7-day money-back guarantee" data-th="รับประกันคืนเงิน 7 วัน">7-day money-back guarantee</span>
+                </li>
+              </ul>
+              <a href="/#contact" class="btn btn--ghost" data-en="Get Started" data-th="เริ่มต้น">Get Started</a>
+              <div class="t-tilt-glare"></div>
+            </div>
+          </div>
+
+          <!-- Communicator (Featured) -->
+          <div class="program-card program-card--featured t-tilt animate animate--delay-2" id="communicator" role="listitem">
+            <div class="t-tilt-card">
+              <div class="program-card__tag" data-en="Most Popular" data-th="ยอดนิยม">Most Popular</div>
+              <h3 class="program-card__name" data-en="Communicator" data-th="นักสื่อสาร">Communicator</h3>
+              <p class="program-card__desc" data-en="For learners ready to speak confidently. Focus on real-world conversations, presentations, and fluency." data-th="สำหรับผู้เรียนที่พร้อมพูดอย่างมั่นใจ เน้นการสนทนาในโลกจริง การนำเสนอ และความคล่องแคล่ว">
+                For learners ready to speak confidently. Focus on real-world conversations, presentations, and fluency.
+              </p>
+              <div class="program-card__price">
+                <span class="program-card__price-num">฿4,900</span>
+                <span class="program-card__price-unit" data-en="/ month" data-th="/ เดือน">/ month</span>
+              </div>
+              <ul class="program-card__features" role="list">
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="16 lessons per month" data-th="16 บทเรียนต่อเดือน">16 lessons per month</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Speaking & listening deep focus" data-th="เน้นการพูดและฟังเชิงลึก">Speaking & listening deep focus</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="1-on-1 conversation sessions" data-th="การสนทนา 1 ต่อ 1">1-on-1 conversation sessions</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Personalised teacher feedback" data-th="ผลตอบรับส่วนตัวจากอาจารย์">Personalised teacher feedback</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Full portal + learning resources" data-th="พอร์ทัลครบถ้วนและแหล่งเรียนรู้">Full portal + learning resources</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="7-day money-back guarantee" data-th="รับประกันคืนเงิน 7 วัน">7-day money-back guarantee</span>
+                </li>
+              </ul>
+              <a href="/#contact" class="btn btn--primary" data-en="Get Started" data-th="เริ่มต้น">Get Started</a>
+              <div class="t-tilt-glare"></div>
+            </div>
+          </div>
+
+          <!-- Pro English -->
+          <div class="program-card t-tilt animate animate--delay-3" id="pro" role="listitem">
+            <div class="t-tilt-card">
+              <div class="program-card__tag" data-en="Professional" data-th="มืออาชีพ">Professional</div>
+              <h3 class="program-card__name" data-en="Pro English" data-th="Pro English">Pro English</h3>
+              <p class="program-card__desc" data-en="For career professionals. Business English, presentations, interviews, and advanced fluency training." data-th="สำหรับมืออาชีพในอาชีพ ภาษาอังกฤษทางธุรกิจ การนำเสนอ การสัมภาษณ์ และการฝึกความคล่องแคล่วขั้นสูง">
+                For career professionals. Business English, presentations, interviews, and advanced fluency training.
+              </p>
+              <div class="program-card__price">
+                <span class="program-card__price-num">฿7,900</span>
+                <span class="program-card__price-unit" data-en="/ month" data-th="/ เดือน">/ month</span>
+              </div>
+              <ul class="program-card__features" role="list">
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Unlimited lessons" data-th="บทเรียนไม่จำกัด">Unlimited lessons</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Business English track" data-th="หลักสูตรภาษาอังกฤษธุรกิจ">Business English track</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Interview & presentation prep" data-th="เตรียมสัมภาษณ์และนำเสนองาน">Interview & presentation prep</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Priority scheduling" data-th="จัดตารางเวลาก่อนใคร">Priority scheduling</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="Dedicated personal teacher" data-th="อาจารย์ประจำตัว">Dedicated personal teacher</span>
+                </li>
+                <li class="program-card__feature">
+                  <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                  <span data-en="7-day money-back guarantee" data-th="รับประกันคืนเงิน 7 วัน">7-day money-back guarantee</span>
+                </li>
+              </ul>
+              <a href="/#contact" class="btn btn--ghost" data-en="Get Started" data-th="เริ่มต้น">Get Started</a>
+              <div class="t-tilt-glare"></div>
+            </div>
+          </div>
+
+          <!-- Custom Package (Wide) -->
+          <div class="program-card program-card--wide t-tilt animate animate--delay-4" id="custom" role="listitem">
+            <div class="t-tilt-card">
+              <div>
+                <div class="program-card__tag" data-en="Flexible" data-th="ยืดหยุ่น">Flexible</div>
+                <h3 class="program-card__name" data-en="Custom Package" data-th="แพ็คเกจกำหนดเอง">Custom Package</h3>
+                <p class="program-card__desc" data-en="Design your own learning experience. Choose your focus areas — speaking, writing, grammar, business English, or exam preparation. Set your own schedule and pay only for the hours you need. No monthly subscription, no lock-in." data-th="ออกแบบประสบการณ์การเรียนรู้ของคุณเอง เลือกพื้นที่โฟกัส ไม่ว่าจะเป็นการพูด การเขียน ไวยากรณ์ ภาษาอังกฤษธุรกิจ หรือการเตรียมสอบ กำหนดตารางเวลาของคุณเองและจ่ายเฉพาะชั่วโมงที่คุณต้องการ ไม่มีสมาชิกรายเดือน ไม่มีการผูกมัด">
+                  Design your own learning experience. Choose your focus areas — speaking, writing, grammar, business English, or exam preparation. Set your own schedule and pay only for the hours you need. No monthly subscription, no lock-in.
+                </p>
+                <div class="program-card__price">
+                  <span class="program-card__price-label" data-en="Starting from" data-th="เริ่มต้นที่">Starting from</span>
+                  <span class="program-card__price-num">฿120</span>
+                  <span class="program-card__price-unit" data-en="/ hour" data-th="/ ชั่วโมง">/ hour</span>
+                </div>
+              </div>
+              <div>
+                <ul class="program-card__features" role="list">
+                  <li class="program-card__feature">
+                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                    <span data-en="No monthly commitment or subscription" data-th="ไม่มีข้อผูกพันรายเดือนหรือการสมัครสมาชิก">No monthly commitment or subscription</span>
+                  </li>
+                  <li class="program-card__feature">
+                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                    <span data-en="Choose any topic, skill, or exam focus" data-th="เลือกหัวข้อ ทักษะ หรือการเตรียมสอบใดก็ได้">Choose any topic, skill, or exam focus</span>
+                  </li>
+                  <li class="program-card__feature">
+                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                    <span data-en="Completely flexible scheduling" data-th="ตารางเวลาที่ยืดหยุ่นอย่างสมบูรณ์">Completely flexible scheduling</span>
+                  </li>
+                  <li class="program-card__feature">
+                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                    <span data-en="Student portal access included" data-th="รวมการเข้าถึงพอร์ทัลนักเรียน">Student portal access included</span>
+                  </li>
+                  <li class="program-card__feature">
+                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                    <span data-en="Ideal for students, busy professionals, and specific goals" data-th="เหมาะสำหรับนักเรียน มืออาชีพที่ยุ่ง และเป้าหมายเฉพาะ">Ideal for students, busy professionals, and specific goals</span>
+                  </li>
+                  <li class="program-card__feature">
+                    <i class="fas fa-check feature-check" aria-hidden="true"></i>
+                    <span data-en="Book as few as 1 hour at a time" data-th="จองเพียง 1 ชั่วโมงต่อครั้งก็ได้">Book as few as 1 hour at a time</span>
+                  </li>
+                </ul>
+                <a href="/#contact" class="btn btn--outline" data-en="Get a Custom Quote" data-th="รับใบเสนอราคากำหนดเอง">Get a Custom Quote</a>
+              </div>
+              <div class="t-tilt-glare"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         COMPARISON TABLE
+         ============================================================ -->
+    <section class="section section--alt" id="compare" aria-labelledby="compare-heading">
+      <div class="container">
+        <div class="text-center animate">
+          <span class="section-label" data-en="Compare Plans" data-th="เปรียบเทียบแผน">Compare Plans</span>
+          <h2 class="section-heading" id="compare-heading" data-en="What's included." data-th="สิ่งที่รวมอยู่">What's included.</h2>
+        </div>
+
+        <div class="compare-wrap animate animate--delay-1">
+          <table class="compare__table" role="table" aria-label="Program comparison table">
+            <thead>
+              <tr>
+                <th scope="col" data-en="Feature" data-th="คุณสมบัติ">Feature</th>
+                <th scope="col" data-en="Starter" data-th="ผู้เริ่มต้น">Starter</th>
+                <th scope="col" class="compare__featured-col" data-en="Communicator" data-th="นักสื่อสาร">Communicator</th>
+                <th scope="col" data-en="Pro English" data-th="Pro English">Pro English</th>
+                <th scope="col" data-en="Custom" data-th="กำหนดเอง">Custom</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-en="Lessons per month" data-th="บทเรียนต่อเดือน">Lessons per month</td>
+                <td>8</td>
+                <td class="compare__featured-col">16</td>
+                <td data-en="Unlimited" data-th="ไม่จำกัด">Unlimited</td>
+                <td data-en="Flexible" data-th="ยืดหยุ่น">Flexible</td>
+              </tr>
+              <tr>
+                <td data-en="Grammar & vocabulary" data-th="ไวยากรณ์และคำศัพท์">Grammar & vocabulary</td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td class="compare__featured-col"><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+              </tr>
+              <tr>
+                <td data-en="Speaking & listening focus" data-th="เน้นการพูดและฟัง">Speaking & listening focus</td>
+                <td><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td class="compare__featured-col"><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+              </tr>
+              <tr>
+                <td data-en="1-on-1 conversation sessions" data-th="การสนทนา 1 ต่อ 1">1-on-1 conversation sessions</td>
+                <td><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td class="compare__featured-col"><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+              </tr>
+              <tr>
+                <td data-en="Personalised feedback" data-th="ผลตอบรับส่วนตัว">Personalised feedback</td>
+                <td><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td class="compare__featured-col"><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+              </tr>
+              <tr>
+                <td data-en="Business English track" data-th="หลักสูตรภาษาอังกฤษธุรกิจ">Business English track</td>
+                <td><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td class="compare__featured-col"><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td data-en="Optional" data-th="ตัวเลือก">Optional</td>
+              </tr>
+              <tr>
+                <td data-en="Interview & presentation prep" data-th="เตรียมสัมภาษณ์และนำเสนองาน">Interview & presentation prep</td>
+                <td><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td class="compare__featured-col"><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td data-en="Optional" data-th="ตัวเลือก">Optional</td>
+              </tr>
+              <tr>
+                <td data-en="Dedicated teacher" data-th="อาจารย์ประจำตัว">Dedicated teacher</td>
+                <td><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td class="compare__featured-col"><span class="compare__dash" aria-label="Not included">—</span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__dash" aria-label="Not included">—</span></td>
+              </tr>
+              <tr>
+                <td data-en="Student portal access" data-th="เข้าถึงพอร์ทัลนักเรียน">Student portal access</td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td class="compare__featured-col"><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+              </tr>
+              <tr>
+                <td data-en="7-day money-back guarantee" data-th="รับประกันคืนเงิน 7 วัน">7-day money-back guarantee</td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td class="compare__featured-col"><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__check" aria-label="Included"><i class="fas fa-check"></i></span></td>
+                <td><span class="compare__dash" aria-label="Not included">—</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FAQ (Pricing)
+         ============================================================ -->
+    <section class="section" id="faq" aria-labelledby="faq-heading">
+      <div class="container">
+        <div class="text-center animate">
+          <span class="section-label" data-en="FAQ" data-th="คำถามที่พบบ่อย">FAQ</span>
+          <h2 class="section-heading" id="faq-heading" data-en="Questions about pricing." data-th="คำถามเกี่ยวกับราคา">Questions about pricing.</h2>
+        </div>
+
+        <div class="faq__list animate animate--delay-1" role="list">
+
+          <div class="faq-item t-acc" data-open="false" role="listitem">
+            <button class="faq-item__btn t-acc-head" aria-expanded="false" aria-controls="pfaq-a1" id="pfaq-q1">
+              <span class="faq-item__q" data-en="Can I switch programs after I enroll?" data-th="สามารถเปลี่ยนโปรแกรมหลังลงทะเบียนได้หรือไม่?">Can I switch programs after I enroll?</span>
+              <div class="faq-item__icon t-acc-chevron" aria-hidden="true">
+                <i class="fas fa-chevron-down"></i>
+              </div>
+            </button>
+            <div class="faq-item__body t-acc-panel" id="pfaq-a1" role="region" aria-labelledby="pfaq-q1" hidden>
+              <div class="t-acc-panel-inner">
+                <p class="faq-item__a" data-en="Yes, you can upgrade or change your program at any time. We will reassess your progress and adjust your curriculum to match your new plan from the following month." data-th="ใช่ คุณสามารถอัปเกรดหรือเปลี่ยนโปรแกรมได้ตลอดเวลา เราจะประเมินความก้าวหน้าของคุณใหม่และปรับหลักสูตรให้ตรงกับแผนใหม่ของคุณตั้งแต่เดือนถัดไป">
+                  Yes, you can upgrade or change your program at any time. We will reassess your progress and adjust your curriculum to match your new plan from the following month.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item t-acc" data-open="false" role="listitem">
+            <button class="faq-item__btn t-acc-head" aria-expanded="false" aria-controls="pfaq-a2" id="pfaq-q2">
+              <span class="faq-item__q" data-en="What is the minimum purchase for the Custom Package?" data-th="การซื้อขั้นต่ำสำหรับ Custom Package คือเท่าไร?">What is the minimum purchase for the Custom Package?</span>
+              <div class="faq-item__icon t-acc-chevron" aria-hidden="true">
+                <i class="fas fa-chevron-down"></i>
+              </div>
+            </button>
+            <div class="faq-item__body t-acc-panel" id="pfaq-a2" role="region" aria-labelledby="pfaq-q2" hidden>
+              <div class="t-acc-panel-inner">
+                <p class="faq-item__a" data-en="The Custom Package starts at ฿120 per hour with no minimum number of hours required. You can book a single session or a bundle of hours — whatever suits your schedule and budget." data-th="Custom Package เริ่มต้นที่ ฿120 ต่อชั่วโมง โดยไม่มีจำนวนชั่วโมงขั้นต่ำที่กำหนด คุณสามารถจองได้ตั้งแต่เซสชันเดียวจนถึงกลุ่มชั่วโมง ขึ้นอยู่กับตารางเวลาและงบประมาณของคุณ">
+                  The Custom Package starts at ฿120 per hour with no minimum number of hours required. You can book a single session or a bundle of hours — whatever suits your schedule and budget.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item t-acc" data-open="false" role="listitem">
+            <button class="faq-item__btn t-acc-head" aria-expanded="false" aria-controls="pfaq-a3" id="pfaq-q3">
+              <span class="faq-item__q" data-en="Is there a free trial before committing?" data-th="มีการทดลองใช้ฟรีก่อนตัดสินใจหรือไม่?">Is there a free trial before committing?</span>
+              <div class="faq-item__icon t-acc-chevron" aria-hidden="true">
+                <i class="fas fa-chevron-down"></i>
+              </div>
+            </button>
+            <div class="faq-item__body t-acc-panel" id="pfaq-a3" role="region" aria-labelledby="pfaq-q3" hidden>
+              <div class="t-acc-panel-inner">
+                <p class="faq-item__a" data-en="Yes. All new students receive a free 30-minute introductory session including a placement assessment and portal walkthrough. No credit card required and no commitment." data-th="ใช่ นักเรียนใหม่ทุกคนจะได้รับเซสชันแนะนำฟรี 30 นาที รวมถึงการประเมินจัดวางและการแนะนำพอร์ทัล ไม่ต้องใช้บัตรเครดิตและไม่มีข้อผูกพัน">
+                  Yes. All new students receive a free 30-minute introductory session including a placement assessment and portal walkthrough. No credit card required and no commitment.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item t-acc" data-open="false" role="listitem">
+            <button class="faq-item__btn t-acc-head" aria-expanded="false" aria-controls="pfaq-a4" id="pfaq-q4">
+              <span class="faq-item__q" data-en="Do you offer discounts for longer commitments?" data-th="มีส่วนลดสำหรับการผูกมัดระยะยาวหรือไม่?">Do you offer discounts for longer commitments?</span>
+              <div class="faq-item__icon t-acc-chevron" aria-hidden="true">
+                <i class="fas fa-chevron-down"></i>
+              </div>
+            </button>
+            <div class="faq-item__body" id="pfaq-a4" role="region" aria-labelledby="pfaq-q4" hidden>
+              <div class="t-acc-panel-inner">
+                <p class="faq-item__a" data-en="Yes. Students who commit to 3 or 6 months in advance receive a 10–15% discount. For the Custom Package, purchasing 10+ hours in a bundle also qualifies for a discounted rate. Contact us for details." data-th="ใช่ นักเรียนที่ผูกมัดล่วงหน้า 3 หรือ 6 เดือนจะได้รับส่วนลด 10-15% สำหรับ Custom Package การซื้อ 10+ ชั่วโมงเป็นกลุ่มก็มีสิทธิ์ได้รับอัตราที่ลดลงเช่นกัน ติดต่อเราเพื่อดูรายละเอียด">
+                  Yes. Students who commit to 3 or 6 months in advance receive a 10–15% discount. For the Custom Package, purchasing 10+ hours in a bundle also qualifies for a discounted rate. Contact us for details.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item t-acc" data-open="false" role="listitem">
+            <button class="faq-item__btn t-acc-head" aria-expanded="false" aria-controls="pfaq-a5" id="pfaq-q5">
+              <span class="faq-item__q" data-en="What payment methods do you accept?" data-th="คุณรับวิธีการชำระเงินอะไรบ้าง?">What payment methods do you accept?</span>
+              <div class="faq-item__icon t-acc-chevron" aria-hidden="true">
+                <i class="fas fa-chevron-down"></i>
+              </div>
+            </button>
+            <div class="faq-item__body" id="pfaq-a5" role="region" aria-labelledby="pfaq-q5" hidden>
+              <div class="t-acc-panel-inner">
+                <p class="faq-item__a" data-en="We accept bank transfer (PromptPay), credit/debit cards, and Line Pay. Corporate invoicing is also available for business clients. All payments are processed securely." data-th="เรารับการโอนเงินธนาคาร (PromptPay) บัตรเครดิต/เดบิต และ Line Pay นอกจากนี้ยังมีการออกใบแจ้งหนี้สำหรับลูกค้าองค์กร การชำระเงินทั้งหมดดำเนินการอย่างปลอดภัย">
+                  We accept bank transfer (PromptPay), credit/debit cards, and Line Pay. Corporate invoicing is also available for business clients. All payments are processed securely.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CTA
+         ============================================================ -->
+    <section class="section section--alt" id="cta" aria-label="Call to action">
+      <div class="container">
+        <div class="cta-strip animate">
+          <h2 class="cta-strip__title" data-en="Not sure which plan is right?" data-th="ไม่แน่ใจว่าแผนไหนเหมาะ?">Not sure which plan is right?</h2>
+          <p class="cta-strip__sub" data-en="Book a free 30-minute consultation. We will assess your level, understand your goals, and recommend the perfect program for you." data-th="จองการให้คำปรึกษาฟรี 30 นาที เราจะประเมินระดับของคุณ เข้าใจเป้าหมายของคุณ และแนะนำโปรแกรมที่เหมาะสมที่สุดสำหรับคุณ">
+            Book a free 30-minute consultation. We will assess your level, understand your goals, and recommend the perfect program for you.
+          </p>
+          <div class="cta-strip__actions">
+            <a href="/#contact" class="btn btn--primary btn--lg" data-en="Book Free Consultation" data-th="จองการให้คำปรึกษาฟรี">Book Free Consultation</a>
+            <a href="about" class="btn btn--outline btn--lg" data-en="Learn About LITALK" data-th="เรียนรู้เกี่ยวกับ LITALK">Learn About LITALK</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer" role="contentinfo" aria-label="Site footer">
+    <div class="container">
+      <div class="footer__top">
+
+        <div class="footer__brand">
+          <img src="img/LITALK-Black.png" alt="LITALK Education" width="120" height="28">
+          <p class="footer__tagline" data-en="Building confident English communicators, one lesson at a time." data-th="สร้างนักสื่อสารภาษาอังกฤษที่มั่นใจ ทีละบทเรียน">
+            Building confident English communicators, one lesson at a time.
+          </p>
+          <div class="footer__socials" aria-label="Social media">
+            <a href="https://www.facebook.com/LITALKOfficial" class="footer__social-icon" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="https://www.instagram.com/LITALKOfficial" class="footer__social-icon" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://x.com/LITALKOfficial" class="footer__social-icon" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-x-twitter"></i>
+            </a>
+            <a href="https://lin.ee/n4zLBXa" class="footer__social-icon" aria-label="Line OA" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-line"></i>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="footer__col-title" data-en="Programs" data-th="หลักสูตร">Programs</h3>
+          <ul class="footer__links" role="list">
+            <li><a href="programs#starter" class="footer__link" data-en="Starter" data-th="ผู้เริ่มต้น">Starter</a></li>
+            <li><a href="programs#communicator" class="footer__link" data-en="Communicator" data-th="นักสื่อสาร">Communicator</a></li>
+            <li><a href="programs#pro" class="footer__link" data-en="Pro English" data-th="Pro English">Pro English</a></li>
+            <li><a href="programs#custom" class="footer__link" data-en="Custom Package" data-th="แพ็คเกจกำหนดเอง">Custom Package</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer__col-title" data-en="Company" data-th="บริษัท">Company</h3>
+          <ul class="footer__links" role="list">
+            <li><a href="about" class="footer__link" data-en="About Us" data-th="เกี่ยวกับเรา">About Us</a></li>
+            <li><a href="/#teachers" class="footer__link" data-en="Our Teachers" data-th="อาจารย์">Our Teachers</a></li>
+            <li><a href="student" class="footer__link" data-en="Student Portal" data-th="พอร์ทัลนักเรียน">Student Portal</a></li>
+            <li><a href="/#contact" class="footer__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer__col-title" data-en="Resources" data-th="ทรัพยากร">Resources</h3>
+          <ul class="footer__links" role="list">
+            <li><a href="/#blog" class="footer__link" data-en="Blog" data-th="บทความ">Blog</a></li>
+            <li><a href="/#faq" class="footer__link" data-en="FAQ" data-th="คำถามที่พบบ่อย">FAQ</a></li>
+            <li><a href="#" class="footer__link" data-en="Privacy Policy" data-th="นโยบายความเป็นส่วนตัว">Privacy Policy</a></li>
+            <li><a href="#" class="footer__link" data-en="Terms of Service" data-th="ข้อกำหนดการใช้งาน">Terms of Service</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer__bottom">
+        <span data-en="© 2026 LITALK Education. All rights reserved." data-th="© 2026 LITALK Education สงวนลิขสิทธิ์ทุกประการ">© 2026 LITALK Education. All rights reserved.</span>
+        <div class="footer__bottom-right">
+          <div class="footer__bottom-social" aria-label="Follow LITALK">
+            <a href="https://www.facebook.com/LITALKOfficial" target="_blank" rel="noopener noreferrer" aria-label="Facebook">FB</a>
+            <a href="https://www.instagram.com/LITALKOfficial" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a>
+            <a href="https://x.com/LITALKOfficial" target="_blank" rel="noopener noreferrer" aria-label="X">X</a>
+            <a href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener noreferrer" aria-label="Line OA">LINE</a>
+          </div>
+          <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
+            <span class="t-tabs-pill" aria-hidden="true"></span>
+            <button class="lang-btn t-tab active" data-lang-target="en" aria-pressed="true">EN</button>
+            <button class="lang-btn t-tab" data-lang-target="th" aria-pressed="false">TH</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js" defer></script>
+
+</body>
+</html>
