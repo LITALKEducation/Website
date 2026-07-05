@@ -1565,7 +1565,9 @@
             authorizationParams: { redirect_uri: window.location.href.split('?')[0] }
         });
 
-        const gasAppUrl = 'https://script.google.com/macros/s/AKfycbyyiEM4NUx-leLse4535upWTtf6q68o4dTFIkO2FS0mml3J3kkIhM7WO27BoAP4aJ-BMg/exec';
+        // Cloudflare Worker API (D1 database) — replaces the old Google Apps
+        // Script / Google Sheets backend.
+        const dataApiUrl = 'https://litalk-files-api.n62c5gwghk.workers.dev';
 
         // Helper functions for cookie management
         function setCookie(name, value, days) {
@@ -1835,17 +1837,31 @@
 
         window.addEventListener('resize', () => updateMobileTabs(false));
 
+        // The Worker returns plain YYYY-MM-DD dates and numeric amounts;
+        // format them for display in Thai.
+        function formatDisplayDate(dateStr) {
+            const d = parseThaiDate(dateStr);
+            if (!dateStr || d.getTime() === 0) return dateStr || '-';
+            return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function formatBaht(n) {
+            if (n === null || n === undefined || n === '') return '-';
+            const num = Number(n);
+            return isNaN(num) ? String(n) : '฿' + num.toLocaleString('en-US');
+        }
+
         async function fetchStudentData(studentId) {
             document.getElementById('display-id').innerText = studentId;
             try {
-                const response = await fetch(`${gasAppUrl}?studentId=${studentId}`, { method: 'GET', redirect: 'follow' });
+                const response = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}`, { method: 'GET' });
                 const result = await response.json();
 
                 if (result.status === 'success') {
                     const data = result.data;
                     document.getElementById('display-name').innerText = data.info.name || '-';
                     document.getElementById('display-course').innerText = data.info.course || '-';
-                    document.getElementById('display-lastpaid').innerText = data.info.lastPaid || '-';
+                    document.getElementById('display-lastpaid').innerText = data.info.lastPaid && data.info.lastPaid !== '-' ? formatDisplayDate(data.info.lastPaid) : '-';
 
                     // Show actual log count in badge card
                     const studyLogsCount = data.studyLogs ? data.studyLogs.length : 0;
@@ -1873,7 +1889,7 @@
                                 <div class="timeline-badge"><i class="fas fa-book-open"></i></div>
                                 <div class="timeline-card${highlightClass}">
                                     <div class="timeline-header">
-                                        <span class="timeline-date"><i class="far fa-calendar-alt"></i> ${log.timestamp || '-'} ${newestBadge}</span>
+                                        <span class="timeline-date"><i class="far fa-calendar-alt"></i> ${formatDisplayDate(log.timestamp)} ${newestBadge}</span>
                                         ${hasVideo ? '<span class="status-badge success-badge"><i class="fas fa-video"></i> วิดีโอพร้อมเรียน</span>' : ''}
                                     </div>
                                     <div class="timeline-feedback">
@@ -1916,11 +1932,14 @@
                                 : `<span class="text-muted">${pay.proof || '-'}</span>`;
 
                             // Style payment method icon dynamically
+                            const method = pay.method || '';
                             let methodIcon = '<i class="fas fa-credit-card"></i>';
-                            if (pay.method.includes('โอน')) {
+                            if (method.includes('โอน')) {
                                 methodIcon = '<i class="fas fa-university"></i>';
-                            } else if (pay.method.includes('เงินสด')) {
+                            } else if (method.includes('เงินสด')) {
                                 methodIcon = '<i class="fas fa-money-bill-wave"></i>';
+                            } else if (method.includes('Stripe')) {
+                                methodIcon = '<i class="fab fa-stripe-s"></i>';
                             }
 
                             let isNewest = index === 0;
@@ -1929,9 +1948,9 @@
 
                             paymentHtml += `
                                     <tr${highlightClass}>
-                                        <td><div class="table-time-cell">${pay.timestamp || '-'}${newestBadge}</div></td>
-                                        <td><span class="payment-method-badge">${methodIcon} ${pay.method || '-'}</span></td>
-                                        <td><span class="payment-amount">${pay.total || '-'}</span></td>
+                                        <td><div class="table-time-cell">${formatDisplayDate(pay.timestamp)}${newestBadge}</div></td>
+                                        <td><span class="payment-method-badge">${methodIcon} ${method || '-'}</span></td>
+                                        <td><span class="payment-amount">${formatBaht(pay.total)}</span></td>
                                         <td>${proofContent}</td>
                                     </tr>`;
                         });
