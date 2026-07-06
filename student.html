@@ -459,11 +459,6 @@
             transform: scale(1.05);
         }
 
-        #push-toggle-btn.is-on {
-            color: var(--accent-warning);
-            border-color: var(--accent-warning);
-        }
-
         .btn-logout-header {
             background: none;
             border: 1px solid var(--border-color);
@@ -1258,90 +1253,6 @@
             flex-shrink: 0;
         }
 
-        /* Notifications */
-        .notifications-section {
-            margin-bottom: 24px;
-        }
-
-        .notification-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 16px 20px;
-            margin-bottom: 12px;
-        }
-
-        .notification-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .notification-item.is-unread {
-            border-color: var(--accent-primary, var(--text-primary));
-        }
-
-        .notification-icon {
-            flex-shrink: 0;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--bg-tertiary, var(--accent-warning-bg));
-            color: var(--text-primary);
-            font-size: 14px;
-        }
-
-        .notification-body {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .notification-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .notification-text {
-            font-size: 13px;
-            color: var(--text-secondary, var(--text-primary));
-            margin-top: 2px;
-        }
-
-        .notification-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .notification-link {
-            color: inherit;
-            text-decoration: underline;
-            font-weight: 600;
-        }
-
-        .notification-dismiss {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 13px;
-            padding: 4px;
-            flex-shrink: 0;
-        }
-
-        .notification-dismiss:hover {
-            color: var(--text-primary);
-        }
-
         .btn-pay-now:hover {
             background: var(--brand-gradient-hover);
             transform: translateY(-1px);
@@ -1602,10 +1513,6 @@
                     <span class="nav-brand-text">Student Portal</span>
                 </a>
                 <div class="nav-actions">
-                    <!-- Web Push toggle (browser/OS notifications, even with the tab closed) -->
-                    <button class="theme-toggle-btn" id="push-toggle-btn" onclick="togglePushNotifications()" aria-label="เปิด/ปิดการแจ้งเตือน" title="เปิด/ปิดการแจ้งเตือนบนอุปกรณ์นี้">
-                        <i id="push-toggle-icon" class="fas fa-bell-slash"></i>
-                    </button>
                     <!-- Theme switch inside dashboard -->
                     <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-toggle-icon-dash" class="fas fa-moon"></i>
@@ -1690,12 +1597,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Notifications -->
-            <section class="content-section notifications-section" id="section-notifications" style="display: none;">
-                <h2 class="section-title"><i class="fas fa-bell"></i> การแจ้งเตือน</h2>
-                <div id="notifications-container"></div>
-            </section>
 
             <!-- Pending Payments Alert -->
             <section class="content-section pending-payments-section" id="section-pending-payments" style="display: none;">
@@ -2071,155 +1972,8 @@
             }[ch]));
         }
 
-        const NOTIF_CATEGORY_ICON = {
-            schedule_activated: 'fa-calendar-check', schedule_changed: 'fa-calendar-days',
-            payment_due: 'fa-hand-holding-dollar', payment_received: 'fa-sack-dollar',
-            credit_adjusted: 'fa-coins', custom: 'fa-bell',
-        };
-        function notifCategoryIcon(category) {
-            return NOTIF_CATEGORY_ICON[category] || 'fa-bell';
-        }
-
-        let currentPortalStudentId = null;
-
-        // Marks a notification read both locally (instant feedback) and on
-        // the server (public by student id, same trust model as the rest of
-        // this portal — see the Worker's /portal/:studentId note).
-        async function dismissNotification(id, btn) {
-            const item = btn.closest('.notification-item');
-            if (item) {
-                item.classList.remove('is-unread');
-                btn.remove();
-            }
-            try {
-                await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalStudentId)}/notifications/${id}/read`, { method: 'POST' });
-            } catch (error) {
-                console.error('dismissNotification:', error);
-            }
-        }
-
-        // ===== Web Push (browser/OS notifications, even with the tab closed) =====
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch((err) => console.error('[Push] Service Worker registration failed:', err));
-            });
-        }
-
-        let pushSubscribed = false;
-
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-            const rawData = atob(base64);
-            return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
-        }
-
-        function updatePushToggleUI() {
-            const btn = document.getElementById('push-toggle-btn');
-            const icon = document.getElementById('push-toggle-icon');
-            if (!btn || !icon) return;
-            btn.classList.toggle('is-on', pushSubscribed);
-            icon.className = pushSubscribed ? 'fas fa-bell' : 'fas fa-bell-slash';
-        }
-
-        async function initPushSupport() {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-            try {
-                const reg = await navigator.serviceWorker.ready;
-                const sub = await reg.pushManager.getSubscription();
-                pushSubscribed = !!sub;
-                updatePushToggleUI();
-            } catch (error) {
-                console.error('initPushSupport:', error);
-            }
-        }
-
-        async function togglePushNotifications() {
-            if (pushSubscribed) await disablePushNotifications();
-            else await enablePushNotifications();
-        }
-
-        // iOS/iPadOS only allows Web Push for a page installed to the Home
-        // Screen — a regular Safari tab silently rejects
-        // Notification.requestPermission() with no OS prompt at all, on every
-        // browser (Chrome/Firefox on iOS are WebKit-based too). Detect this
-        // up front so we can guide the user instead of a confusing failure.
-        function isIosDevice() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        }
-        function isStandaloneDisplayMode() {
-            return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-        }
-
-        async function enablePushNotifications() {
-            if (!currentPortalStudentId) return;
-            if (isIosDevice() && !isStandaloneDisplayMode()) {
-                alert(
-                    'iPhone/iPad ของ Apple อนุญาตให้ขอเปิดการแจ้งเตือนได้เฉพาะเมื่อเพิ่มเว็บนี้ลงหน้าจอโฮมแล้วเท่านั้น (จำกัดโดย iOS เอง ใช้ได้ทุกเบราว์เซอร์เหมือนกันหมด):\n\n' +
-                    '1. แตะปุ่มแชร์ (ไอคอนสี่เหลี่ยมมีลูกศรชี้ขึ้น) ด้านล่างจอ\n' +
-                    '2. เลือก "เพิ่มลงหน้าจอโฮม" (Add to Home Screen)\n' +
-                    '3. เปิดแอปจากไอคอนในหน้าจอโฮม (ไม่ใช่จาก Safari) แล้วกดปุ่มนี้อีกครั้ง'
-                );
-                return;
-            }
-            if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') {
-                alert('เบราว์เซอร์หรือแอปที่เปิดอยู่นี้ไม่รองรับการแจ้งเตือนแบบ push — พบบ่อยเมื่อเปิดผ่านแอปในตัว (เช่น LINE, Facebook) กรุณาเปิดด้วย Safari/Chrome โดยตรง');
-                return;
-            }
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'denied') {
-                    alert('เว็บไซต์นี้ถูกบล็อกการแจ้งเตือนไว้แล้ว กรุณาไปที่ตั้งค่าเว็บไซต์นี้ (ไอคอนกุญแจ/ตัวเลื่อนข้าง URL) แล้วอนุญาตใหม่');
-                    return;
-                }
-                if (permission !== 'granted') return;
-                const keyRes = await fetch(`${dataApiUrl}/push/vapid-public-key`);
-                const { publicKey } = await keyRes.json();
-                if (!publicKey) {
-                    alert('ระบบยังไม่ได้ตั้งค่าการแจ้งเตือนแบบ push กรุณาติดต่อแอดมิน');
-                    return;
-                }
-                const reg = await navigator.serviceWorker.ready;
-                const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
-                const json = sub.toJSON();
-                const subRes = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalStudentId)}/push/subscribe`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
-                });
-                if (!subRes.ok) throw new Error('subscribe endpoint returned ' + subRes.status);
-                pushSubscribed = true;
-                updatePushToggleUI();
-            } catch (error) {
-                console.error('enablePushNotifications:', error);
-                alert('เปิดการแจ้งเตือนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-            }
-        }
-
-        async function disablePushNotifications() {
-            try {
-                const reg = await navigator.serviceWorker.ready;
-                const sub = await reg.pushManager.getSubscription();
-                if (sub) {
-                    await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalStudentId)}/push/unsubscribe`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ endpoint: sub.endpoint }),
-                    });
-                    await sub.unsubscribe();
-                }
-                pushSubscribed = false;
-                updatePushToggleUI();
-            } catch (error) {
-                console.error('disablePushNotifications:', error);
-            }
-        }
-
         async function fetchStudentData(studentId) {
-            currentPortalStudentId = studentId;
             document.getElementById('display-id').innerText = studentId;
-            initPushSupport();
             try {
                 const response = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}`, { method: 'GET' });
                 const result = await response.json();
@@ -2267,28 +2021,6 @@
                         scheduleContainer.innerHTML = scheduleHtml;
                     } else {
                         scheduleContainer.innerHTML = '<div class="empty-state"><i class="far fa-calendar-xmark"></i><p>ยังไม่มีตารางเรียนที่กำลังจะถึงในระบบ</p></div>';
-                    }
-
-                    // Generate notifications (hidden entirely when there are none)
-                    const notifSection = document.getElementById('section-notifications');
-                    const notifContainer = document.getElementById('notifications-container');
-                    if (data.notifications && data.notifications.length > 0) {
-                        notifSection.style.display = '';
-                        notifContainer.innerHTML = data.notifications.map((n) => `
-                            <div class="notification-item${n.isRead ? '' : ' is-unread'}" data-notif-id="${n.id}">
-                                <span class="notification-icon"><i class="fas ${notifCategoryIcon(n.category)}"></i></span>
-                                <div class="notification-body">
-                                    <div class="notification-title">${escapeHtml(n.title)}</div>
-                                    ${n.body ? `<div class="notification-text">${escapeHtml(n.body)}</div>` : ''}
-                                    <div class="notification-meta">
-                                        <span>${formatDisplayDate(n.createdAt)}</span>
-                                        ${n.linkUrl ? `<a href="${escapeHtml(n.linkUrl)}" target="_blank" rel="noopener" class="notification-link">เปิดลิงก์ <i class="fas fa-arrow-up-right-from-square"></i></a>` : ''}
-                                    </div>
-                                </div>
-                                ${n.isRead ? '' : `<button class="notification-dismiss" title="ทำเครื่องหมายว่าอ่านแล้ว" onclick="dismissNotification(${n.id}, this)"><i class="fas fa-check"></i></button>`}
-                            </div>`).join('');
-                    } else {
-                        notifSection.style.display = 'none';
                     }
 
                     // Generate pending payments alert (hidden entirely when there's nothing to pay)
