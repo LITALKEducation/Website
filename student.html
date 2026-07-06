@@ -2140,30 +2140,60 @@
             else await enablePushNotifications();
         }
 
+        // iOS/iPadOS only allows Web Push for a page installed to the Home
+        // Screen — a regular Safari tab silently rejects
+        // Notification.requestPermission() with no OS prompt at all, on every
+        // browser (Chrome/Firefox on iOS are WebKit-based too). Detect this
+        // up front so we can guide the user instead of a confusing failure.
+        function isIosDevice() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+        function isStandaloneDisplayMode() {
+            return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+        }
+
         async function enablePushNotifications() {
             if (!currentPortalStudentId) return;
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                alert('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือนแบบ push');
+            if (isIosDevice() && !isStandaloneDisplayMode()) {
+                alert(
+                    'iPhone/iPad ของ Apple อนุญาตให้ขอเปิดการแจ้งเตือนได้เฉพาะเมื่อเพิ่มเว็บนี้ลงหน้าจอโฮมแล้วเท่านั้น (จำกัดโดย iOS เอง ใช้ได้ทุกเบราว์เซอร์เหมือนกันหมด):\n\n' +
+                    '1. แตะปุ่มแชร์ (ไอคอนสี่เหลี่ยมมีลูกศรชี้ขึ้น) ด้านล่างจอ\n' +
+                    '2. เลือก "เพิ่มลงหน้าจอโฮม" (Add to Home Screen)\n' +
+                    '3. เปิดแอปจากไอคอนในหน้าจอโฮม (ไม่ใช่จาก Safari) แล้วกดปุ่มนี้อีกครั้ง'
+                );
+                return;
+            }
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') {
+                alert('เบราว์เซอร์หรือแอปที่เปิดอยู่นี้ไม่รองรับการแจ้งเตือนแบบ push — พบบ่อยเมื่อเปิดผ่านแอปในตัว (เช่น LINE, Facebook) กรุณาเปิดด้วย Safari/Chrome โดยตรง');
                 return;
             }
             try {
                 const permission = await Notification.requestPermission();
+                if (permission === 'denied') {
+                    alert('เว็บไซต์นี้ถูกบล็อกการแจ้งเตือนไว้แล้ว กรุณาไปที่ตั้งค่าเว็บไซต์นี้ (ไอคอนกุญแจ/ตัวเลื่อนข้าง URL) แล้วอนุญาตใหม่');
+                    return;
+                }
                 if (permission !== 'granted') return;
                 const keyRes = await fetch(`${dataApiUrl}/push/vapid-public-key`);
                 const { publicKey } = await keyRes.json();
-                if (!publicKey) return;
+                if (!publicKey) {
+                    alert('ระบบยังไม่ได้ตั้งค่าการแจ้งเตือนแบบ push กรุณาติดต่อแอดมิน');
+                    return;
+                }
                 const reg = await navigator.serviceWorker.ready;
                 const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
                 const json = sub.toJSON();
-                await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalStudentId)}/push/subscribe`, {
+                const subRes = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalStudentId)}/push/subscribe`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
                 });
+                if (!subRes.ok) throw new Error('subscribe endpoint returned ' + subRes.status);
                 pushSubscribed = true;
                 updatePushToggleUI();
             } catch (error) {
                 console.error('enablePushNotifications:', error);
+                alert('เปิดการแจ้งเตือนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
             }
         }
 
