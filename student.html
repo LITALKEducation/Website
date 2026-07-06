@@ -1190,6 +1190,87 @@
             transform: translateY(-1px);
         }
 
+        /* Schedule & Pending Payments (full-width sections above the tabs) */
+        .schedule-section,
+        .pending-payments-section {
+            margin-bottom: 24px;
+        }
+
+        .pending-payments-section {
+            border-color: var(--accent-warning);
+            background-color: var(--accent-warning-bg);
+        }
+
+        .pending-payment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 12px;
+        }
+
+        .pending-payment-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .pending-payment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .pending-payment-desc {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pending-payment-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-warning);
+        }
+
+        .btn-pay-now {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--brand-gradient);
+            color: var(--brand-btn-text);
+            font-weight: 600;
+            font-size: 13px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: var(--brand-btn-shadow);
+            transition: var(--transition-all);
+            flex-shrink: 0;
+        }
+
+        .btn-pay-now:hover {
+            background: var(--brand-gradient-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--brand-btn-shadow-hover);
+        }
+
+        .schedule-next-badge {
+            background-color: var(--accent-success);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         /* Empty States */
         .empty-state {
             text-align: center;
@@ -1353,6 +1434,15 @@
             .payment-amount {
                 font-size: 13px;
             }
+
+            .pending-payment-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-pay-now {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -1507,6 +1597,21 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Pending Payments Alert -->
+            <section class="content-section pending-payments-section" id="section-pending-payments" style="display: none;">
+                <h2 class="section-title"><i class="fas fa-triangle-exclamation"></i> รายการที่ต้องชำระเงิน</h2>
+                <div id="pending-payments-container"></div>
+            </section>
+
+            <!-- Upcoming Schedule -->
+            <section class="content-section schedule-section">
+                <h2 class="section-title"><i class="fas fa-calendar-days"></i> ตารางเรียนที่จะถึง</h2>
+                <div id="schedule-container">
+                    <div class="loading-spinner"><i class="fas fa-circle-notch"></i>
+                        กำลังดึงข้อมูลตารางเรียน...</div>
+                </div>
+            </section>
 
             <!-- Mobile Navigation Quick Tabs -->
             <div class="mobile-quick-menu t-tabs" role="tablist">
@@ -1851,6 +1956,22 @@
             return isNaN(num) ? String(n) : '฿' + num.toLocaleString('en-US');
         }
 
+        // booking_time is the start of a fixed 1-hour slot (e.g. "09:00")
+        function formatTimeRange(timeStr) {
+            if (!timeStr) return '-';
+            const [h, m] = timeStr.split(':').map(Number);
+            if (isNaN(h)) return timeStr;
+            const pad = (v) => String(v).padStart(2, '0');
+            return `${pad(h)}:${pad(m || 0)} - ${pad((h + 1) % 24)}:${pad(m || 0)}`;
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/[&<>"']/g, (ch) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+            }[ch]));
+        }
+
         async function fetchStudentData(studentId) {
             document.getElementById('display-id').innerText = studentId;
             try {
@@ -1866,6 +1987,62 @@
                     // Show actual log count in badge card
                     const studyLogsCount = data.studyLogs ? data.studyLogs.length : 0;
                     document.getElementById('display-classes-count').innerText = `${studyLogsCount} คลาส`;
+
+                    // Generate upcoming schedule (already sorted soonest-first by the API)
+                    const scheduleContainer = document.getElementById('schedule-container');
+                    if (data.schedule && data.schedule.length > 0) {
+                        let scheduleHtml = `
+                        <div class="table-wrapper">
+                            <table class="payment-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="far fa-calendar-alt"></i> วันที่</th>
+                                        <th><i class="far fa-clock"></i> เวลาเรียน</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                        data.schedule.forEach((session, index) => {
+                            let isNext = index === 0;
+                            let highlightClass = isNext ? ' class="newest-highlight"' : '';
+                            let nextBadge = isNext ? ` <span class="schedule-next-badge"><i class="fas fa-arrow-right"></i> ครั้งถัดไป</span>` : '';
+
+                            scheduleHtml += `
+                                    <tr${highlightClass}>
+                                        <td><div class="table-time-cell">${formatDisplayDate(session.date)}${nextBadge}</div></td>
+                                        <td>${formatTimeRange(session.time)}</td>
+                                    </tr>`;
+                        });
+
+                        scheduleHtml += `
+                                </tbody>
+                            </table>
+                        </div>`;
+                        scheduleContainer.innerHTML = scheduleHtml;
+                    } else {
+                        scheduleContainer.innerHTML = '<div class="empty-state"><i class="far fa-calendar-xmark"></i><p>ยังไม่มีตารางเรียนที่กำลังจะถึงในระบบ</p></div>';
+                    }
+
+                    // Generate pending payments alert (hidden entirely when there's nothing to pay)
+                    const pendingSection = document.getElementById('section-pending-payments');
+                    const pendingContainer = document.getElementById('pending-payments-container');
+                    if (data.pendingPayments && data.pendingPayments.length > 0) {
+                        pendingSection.style.display = '';
+                        let pendingHtml = '';
+                        data.pendingPayments.forEach((link) => {
+                            pendingHtml += `
+                            <div class="pending-payment-item">
+                                <div class="pending-payment-info">
+                                    <span class="pending-payment-desc">${escapeHtml(link.description || 'รายการชำระเงิน')}</span>
+                                    <span class="pending-payment-amount">${formatBaht(link.amount)}</span>
+                                </div>
+                                <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener" class="btn-pay-now"><i class="fab fa-stripe-s"></i> ชำระเงิน</a>
+                            </div>`;
+                        });
+                        pendingContainer.innerHTML = pendingHtml;
+                    } else {
+                        pendingSection.style.display = 'none';
+                    }
 
                     // Generate study timeline
                     const studyContainer = document.getElementById('study-log-container');
