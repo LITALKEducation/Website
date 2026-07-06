@@ -1253,6 +1253,90 @@
             flex-shrink: 0;
         }
 
+        /* Notifications */
+        .notifications-section {
+            margin-bottom: 24px;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 12px;
+        }
+
+        .notification-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .notification-item.is-unread {
+            border-color: var(--accent-primary, var(--text-primary));
+        }
+
+        .notification-icon {
+            flex-shrink: 0;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-tertiary, var(--accent-warning-bg));
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .notification-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .notification-text {
+            font-size: 13px;
+            color: var(--text-secondary, var(--text-primary));
+            margin-top: 2px;
+        }
+
+        .notification-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .notification-link {
+            color: inherit;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .notification-dismiss {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 13px;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+
+        .notification-dismiss:hover {
+            color: var(--text-primary);
+        }
+
         .btn-pay-now:hover {
             background: var(--brand-gradient-hover);
             transform: translateY(-1px);
@@ -1597,6 +1681,12 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Notifications -->
+            <section class="content-section notifications-section" id="section-notifications" style="display: none;">
+                <h2 class="section-title"><i class="fas fa-bell"></i> การแจ้งเตือน</h2>
+                <div id="notifications-container"></div>
+            </section>
 
             <!-- Pending Payments Alert -->
             <section class="content-section pending-payments-section" id="section-pending-payments" style="display: none;">
@@ -1972,7 +2062,35 @@
             }[ch]));
         }
 
+        const NOTIF_CATEGORY_ICON = {
+            schedule_activated: 'fa-calendar-check', schedule_changed: 'fa-calendar-days',
+            payment_due: 'fa-hand-holding-dollar', payment_received: 'fa-sack-dollar',
+            credit_adjusted: 'fa-coins', custom: 'fa-bell',
+        };
+        function notifCategoryIcon(category) {
+            return NOTIF_CATEGORY_ICON[category] || 'fa-bell';
+        }
+
+        let currentPortalStudentId = null;
+
+        // Marks a notification read both locally (instant feedback) and on
+        // the server (public by student id, same trust model as the rest of
+        // this portal — see the Worker's /portal/:studentId note).
+        async function dismissNotification(id, btn) {
+            const item = btn.closest('.notification-item');
+            if (item) {
+                item.classList.remove('is-unread');
+                btn.remove();
+            }
+            try {
+                await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalStudentId)}/notifications/${id}/read`, { method: 'POST' });
+            } catch (error) {
+                console.error('dismissNotification:', error);
+            }
+        }
+
         async function fetchStudentData(studentId) {
+            currentPortalStudentId = studentId;
             document.getElementById('display-id').innerText = studentId;
             try {
                 const response = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}`, { method: 'GET' });
@@ -2021,6 +2139,28 @@
                         scheduleContainer.innerHTML = scheduleHtml;
                     } else {
                         scheduleContainer.innerHTML = '<div class="empty-state"><i class="far fa-calendar-xmark"></i><p>ยังไม่มีตารางเรียนที่กำลังจะถึงในระบบ</p></div>';
+                    }
+
+                    // Generate notifications (hidden entirely when there are none)
+                    const notifSection = document.getElementById('section-notifications');
+                    const notifContainer = document.getElementById('notifications-container');
+                    if (data.notifications && data.notifications.length > 0) {
+                        notifSection.style.display = '';
+                        notifContainer.innerHTML = data.notifications.map((n) => `
+                            <div class="notification-item${n.isRead ? '' : ' is-unread'}" data-notif-id="${n.id}">
+                                <span class="notification-icon"><i class="fas ${notifCategoryIcon(n.category)}"></i></span>
+                                <div class="notification-body">
+                                    <div class="notification-title">${escapeHtml(n.title)}</div>
+                                    ${n.body ? `<div class="notification-text">${escapeHtml(n.body)}</div>` : ''}
+                                    <div class="notification-meta">
+                                        <span>${formatDisplayDate(n.createdAt)}</span>
+                                        ${n.linkUrl ? `<a href="${escapeHtml(n.linkUrl)}" target="_blank" rel="noopener" class="notification-link">เปิดลิงก์ <i class="fas fa-arrow-up-right-from-square"></i></a>` : ''}
+                                    </div>
+                                </div>
+                                ${n.isRead ? '' : `<button class="notification-dismiss" title="ทำเครื่องหมายว่าอ่านแล้ว" onclick="dismissNotification(${n.id}, this)"><i class="fas fa-check"></i></button>`}
+                            </div>`).join('');
+                    } else {
+                        notifSection.style.display = 'none';
                     }
 
                     // Generate pending payments alert (hidden entirely when there's nothing to pay)
