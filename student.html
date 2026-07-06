@@ -2142,28 +2142,41 @@
 
         async function enablePushNotifications() {
             if (!currentPortalStudentId) return;
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                alert('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือนแบบ push');
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') {
+                alert(
+                    'เบราว์เซอร์หรือแอปที่เปิดอยู่นี้ไม่รองรับการแจ้งเตือนแบบ push\n\n' +
+                    'พบบ่อยเมื่อเปิดผ่านแอปในตัว (เช่น LINE, Facebook) — กรุณาเปิดด้วย Safari/Chrome โดยตรง\n' +
+                    'หากใช้ iPhone ต้องกด "เพิ่มลงหน้าจอโฮม" ก่อน (Web Push บน iOS ใช้ได้เฉพาะเมื่อเพิ่มเป็นแอปในหน้าจอหลักแล้วเท่านั้น)'
+                );
                 return;
             }
             try {
                 const permission = await Notification.requestPermission();
+                if (permission === 'denied') {
+                    alert('เว็บไซต์นี้ถูกบล็อกการแจ้งเตือนไว้แล้ว กรุณาไปที่ตั้งค่าเว็บไซต์นี้ (ไอคอนกุญแจ/ตัวเลื่อนข้าง URL) แล้วอนุญาตใหม่');
+                    return;
+                }
                 if (permission !== 'granted') return;
                 const keyRes = await fetch(`${dataApiUrl}/push/vapid-public-key`);
                 const { publicKey } = await keyRes.json();
-                if (!publicKey) return;
+                if (!publicKey) {
+                    alert('ระบบยังไม่ได้ตั้งค่าการแจ้งเตือนแบบ push กรุณาติดต่อแอดมิน');
+                    return;
+                }
                 const reg = await navigator.serviceWorker.ready;
                 const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
                 const json = sub.toJSON();
-                await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalStudentId)}/push/subscribe`, {
+                const subRes = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalStudentId)}/push/subscribe`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
                 });
+                if (!subRes.ok) throw new Error('subscribe endpoint returned ' + subRes.status);
                 pushSubscribed = true;
                 updatePushToggleUI();
             } catch (error) {
                 console.error('enablePushNotifications:', error);
+                alert('เปิดการแจ้งเตือนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
             }
         }
 
