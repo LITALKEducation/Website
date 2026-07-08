@@ -1755,6 +1755,13 @@
         const auth0Client = new auth0.Auth0Client({
             domain: 'auth.litalkeducation.com',
             clientId: 'NmKUxriv62IDG9yQQ3CZqkVp2ujkjdbp',
+            // Refresh tokens (with rotation) + a localStorage cache keep
+            // getTokenSilently() working in Safari/Firefox and other browsers
+            // that block third-party cookies, where the default hidden-iframe
+            // flow fails. This is what made the token fetch flaky.
+            useRefreshTokens: true,
+            useRefreshTokensFallback: true,
+            cacheLocation: 'localstorage',
             authorizationParams: { redirect_uri: window.location.href.split('?')[0], audience: filesApiAudience }
         });
 
@@ -1765,10 +1772,14 @@
         // Best-effort access token for the portal. Present only when the student
         // signed in through Auth0 (not the ?id= / cookie shortcut); the API uses
         // it to release private data (files, Meet links). Returns null otherwise.
+        // Skips the token call entirely for un-authenticated (?id=) visitors so
+        // there is no needless failing round-trip on every load.
         async function getPortalToken() {
             try {
+                if (!(await auth0Client.isAuthenticated())) return null;
                 return await auth0Client.getTokenSilently({ authorizationParams: { audience: filesApiAudience } });
-            } catch {
+            } catch (err) {
+                console.warn('Portal token unavailable:', err);
                 return null;
             }
         }
