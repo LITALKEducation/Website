@@ -3,9 +3,6 @@
    Style: Minimal, Modern, Premium | Black & White only
    ============================================================ */
 
-/* ---------- Google Fonts ---------- */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Mitr:wght@300;400;500;600;700&display=swap');
-
 /* ---------- Reset & Base ---------- */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -107,6 +104,24 @@ body {
 [lang="th"] body,
 html[data-lang="th"] body {
   font-family: var(--font-th);
+}
+
+/* Mitr's heaviest real weight is 700 (Bold) — it has no 800/900 cut.
+   Requesting those weights on Thai text forces the browser to fake-
+   embolden Mitr 700, which renders visibly different from Montserrat's
+   true 800/900 weights. Cap Thai headings back to Mitr's real Bold so
+   EN/TH text reads with matching, symmetric weight. */
+html[data-lang="th"] .hero__headline,
+html[data-lang="th"] .section-heading,
+html[data-lang="th"] .program-card__name,
+html[data-lang="th"] .contact__info-title,
+html[data-lang="th"] .page-hero__title,
+html[data-lang="th"] .story__question,
+html[data-lang="th"] .vm-card__title,
+html[data-lang="th"] .value-card__word,
+html[data-lang="th"] .cta-strip__title,
+html[data-lang="th"] .legal-content h2 {
+  font-weight: 700;
 }
 
 img {
