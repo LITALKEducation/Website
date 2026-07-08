@@ -676,9 +676,32 @@
         /* Stats Cards Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-bottom: 40px;
+        }
+
+        .hero-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .hero-nickname {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 20px;
+        }
+
+        .hero-nickname:not(:empty)::before {
+            content: " (";
+        }
+
+        .hero-nickname:not(:empty)::after {
+            content: ")";
         }
 
         .stat-card {
@@ -723,6 +746,52 @@
         .stat-icon-wrapper.purple {
             background-color: var(--action-btn-bg);
             color: var(--action-btn-color);
+        }
+
+        .stat-icon-wrapper.orange {
+            background-color: rgba(245, 158, 11, 0.12);
+            color: #f59e0b;
+        }
+
+        /* Documents / Files list */
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            background-color: var(--bg-secondary);
+            transition: var(--transition-all);
+        }
+
+        .file-item:hover {
+            border-color: var(--brand-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .file-icon {
+            font-size: 22px;
+            color: var(--brand-primary);
+            flex-shrink: 0;
+        }
+
+        .file-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .file-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
         }
 
         .stat-info {
@@ -1550,8 +1619,9 @@
         <main class="dashboard-content">
             <!-- Welcome Hero -->
             <div class="welcome-hero">
+                <img id="display-avatar" class="hero-avatar" alt="รูปโปรไฟล์" style="display: none;">
                 <div class="hero-text">
-                    <h1>ยินดีต้อนรับ, <span id="display-name"><span class="skeleton-loader text-loader"></span></span>
+                    <h1>ยินดีต้อนรับ, <span id="display-name"><span class="skeleton-loader text-loader"></span></span><span id="display-nickname" class="hero-nickname"></span>
                     </h1>
                     <p>เข้าถึงข้อมูลประวัติการเรียนวิดีโอย้อนหลัง และรายการชำระเงินของคุณได้ตลอดเวลา</p>
                 </div>
@@ -1593,6 +1663,16 @@
                         <h3 class="stat-value" id="display-classes-count">- คลาส</h3>
                     </div>
                 </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper orange">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">ชั่วโมงเรียนคงเหลือ</span>
+                        <h3 class="stat-value" id="display-credit">- ชม.</h3>
+                    </div>
+                </div>
             </div>
 
             <!-- Pending Payments Alert -->
@@ -1608,6 +1688,12 @@
                     <div class="loading-spinner"><i class="fas fa-circle-notch"></i>
                         กำลังดึงข้อมูลตารางเรียน...</div>
                 </div>
+            </section>
+
+            <!-- Documents / Files (only shown to the signed-in student) -->
+            <section class="content-section files-section" id="section-files" style="display: none;">
+                <h2 class="section-title"><i class="fas fa-folder-open"></i> เอกสารและไฟล์ของคุณ</h2>
+                <div id="files-container"></div>
             </section>
 
             <!-- Mobile Navigation Quick Tabs -->
@@ -1661,15 +1747,34 @@
             document.documentElement.setAttribute('data-theme', theme);
         })();
 
+        // Matches the Worker's AUTH0_AUDIENCE so getTokenSilently() returns a
+        // JWT the API can verify — required to unlock the student's private
+        // files and Google Meet links.
+        const filesApiAudience = 'https://admin.litalkeducation.com/files-api';
+
         const auth0Client = new auth0.Auth0Client({
             domain: 'auth.litalkeducation.com',
             clientId: 'NmKUxriv62IDG9yQQ3CZqkVp2ujkjdbp',
-            authorizationParams: { redirect_uri: window.location.href.split('?')[0] }
+            authorizationParams: { redirect_uri: window.location.href.split('?')[0], audience: filesApiAudience }
         });
 
         // Cloudflare Worker API (D1 database) — replaces the old Google Apps
         // Script / Google Sheets backend.
         const dataApiUrl = 'https://litalk-files-api.n62c5gwghk.workers.dev';
+
+        // Best-effort access token for the portal. Present only when the student
+        // signed in through Auth0 (not the ?id= / cookie shortcut); the API uses
+        // it to release private data (files, Meet links). Returns null otherwise.
+        async function getPortalToken() {
+            try {
+                return await auth0Client.getTokenSilently({ authorizationParams: { audience: filesApiAudience } });
+            } catch {
+                return null;
+            }
+        }
+
+        // Holds the current portal token so file-download handlers can reuse it.
+        let portalAuthToken = null;
 
         // Helper functions for cookie management
         function setCookie(name, value, days) {
@@ -1969,25 +2074,107 @@
             }[ch]));
         }
 
+        function formatFileSize(bytes) {
+            const n = Number(bytes);
+            if (!Number.isFinite(n) || n <= 0) return '';
+            if (n < 1024) return `${n} B`;
+            if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+            return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+        }
+
+        // Downloads via fetch (not a plain link) because the endpoint needs the
+        // Auth0 Bearer token; the response is turned into a temporary blob URL.
+        async function downloadPortalFile(studentId, fileId, filename) {
+            try {
+                const res = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}/files/${encodeURIComponent(fileId)}`, {
+                    headers: portalAuthToken ? { Authorization: `Bearer ${portalAuthToken}` } : {},
+                });
+                if (!res.ok) throw new Error('download failed');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename || 'file';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch {
+                alert('ไม่สามารถดาวน์โหลดไฟล์ได้ กรุณาลองใหม่อีกครั้ง');
+            }
+        }
+
+        function renderFiles(studentId, files) {
+            const section = document.getElementById('section-files');
+            const container = document.getElementById('files-container');
+            if (!files || files.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = '';
+            container.innerHTML = files.map((f) => {
+                const sub = [f.fileType, formatFileSize(f.size), f.uploadedAt ? formatDisplayDate(f.uploadedAt) : '']
+                    .filter(Boolean).map(escapeHtml).join(' • ');
+                const nameArg = JSON.stringify(String(f.filename)).replace(/"/g, '&quot;');
+                return `
+                <div class="file-item">
+                    <i class="fas fa-file-lines file-icon"></i>
+                    <div class="file-meta">
+                        <div class="file-name">${escapeHtml(f.filename)}</div>
+                        ${sub ? `<div class="file-sub">${sub}</div>` : ''}
+                    </div>
+                    <button type="button" class="btn-table-action"
+                        onclick="downloadPortalFile(${JSON.stringify(String(studentId)).replace(/"/g, '&quot;')}, ${JSON.stringify(String(f.id)).replace(/"/g, '&quot;')}, ${nameArg})">
+                        <i class="fas fa-download"></i> ดาวน์โหลด
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
         async function fetchStudentData(studentId) {
             document.getElementById('display-id').innerText = studentId;
             try {
-                const response = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}`, { method: 'GET' });
+                // A token (when the student signed in via Auth0) unlocks private
+                // data — files and Google Meet links — server-side.
+                portalAuthToken = await getPortalToken();
+                const headers = portalAuthToken ? { Authorization: `Bearer ${portalAuthToken}` } : {};
+                const response = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}`, { method: 'GET', headers });
                 const result = await response.json();
 
                 if (result.status === 'success') {
                     const data = result.data;
                     document.getElementById('display-name').innerText = data.info.name || '-';
+                    document.getElementById('display-nickname').innerText = data.info.nickname || '';
                     document.getElementById('display-course').innerText = data.info.course || '-';
                     document.getElementById('display-lastpaid').innerText = data.info.lastPaid && data.info.lastPaid !== '-' ? formatDisplayDate(data.info.lastPaid) : '-';
+
+                    // Remaining class-hour credit balance
+                    const credit = Number(data.info.creditBalance);
+                    document.getElementById('display-credit').innerText = `${Number.isFinite(credit) ? credit.toLocaleString('en-US') : '-'} ชม.`;
+
+                    // Profile avatar (served publicly by student id)
+                    const avatarEl = document.getElementById('display-avatar');
+                    if (data.info.hasAvatar) {
+                        avatarEl.src = `${dataApiUrl}/portal/${encodeURIComponent(studentId)}/avatar`;
+                        avatarEl.style.display = '';
+                    } else {
+                        avatarEl.style.display = 'none';
+                    }
 
                     // Show actual log count in badge card
                     const studyLogsCount = data.studyLogs ? data.studyLogs.length : 0;
                     document.getElementById('display-classes-count').innerText = `${studyLogsCount} คลาส`;
 
+                    // Documents / files — only present when the student is signed in
+                    renderFiles(studentId, data.files || []);
+
                     // Generate upcoming schedule (already sorted soonest-first by the API)
                     const scheduleContainer = document.getElementById('schedule-container');
                     if (data.schedule && data.schedule.length > 0) {
+                        // Only render the "join class" column when at least one
+                        // upcoming session actually has a Meet link (returned to
+                        // signed-in students only).
+                        const anyMeet = data.schedule.some((s) => s.meet);
                         let scheduleHtml = `
                         <div class="table-wrapper">
                             <table class="payment-table">
@@ -1995,6 +2182,7 @@
                                     <tr>
                                         <th><i class="far fa-calendar-alt"></i> วันที่</th>
                                         <th><i class="far fa-clock"></i> เวลาเรียน</th>
+                                        ${anyMeet ? '<th><i class="fas fa-video"></i> ห้องเรียน</th>' : ''}
                                     </tr>
                                 </thead>
                                 <tbody>`;
@@ -2003,11 +2191,17 @@
                             let isNext = index === 0;
                             let highlightClass = isNext ? ' class="newest-highlight"' : '';
                             let nextBadge = isNext ? ` <span class="schedule-next-badge"><i class="fas fa-arrow-right"></i> ครั้งถัดไป</span>` : '';
+                            let meetCell = anyMeet
+                                ? `<td>${session.meet
+                                    ? `<a href="${escapeHtml(session.meet)}" target="_blank" rel="noopener" class="btn-table-action"><i class="fas fa-video"></i> เข้าเรียน</a>`
+                                    : '<span class="text-muted">-</span>'}</td>`
+                                : '';
 
                             scheduleHtml += `
                                     <tr${highlightClass}>
                                         <td><div class="table-time-cell">${formatDisplayDate(session.date)}${nextBadge}</div></td>
                                         <td>${formatTimeRange(session.time)}</td>
+                                        ${meetCell}
                                     </tr>`;
                         });
 
