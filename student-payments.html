@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LITALK Education - การชำระเงิน</title>
+    <meta name="description" content="LITALK Education Student Portal - รายการชำระเงินทั้งหมดของคุณ">
+    <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
+    <script>
+        // Init theme before first paint to prevent flickering
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', savedTheme || (systemPrefersDark ? 'dark' : 'light'));
+        })();
+    </script>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="stylesheet" href="css/student-portal.css">
+</head>
+
+<body>
+
+    <!-- STUDENT DASHBOARD (Payments page) -->
+    <div id="student-dashboard" class="dashboard-page">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
+                    <span class="nav-brand-text">Student Portal</span>
+                </a>
+                <div class="nav-actions">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                        <i id="theme-toggle-icon-dash" class="fas fa-moon"></i>
+                    </button>
+                    <button class="btn-logout-header" onclick="logout()" id="logout-btn">
+                        <i class="fas fa-arrow-right-from-bracket"></i>
+                        <span>ออกจากระบบ</span>
+                    </button>
+                </div>
+                <!-- Hamburger Button -->
+                <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="student-mobile-drawer">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+
+            <!-- Mobile Drawer -->
+            <div class="nav-drawer t-panel-slide" id="student-mobile-drawer" data-open="false" role="navigation" aria-label="Mobile navigation">
+                <a href="student" class="drawer-link"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
+                <a href="student-study-log" class="drawer-link"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
+                <a href="student-payments" class="drawer-link active"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                <div class="drawer-divider"></div>
+                <a href="/" class="drawer-link"><i class="fas fa-home"></i> หน้าหลัก</a>
+                <a href="programs" class="drawer-link"><i class="fas fa-book"></i> หลักสูตรทั้งหมด</a>
+                <a href="about" class="drawer-link"><i class="fas fa-info-circle"></i> เกี่ยวกับเรา</a>
+                <div class="drawer-divider"></div>
+                <div class="drawer-actions">
+                    <button class="drawer-action-btn theme-toggle-btn-mobile" onclick="toggleTheme()" aria-label="Toggle Theme">
+                        <i id="theme-toggle-icon-mobile" class="fas fa-moon"></i>
+                        <span id="theme-text-mobile">โหมดมืด</span>
+                    </button>
+                    <button class="drawer-action-btn logout-btn-mobile" onclick="logout()" id="logout-btn-mobile">
+                        <i class="fas fa-arrow-right-from-bracket"></i>
+                        <span>ออกจากระบบ</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Panel Content -->
+        <main class="dashboard-content">
+            <!-- Portal Tabs -->
+            <nav class="portal-tabs" aria-label="Portal navigation">
+                <a href="student" class="portal-tab"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
+                <a href="student-study-log" class="portal-tab"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
+                <a href="student-payments" class="portal-tab active" aria-current="page"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+            </nav>
+
+            <!-- Page Header -->
+            <header class="page-head">
+                <div class="page-head-main">
+                    <span class="page-head-icon"><i class="fas fa-receipt"></i></span>
+                    <div class="page-head-text">
+                        <h1>การชำระเงิน</h1>
+                        <p>รายการค้างชำระและประวัติการชำระเงินทั้งหมดของคุณ พร้อมใบเสร็จรับเงิน</p>
+                    </div>
+                </div>
+                <div class="page-head-side">
+                    <span class="page-head-chip"><i class="fas fa-file-invoice-dollar"></i>
+                        <span id="display-payments-count"><span class="skeleton-loader" style="width:60px;height:16px;"></span></span>
+                    </span>
+                    <a href="student" class="btn-back-overview"><i class="fas fa-arrow-left"></i> กลับหน้าภาพรวม</a>
+                </div>
+            </header>
+
+            <!-- Pending Payments Alert -->
+            <section class="content-section pending-payments-section" id="section-pending-payments" style="display: none;">
+                <h2 class="section-title"><i class="fas fa-triangle-exclamation"></i> รายการที่ต้องชำระเงิน</h2>
+                <p class="section-sub">คุณมีรายการค้างชำระ กดปุ่ม "ชำระเงิน" เพื่อชำระผ่านช่องทางออนไลน์ได้ทันที</p>
+                <div id="pending-payments-container"></div>
+            </section>
+
+            <!-- Full Payment History -->
+            <section class="content-section">
+                <h2 class="section-title"><i class="fas fa-clock-rotate-left"></i> ประวัติการชำระเงินทั้งหมด</h2>
+                <p class="section-sub">เรียงจากรายการล่าสุดไปเก่าสุด กด "ดูใบเสร็จ" เพื่อเปิดหลักฐานการชำระเงิน</p>
+                <div id="payment-info-container">
+                    <div class="loading-spinner"><i class="fas fa-circle-notch"></i>
+                        กำลังดึงข้อมูลประวัติชำระเงิน...</div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <div class="footer-content">
+                <i class="far fa-copyright"></i> 2026 LITALK Education <i class="fas fa-circle"
+                    style="font-size:4px;vertical-align:middle;margin:0 8px;"></i> All rights reserved
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/student-portal.js"></script>
+    <script>
+        window.onload = async () => {
+            updateThemeIcons(document.documentElement.getAttribute('data-theme'));
+
+            const studentId = resolvePortalStudentId();
+            if (!studentId) {
+                // Not signed in — send back to the portal entry page for login
+                window.location.replace('student');
+                return;
+            }
+
+            document.getElementById('student-dashboard').style.display = 'block';
+            initStudentHamburger();
+
+            const container = document.getElementById('payment-info-container');
+            const countEl = document.getElementById('display-payments-count');
+            try {
+                const result = await fetchPortalData(studentId);
+                if (result.status === 'success') {
+                    const data = result.data;
+                    const payments = data.payments || [];
+                    countEl.innerText = `${payments.length} รายการ`;
+
+                    renderPendingPayments(
+                        document.getElementById('section-pending-payments'),
+                        document.getElementById('pending-payments-container'),
+                        data.pendingPayments
+                    );
+                    renderPayments(container, payments);
+                } else {
+                    countEl.innerText = '- รายการ';
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>${escapeHtml(result.message || 'ไม่พบข้อมูล')}</p></div>`;
+                }
+            } catch (error) {
+                countEl.innerText = '- รายการ';
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล กรุณาลองใหม่อีกครั้ง</p></div>';
+            }
+        };
+    </script>
+</body>
+
+</html>
