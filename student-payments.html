@@ -110,8 +110,18 @@
                 <h2 class="section-title"><i class="fas fa-clock-rotate-left"></i> ประวัติการชำระเงินทั้งหมด</h2>
                 <p class="section-sub">เรียงจากรายการล่าสุดไปเก่าสุด กด "ดูใบเสร็จ" เพื่อเปิดหลักฐานการชำระเงิน</p>
                 <div id="payment-info-container">
-                    <div class="loading-spinner"><i class="fas fa-circle-notch"></i>
-                        กำลังดึงข้อมูลประวัติชำระเงิน...</div>
+                    <div class="skeleton-card" aria-hidden="true">
+                        <span class="skeleton-loader skeleton-row short"></span>
+                        <span class="skeleton-loader skeleton-row medium"></span>
+                    </div>
+                    <div class="skeleton-card" aria-hidden="true">
+                        <span class="skeleton-loader skeleton-row short"></span>
+                        <span class="skeleton-loader skeleton-row medium"></span>
+                    </div>
+                    <div class="skeleton-card" aria-hidden="true">
+                        <span class="skeleton-loader skeleton-row short"></span>
+                        <span class="skeleton-loader skeleton-row medium"></span>
+                    </div>
                 </div>
             </section>
         </main>
@@ -123,6 +133,28 @@
                     style="font-size:4px;vertical-align:middle;margin:0 8px;"></i> All rights reserved
             </div>
         </footer>
+
+        <!-- Mobile bottom navigation -->
+        <nav class="bottom-nav" aria-label="เมนูหลัก">
+            <a href="student" class="bottom-nav-item">
+                <i class="fas fa-gauge-high"></i>
+                <span>ภาพรวม</span>
+            </a>
+            <a href="student-study-log" class="bottom-nav-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>บันทึกการเรียน</span>
+            </a>
+            <a href="student-payments" class="bottom-nav-item active" aria-current="page">
+                <i class="fas fa-receipt"></i>
+                <span>การชำระเงิน</span>
+            </a>
+        </nav>
+
+        <!-- Mobile floating action button (upgraded to the Meet link by updateFab) -->
+        <a id="fab-join" class="fab" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"
+            aria-label="ติดต่อแอดมินทาง LINE">
+            <i class="fab fa-line"></i>
+        </a>
     </div>
 
     <script src="js/student-portal.js"></script>
@@ -155,6 +187,7 @@
                         data.pendingPayments
                     );
                     renderPayments(container, payments);
+                    updateFab(data.schedule);
                 } else {
                     countEl.innerText = '- รายการ';
                     container.innerHTML = `<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>${escapeHtml(result.message || 'ไม่พบข้อมูล')}</p></div>`;

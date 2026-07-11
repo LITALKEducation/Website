@@ -360,6 +360,138 @@ function renderSchedule(container, schedule) {
     container.innerHTML = scheduleHtml;
 }
 
+// ---------- Next class spotlight ----------
+// The API returns schedule[] soonest-first with `date` (may be a Thai
+// Buddhist-era string), `time` (start of a fixed 1-hour slot) and an
+// auth-gated `meet` link.
+function getScheduleStart(session) {
+    if (!session) return null;
+    const d = parseThaiDate(session.date);
+    if (d.getTime() === 0) return null;
+    const [h, m] = String(session.time || '').split(':').map(Number);
+    if (Number.isFinite(h)) d.setHours(h, Number.isFinite(m) ? m : 0, 0, 0);
+    return d;
+}
+
+// Google Calendar template link with floating local times pinned to
+// Asia/Bangkok — avoids UTC conversion bugs and works on iOS where
+// .ics data URIs are unreliable.
+function buildGoogleCalendarUrl(session) {
+    const start = getScheduleStart(session);
+    if (!start) return null;
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const pad = (v) => String(v).padStart(2, '0');
+    const fmt = (d) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: 'คลาสเรียน LITALK Education',
+        dates: `${fmt(start)}/${fmt(end)}`,
+        ctz: 'Asia/Bangkok',
+        details: session.meet ? `เข้าเรียนผ่าน Google Meet: ${session.meet}` : 'คลาสเรียนกับ LITALK Education',
+    });
+    if (session.meet) params.set('location', session.meet);
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function getRelativeDayLabel(date) {
+    if (!date) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(date);
+    target.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((target - today) / 86400000);
+    if (diffDays === 0) return 'วันนี้';
+    if (diffDays === 1) return 'พรุ่งนี้';
+    if (diffDays > 1) return `อีก ${diffDays} วัน`;
+    return '';
+}
+
+function renderNextClass(container, schedule) {
+    if (!container) return;
+    if (!schedule || schedule.length === 0) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+        return;
+    }
+    const next = schedule[0];
+    const start = getScheduleStart(next);
+    const relative = start ? getRelativeDayLabel(start) : '';
+    const calendarUrl = buildGoogleCalendarUrl(next);
+    // The Meet link is only present for Auth0-authenticated students;
+    // cookie/?id= sessions get a hint instead of a dead button.
+    const joinAction = next.meet
+        ? `<a href="${escapeHtml(next.meet)}" target="_blank" rel="noopener" class="btn-join-class"><i class="fas fa-video"></i> เข้าห้องเรียน</a>`
+        : `<span class="next-class-join-hint"><i class="fas fa-lock"></i> เข้าสู่ระบบด้วยบัญชี LITALK เพื่อรับลิงก์เข้าเรียน</span>`;
+
+    container.style.display = '';
+    container.innerHTML = `
+    <div class="next-class-card">
+        <div class="next-class-date-badge">
+            <span class="next-class-day">${start ? start.getDate() : '-'}</span>
+            <span class="next-class-month">${start ? escapeHtml(start.toLocaleDateString('th-TH', { month: 'short' })) : ''}</span>
+        </div>
+        <div class="next-class-meta">
+            <span class="next-class-title">คลาสเรียนครั้งถัดไป${relative ? ` <span class="next-class-relative">${escapeHtml(relative)}</span>` : ''}</span>
+            <span class="next-class-time"><i class="far fa-calendar-alt"></i> ${formatDisplayDate(next.date)} · <i class="far fa-clock"></i> ${formatTimeRange(next.time)}</span>
+        </div>
+        <div class="next-class-actions">
+            ${joinAction}
+            ${calendarUrl ? `<a href="${escapeHtml(calendarUrl)}" target="_blank" rel="noopener" class="btn-add-calendar"><i class="far fa-calendar-plus"></i> เพิ่มลงปฏิทิน</a>` : ''}
+        </div>
+    </div>`;
+}
+
+// Mobile floating action button (#fab-join). Markup ships with the LINE
+// support link as the fallback; upgrade it once schedule data arrives.
+function updateFab(schedule) {
+    const fab = document.getElementById('fab-join');
+    if (!fab) return;
+    const next = schedule && schedule[0];
+    if (next && next.meet) {
+        fab.href = next.meet;
+        fab.target = '_blank';
+        fab.rel = 'noopener';
+        fab.innerHTML = '<i class="fas fa-video"></i>';
+        fab.setAttribute('aria-label', 'เข้าเรียนคลาสถัดไป');
+    } else if (schedule && schedule.length > 0) {
+        fab.href = 'student#section-schedule';
+        fab.removeAttribute('target');
+        fab.innerHTML = '<i class="fas fa-calendar-days"></i>';
+        fab.setAttribute('aria-label', 'ดูตารางเรียนที่จะถึง');
+    }
+}
+
+// ---------- Dropdown menus (<details class="menu-dropdown">) ----------
+// Native <details> gives keyboard toggling for free; add outside-click
+// and Escape-to-close (returning focus to the trigger) plus
+// only-one-open-at-a-time behaviour.
+function initDropdowns() {
+    const dropdowns = document.querySelectorAll('details.menu-dropdown');
+    if (!dropdowns.length) return;
+    dropdowns.forEach((dd) => {
+        dd.addEventListener('toggle', () => {
+            if (!dd.open) return;
+            dropdowns.forEach((other) => {
+                if (other !== dd) other.open = false;
+            });
+        });
+    });
+    document.addEventListener('click', (e) => {
+        dropdowns.forEach((dd) => {
+            if (dd.open && !dd.contains(e.target)) dd.open = false;
+        });
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        dropdowns.forEach((dd) => {
+            if (!dd.open) return;
+            dd.open = false;
+            const summary = dd.querySelector('summary');
+            if (summary) summary.focus();
+        });
+    });
+}
+
 // ---------- Pending payments ----------
 function renderPendingPayments(section, container, pendingPayments) {
     if (!section || !container) return;
@@ -380,14 +512,16 @@ function renderPendingPayments(section, container, pendingPayments) {
 
 // ---------- Study logs ----------
 // Renders the study log timeline. Options:
-//   limit     — show only the newest N logs (dashboard preview)
-//   moreHref  — when limited and there are more logs, append a
-//               "view all" link pointing at the full page
+//   limit        — show only the newest N logs (dashboard preview)
+//   moreHref     — when limited and there are more logs, append a
+//                  "view all" link pointing at the full page
+//   groupByMonth — insert a month header whenever the (Thai) month of
+//                  the log changes (used by the full study-log page)
 // Long feedback is collapsed behind a "read more" toggle so one verbose
 // log doesn't force endless scrolling (most useful on mobile).
 function renderStudyLogs(container, studyLogs, options = {}) {
     if (!container) return;
-    const { limit, moreHref } = options;
+    const { limit, moreHref, groupByMonth } = options;
 
     if (!studyLogs || studyLogs.length === 0) {
         container.innerHTML = '<div class="empty-state"><i class="far fa-folder-open"></i><p>ยังไม่มีบันทึกประวัติการเรียนในระบบ</p></div>';
@@ -398,8 +532,30 @@ function renderStudyLogs(container, studyLogs, options = {}) {
     const logs = [...studyLogs].sort((a, b) => parseThaiDate(b.timestamp) - parseThaiDate(a.timestamp));
     const shown = limit ? logs.slice(0, limit) : logs;
 
+    const monthKey = (log) => {
+        const d = parseThaiDate(log.timestamp);
+        return d.getTime() === 0 ? 'ไม่ระบุเดือน' : d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    };
+    let monthCounts = null;
+    if (groupByMonth) {
+        monthCounts = new Map();
+        shown.forEach((log) => {
+            const key = monthKey(log);
+            monthCounts.set(key, (monthCounts.get(key) || 0) + 1);
+        });
+    }
+    let currentMonth = null;
+
     let studyHtml = `<div class="timeline-container">`;
     shown.forEach((log, index) => {
+        if (groupByMonth) {
+            const key = monthKey(log);
+            if (key !== currentMonth) {
+                currentMonth = key;
+                studyHtml += `
+        <div class="timeline-month-header">${escapeHtml(key)} <span class="timeline-month-count">${monthCounts.get(key)} คลาส</span></div>`;
+            }
+        }
         const hasVideo = log.video && log.video.startsWith('http');
         const videoButton = hasVideo
             ? `<a href="${escapeHtml(log.video)}" target="_blank" rel="noopener" class="timeline-video-btn"><i class="fas fa-play-circle"></i> ดูวิดีโอย้อนหลัง</a>`
