@@ -139,16 +139,40 @@
 
             <!-- Welcome Hero -->
             <div class="welcome-hero">
-                <img id="display-avatar" class="hero-avatar" alt="รูปโปรไฟล์" style="display: none;">
+                <div class="hero-profile">
+                    <img id="display-avatar" class="hero-avatar" alt="รูปโปรไฟล์" style="display: none;">
+                    <div id="display-avatar-fallback" class="hero-avatar-fallback" aria-hidden="true"><i class="fas fa-user"></i></div>
+                </div>
                 <div class="hero-text">
                     <h1>ยินดีต้อนรับ, <span id="display-name"><span class="skeleton-loader text-loader"></span></span><span id="display-nickname" class="hero-nickname"></span>
                     </h1>
-                    <p>ภาพรวมการเรียนของคุณ — ตารางเรียน บันทึกการเรียนล่าสุด และการชำระเงิน ครบในหน้าเดียว</p>
+                    <div class="hero-chips">
+                        <span class="student-id-badge">
+                            <i class="fas fa-id-badge"></i> ID: <span id="display-id">-</span>
+                        </span>
+                        <span class="hero-course-chip" id="display-hero-course" hidden>
+                            <i class="fas fa-book-open"></i> <span></span>
+                        </span>
+                        <span class="membership-badge" id="display-membership" hidden></span>
+                    </div>
                 </div>
-                <div class="hero-badge-container">
-                    <span class="student-id-badge">
-                        <i class="fas fa-id-badge"></i> ID: <span id="display-id">-</span>
-                    </span>
+                <div class="hero-actions">
+                    <a class="hero-action-btn primary" id="hero-action-join" href="#section-schedule">
+                        <i class="fas fa-video"></i> เข้าเรียน
+                    </a>
+                    <a class="hero-action-btn" id="hero-action-pay" href="student-payments" hidden>
+                        <i class="fas fa-credit-card"></i> ชำระเงิน
+                    </a>
+                    <details class="menu-dropdown">
+                        <summary class="hero-action-btn" aria-label="เมนูเพิ่มเติม" role="button">
+                            <i class="fas fa-ellipsis"></i>
+                        </summary>
+                        <div class="menu-dropdown-panel">
+                            <a class="menu-dropdown-item" href="student-study-log"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
+                            <a class="menu-dropdown-item" href="student-payments"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                            <a class="menu-dropdown-item" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"><i class="fab fa-line"></i> ติดต่อแอดมิน</a>
+                        </div>
+                    </details>
                 </div>
             </div>
 
@@ -156,26 +180,16 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon-wrapper blue">
-                        <i class="fas fa-book-open"></i>
+                        <i class="fas fa-hourglass-half"></i>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-label">คอร์สเรียนของคุณ</span>
-                        <h3 class="stat-value" id="display-course">-</h3>
+                        <span class="stat-label">ชั่วโมงเรียนคงเหลือ</span>
+                        <h3 class="stat-value" id="display-credit">- ชม.</h3>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon-wrapper green">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">ชำระเงินล่าสุด</span>
-                        <h3 class="stat-value" id="display-lastpaid">-</h3>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon-wrapper purple">
                         <i class="fas fa-clipboard-list"></i>
                     </div>
                     <div class="stat-info">
@@ -185,12 +199,22 @@
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-icon-wrapper orange">
-                        <i class="fas fa-hourglass-half"></i>
+                    <div class="stat-icon-wrapper purple">
+                        <i class="fas fa-calendar-check"></i>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-label">ชั่วโมงเรียนคงเหลือ</span>
-                        <h3 class="stat-value" id="display-credit">- ชม.</h3>
+                        <span class="stat-label" id="display-payment-status-label">ชำระเงินล่าสุด</span>
+                        <h3 class="stat-value" id="display-payment-status"><span id="display-lastpaid">-</span></h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper orange">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">คอร์สเรียนของคุณ</span>
+                        <h3 class="stat-value" id="display-course">-</h3>
                     </div>
                 </div>
             </div>
@@ -203,12 +227,15 @@
             </section>
 
             <!-- Upcoming Schedule -->
-            <section class="content-section schedule-section">
+            <section class="content-section schedule-section" id="section-schedule">
                 <h2 class="section-title"><i class="fas fa-calendar-days"></i> ตารางเรียนที่จะถึง</h2>
-                <p class="section-sub">วันและเวลาเรียนครั้งต่อไปของคุณ คลาสที่ใกล้ที่สุดจะมีป้าย "ครั้งถัดไป" กำกับไว้</p>
+                <p class="section-sub">วันและเวลาเรียนครั้งต่อไปของคุณ พร้อมปุ่มเข้าห้องเรียนและเพิ่มลงปฏิทิน</p>
+                <div id="next-class-container" style="display: none;"></div>
                 <div id="schedule-container">
-                    <div class="loading-spinner"><i class="fas fa-circle-notch"></i>
-                        กำลังดึงข้อมูลตารางเรียน...</div>
+                    <div class="skeleton-card" aria-hidden="true">
+                        <span class="skeleton-loader skeleton-row short"></span>
+                        <span class="skeleton-loader skeleton-row medium"></span>
+                    </div>
                 </div>
             </section>
 
@@ -231,8 +258,15 @@
                     </div>
                     <p class="section-sub">สรุปผลการเรียนครั้งล่าสุดของคุณ ดูบันทึกทั้งหมดได้ที่หน้า "บันทึกการเรียน"</p>
                     <div id="study-log-container">
-                        <div class="loading-spinner"><i class="fas fa-circle-notch"></i>
-                            กำลังดึงข้อมูลประวัติการเรียน...</div>
+                        <div class="skeleton-card" aria-hidden="true">
+                            <span class="skeleton-loader skeleton-row short"></span>
+                            <span class="skeleton-loader skeleton-row"></span>
+                            <span class="skeleton-loader skeleton-row medium"></span>
+                        </div>
+                        <div class="skeleton-card" aria-hidden="true">
+                            <span class="skeleton-loader skeleton-row short"></span>
+                            <span class="skeleton-loader skeleton-row medium"></span>
+                        </div>
                     </div>
                 </section>
 
@@ -246,8 +280,14 @@
                     </div>
                     <p class="section-sub">รายการชำระเงินล่าสุดของคุณ ดูประวัติทั้งหมดได้ที่หน้า "การชำระเงิน"</p>
                     <div id="payment-info-container">
-                        <div class="loading-spinner"><i class="fas fa-circle-notch"></i>
-                            กำลังดึงข้อมูลประวัติชำระเงิน...</div>
+                        <div class="skeleton-card" aria-hidden="true">
+                            <span class="skeleton-loader skeleton-row short"></span>
+                            <span class="skeleton-loader skeleton-row medium"></span>
+                        </div>
+                        <div class="skeleton-card" aria-hidden="true">
+                            <span class="skeleton-loader skeleton-row short"></span>
+                            <span class="skeleton-loader skeleton-row medium"></span>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -260,6 +300,28 @@
                     style="font-size:4px;vertical-align:middle;margin:0 8px;"></i> All rights reserved
             </div>
         </footer>
+
+        <!-- Mobile bottom navigation -->
+        <nav class="bottom-nav" aria-label="เมนูหลัก">
+            <a href="student" class="bottom-nav-item active" aria-current="page">
+                <i class="fas fa-gauge-high"></i>
+                <span>ภาพรวม</span>
+            </a>
+            <a href="student-study-log" class="bottom-nav-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>บันทึกการเรียน</span>
+            </a>
+            <a href="student-payments" class="bottom-nav-item">
+                <i class="fas fa-receipt"></i>
+                <span>การชำระเงิน</span>
+            </a>
+        </nav>
+
+        <!-- Mobile floating action button (upgraded to the Meet link by updateFab) -->
+        <a id="fab-join" class="fab" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"
+            aria-label="ติดต่อแอดมินทาง LINE">
+            <i class="fab fa-line"></i>
+        </a>
     </div>
 
     <script src="js/student-portal.js"></script>
@@ -318,6 +380,7 @@
             // Hide top level toggle as dashboard has its own theme toggle
             document.getElementById('theme-toggle-container').style.display = 'none';
             initStudentHamburger();
+            initDropdowns();
             loadOverview(studentId);
         }
 
@@ -337,13 +400,37 @@
                     const credit = Number(data.info.creditBalance);
                     document.getElementById('display-credit').innerText = `${Number.isFinite(credit) ? credit.toLocaleString('en-US') : '-'} ชม.`;
 
-                    // Profile avatar (served publicly by student id)
+                    // Membership status, derived from the remaining credit
+                    const membershipEl = document.getElementById('display-membership');
+                    if (Number.isFinite(credit)) {
+                        const active = credit > 0;
+                        membershipEl.className = `membership-badge ${active ? 'membership-active' : 'membership-inactive'}`;
+                        membershipEl.innerHTML = active
+                            ? '<i class="fas fa-circle-check"></i> สมาชิกที่ใช้งานอยู่'
+                            : '<i class="fas fa-hourglass-end"></i> หมดชั่วโมงเรียน';
+                        membershipEl.hidden = false;
+                    }
+
+                    // Course chip in the hero (mirrors the stat card)
+                    const heroCourseEl = document.getElementById('display-hero-course');
+                    if (data.info.course) {
+                        heroCourseEl.querySelector('span').innerText = data.info.course;
+                        heroCourseEl.hidden = false;
+                    }
+
+                    // Profile avatar (served publicly by student id),
+                    // or an initial-letter fallback when none is set
                     const avatarEl = document.getElementById('display-avatar');
+                    const avatarFallbackEl = document.getElementById('display-avatar-fallback');
                     if (data.info.hasAvatar) {
                         avatarEl.src = `${dataApiUrl}/portal/${encodeURIComponent(studentId)}/avatar`;
                         avatarEl.style.display = '';
+                        avatarFallbackEl.hidden = true;
                     } else {
                         avatarEl.style.display = 'none';
+                        const initial = String(data.info.nickname || data.info.name || studentId).trim().charAt(0);
+                        if (initial) avatarFallbackEl.innerText = initial.toUpperCase();
+                        avatarFallbackEl.hidden = false;
                     }
 
                     // Show actual log count in badge card
@@ -353,8 +440,20 @@
                     // Documents / files — only present when the student is signed in
                     renderFiles(studentId, data.files || []);
 
-                    // Upcoming schedule (already sorted soonest-first by the API)
+                    // Upcoming schedule: spotlight card for the next class,
+                    // then the full table (already sorted soonest-first)
+                    renderNextClass(document.getElementById('next-class-container'), data.schedule);
                     renderSchedule(document.getElementById('schedule-container'), data.schedule);
+                    updateFab(data.schedule);
+
+                    // Hero quick action: jump straight into the next class
+                    // when its Meet link is available (Auth0 sessions only)
+                    const heroJoinBtn = document.getElementById('hero-action-join');
+                    if (data.schedule && data.schedule[0] && data.schedule[0].meet) {
+                        heroJoinBtn.href = data.schedule[0].meet;
+                        heroJoinBtn.target = '_blank';
+                        heroJoinBtn.rel = 'noopener';
+                    }
 
                     // Pending payments alert (hidden entirely when there's nothing to pay)
                     renderPendingPayments(
@@ -362,6 +461,14 @@
                         document.getElementById('pending-payments-container'),
                         data.pendingPayments
                     );
+
+                    // Payment status stat + hero shortcut when something is due
+                    const pendingCount = data.pendingPayments ? data.pendingPayments.length : 0;
+                    if (pendingCount > 0) {
+                        document.getElementById('display-payment-status-label').innerText = 'สถานะการชำระเงิน';
+                        document.getElementById('display-payment-status').innerText = `ค้างชำระ ${pendingCount} รายการ`;
+                        document.getElementById('hero-action-pay').hidden = false;
+                    }
 
                     // Preview: latest study logs + latest payments
                     renderStudyLogs(document.getElementById('study-log-container'), data.studyLogs, {

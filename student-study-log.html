@@ -104,8 +104,19 @@
                 <h2 class="section-title"><i class="fas fa-clock-rotate-left"></i> ประวัติการเรียนทั้งหมด</h2>
                 <p class="section-sub">เรียงจากคลาสล่าสุดไปคลาสแรกสุด กด "อ่านเพิ่มเติม" เพื่อดูข้อเสนอแนะฉบับเต็ม</p>
                 <div id="study-log-container">
-                    <div class="loading-spinner"><i class="fas fa-circle-notch"></i>
-                        กำลังดึงข้อมูลประวัติการเรียน...</div>
+                    <div class="skeleton-card" aria-hidden="true">
+                        <span class="skeleton-loader skeleton-row short"></span>
+                        <span class="skeleton-loader skeleton-row"></span>
+                        <span class="skeleton-loader skeleton-row medium"></span>
+                    </div>
+                    <div class="skeleton-card" aria-hidden="true">
+                        <span class="skeleton-loader skeleton-row short"></span>
+                        <span class="skeleton-loader skeleton-row medium"></span>
+                    </div>
+                    <div class="skeleton-card" aria-hidden="true">
+                        <span class="skeleton-loader skeleton-row short"></span>
+                        <span class="skeleton-loader skeleton-row medium"></span>
+                    </div>
                 </div>
             </section>
         </main>
@@ -117,6 +128,28 @@
                     style="font-size:4px;vertical-align:middle;margin:0 8px;"></i> All rights reserved
             </div>
         </footer>
+
+        <!-- Mobile bottom navigation -->
+        <nav class="bottom-nav" aria-label="เมนูหลัก">
+            <a href="student" class="bottom-nav-item">
+                <i class="fas fa-gauge-high"></i>
+                <span>ภาพรวม</span>
+            </a>
+            <a href="student-study-log" class="bottom-nav-item active" aria-current="page">
+                <i class="fas fa-graduation-cap"></i>
+                <span>บันทึกการเรียน</span>
+            </a>
+            <a href="student-payments" class="bottom-nav-item">
+                <i class="fas fa-receipt"></i>
+                <span>การชำระเงิน</span>
+            </a>
+        </nav>
+
+        <!-- Mobile floating action button (upgraded to the Meet link by updateFab) -->
+        <a id="fab-join" class="fab" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"
+            aria-label="ติดต่อแอดมินทาง LINE">
+            <i class="fab fa-line"></i>
+        </a>
     </div>
 
     <script src="js/student-portal.js"></script>
@@ -141,7 +174,8 @@
                 if (result.status === 'success') {
                     const logs = result.data.studyLogs || [];
                     countEl.innerText = `${logs.length} คลาส`;
-                    renderStudyLogs(container, logs);
+                    renderStudyLogs(container, logs, { groupByMonth: true });
+                    updateFab(result.data.schedule);
                 } else {
                     countEl.innerText = '- คลาส';
                     container.innerHTML = `<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>${escapeHtml(result.message || 'ไม่พบข้อมูล')}</p></div>`;
