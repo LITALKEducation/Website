@@ -166,6 +166,7 @@
 
             document.getElementById('student-dashboard').style.display = 'block';
             initStudentHamburger();
+            initAIChatWidget(studentId);
 
             const container = document.getElementById('study-log-container');
             const countEl = document.getElementById('display-classes-count');
@@ -186,6 +187,20 @@
             }
         };
     </script>
+
+    <!-- AI chat assistant -->
+    <button class="ai-chat-fab" id="ai-chat-fab" onclick="toggleAIChat()" aria-label="ผู้ช่วย AI" title="ผู้ช่วย AI" style="display:none;"><i class="fas fa-robot"></i></button>
+    <div class="ai-chat-panel" id="ai-chat-panel">
+        <div class="ai-chat-panel__header">
+            <span>ผู้ช่วย AI</span>
+            <button class="ai-chat-panel__close" onclick="toggleAIChat(false)" aria-label="ปิด"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="ai-chat-panel__messages" id="ai-chat-messages"></div>
+        <form class="ai-chat-panel__form" id="ai-chat-form" onsubmit="return submitAIChat(event)">
+            <textarea class="ai-chat-panel__input" id="ai-chat-input" rows="1" placeholder="พิมพ์คำถาม..." maxlength="2000" onkeydown="if(event.key==='Enter' &amp;&amp; !event.shiftKey){event.preventDefault();this.form.requestSubmit();}"></textarea>
+            <button type="submit" class="ai-chat-panel__send" id="ai-chat-send" aria-label="ส่ง"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
 </body>
 
 </html>
