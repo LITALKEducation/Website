@@ -717,6 +717,16 @@ function initAIChatWidget(studentId) {
     aiChatStudentId = studentId;
     const fab = document.getElementById('ai-chat-fab');
     if (fab) fab.style.display = 'flex';
+
+    const messages = document.getElementById('ai-chat-messages');
+    const scrollBtn = document.getElementById('ai-chat-scroll-btn');
+    if (messages && scrollBtn && !messages.dataset.scrollBtnBound) {
+        messages.dataset.scrollBtnBound = '1';
+        messages.addEventListener('scroll', () => {
+            const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 60;
+            scrollBtn.classList.toggle('show', !nearBottom);
+        });
+    }
 }
 
 function toggleAIChat(force) {
@@ -728,18 +738,97 @@ function toggleAIChat(force) {
         const input = document.getElementById('ai-chat-input');
         if (input) input.focus();
         const messages = document.getElementById('ai-chat-messages');
-        if (messages && !messages.childElementCount) {
-            appendAIChatMessage('assistant', 'สวัสดีค่ะ ถามเกี่ยวกับตารางเรียน เครดิตคงเหลือ หรือการชำระเงินของคุณได้เลยค่ะ');
+        if (messages && !messages.querySelector('.ai-chat-msg, .ai-chat-msg-row')) {
+            appendAIChatMessage('assistant', 'สวัสดีค่ะ หนูชื่อน้องลิลลี่ ถามเกี่ยวกับตารางเรียน เครดิตคงเหลือ หรือการชำระเงินของคุณได้เลยค่ะ');
         }
     }
+}
+
+function startNewAIChat() {
+    aiChatConversationId = null;
+    const messages = document.getElementById('ai-chat-messages');
+    if (!messages) return;
+    messages.querySelectorAll('.ai-chat-msg, .ai-chat-msg-row').forEach((el) => el.remove());
+    appendAIChatMessage('assistant', 'สวัสดีค่ะ หนูชื่อน้องลิลลี่ เริ่มการสนทนาใหม่แล้วนะคะ ถามอะไรได้เลย');
+}
+
+function scrollAIChatToBottom() {
+    const messages = document.getElementById('ai-chat-messages');
+    if (messages) messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
+}
+
+// Minimal, safe Markdown-to-HTML for AI replies: escapes HTML first, then
+// re-introduces only the small set of patterns LLMs actually use in chat
+// answers (bold, italic, inline/fenced code, links, lists, paragraphs).
+// Not a full CommonMark parser by design.
+function renderChatMarkdown(text) {
+    const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const inline = (s) => escapeHtml(s)
+        .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    const codeBlocks = [];
+    const withPlaceholders = String(text).replace(/```[a-zA-Z0-9]*\n?([\s\S]*?)```/g, (_, code) => {
+        codeBlocks.push(escapeHtml(code.replace(/\n$/, '')));
+        return '\nCODEBLOCK' + (codeBlocks.length - 1) + '\n';
+    });
+
+    const out = [];
+    let para = [];
+    let list = null;
+    const flushPara = () => { if (para.length) { out.push('<p>' + para.join('<br>') + '</p>'); para = []; } };
+    const flushList = () => { if (list) { out.push('<' + list.type + '>' + list.items.map((i) => '<li>' + i + '</li>').join('') + '</' + list.type + '>'); list = null; } };
+    for (const rawLine of withPlaceholders.split('\n')) {
+        const line = rawLine.trim();
+        const codeMatch = line.match(/^CODEBLOCK(\d+)$/);
+        const ul = line.match(/^[-*]\s+(.*)$/);
+        const ol = line.match(/^\d+\.\s+(.*)$/);
+        if (codeMatch) {
+            flushPara();
+            flushList();
+            out.push('<pre><code>' + codeBlocks[Number(codeMatch[1])] + '</code></pre>');
+        } else if (ul) {
+            flushPara();
+            if (!list || list.type !== 'ul') { flushList(); list = { type: 'ul', items: [] }; }
+            list.items.push(inline(ul[1]));
+        } else if (ol) {
+            flushPara();
+            if (!list || list.type !== 'ol') { flushList(); list = { type: 'ol', items: [] }; }
+            list.items.push(inline(ol[1]));
+        } else if (line === '') {
+            flushPara();
+            flushList();
+        } else {
+            flushList();
+            para.push(inline(line));
+        }
+    }
+    flushPara();
+    flushList();
+
+    return out.join('');
 }
 
 function appendAIChatMessage(role, text) {
     const messages = document.getElementById('ai-chat-messages');
     const el = document.createElement('div');
     el.className = 'ai-chat-msg ai-chat-msg--' + role;
-    el.textContent = text;
-    messages.appendChild(el);
+    if (role === 'assistant') {
+        el.innerHTML = renderChatMarkdown(text);
+        const row = document.createElement('div');
+        row.className = 'ai-chat-msg-row';
+        const avatar = document.createElement('span');
+        avatar.className = 'ai-chat-msg-avatar';
+        avatar.textContent = '🌷';
+        row.appendChild(avatar);
+        row.appendChild(el);
+        messages.appendChild(row);
+    } else {
+        el.textContent = text;
+        messages.appendChild(el);
+    }
     messages.scrollTop = messages.scrollHeight;
     return el;
 }
