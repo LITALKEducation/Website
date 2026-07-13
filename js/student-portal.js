@@ -29,16 +29,36 @@ const auth0Client = (typeof auth0 !== 'undefined')
     : null;
 
 // Cloudflare Worker API (D1 database) — replaces the old Google Apps
-// Script / Google Sheets backend.
-const dataApiUrl = 'https://litalk-files-api.n62c5gwghk.workers.dev';
+// Script / Google Sheets backend. Served on the litalkeducation.com
+// custom domain rather than the raw workers.dev subdomain.
+const dataApiUrl = 'https://istudent.litalkeducation.com';
+
+// Auth0's hidden-iframe silent auth can hang indefinitely instead of
+// rejecting — notably in the LINE/Facebook in-app browser and other
+// WebViews that restrict third-party storage. Without a timeout, awaiting
+// it would block the portal data fetch forever, so race it against a
+// deadline and fall back to the unauthenticated path when it's exceeded.
+function withTimeout(promise, ms, message) {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(message)), ms);
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 // Best-effort access token for the portal. Present only when the student
 // signed in through Auth0 (not the ?id= / cookie shortcut); the API uses
 // it to release private data (files, Meet links). Returns null otherwise.
 async function getPortalToken() {
     try {
-        if (!auth0Client || !(await auth0Client.isAuthenticated())) return null;
-        return await auth0Client.getTokenSilently({ authorizationParams: { audience: filesApiAudience } });
+        if (!auth0Client) return null;
+        const isAuthed = await withTimeout(auth0Client.isAuthenticated(), 4000, 'isAuthenticated timed out');
+        if (!isAuthed) return null;
+        return await withTimeout(
+            auth0Client.getTokenSilently({ authorizationParams: { audience: filesApiAudience } }),
+            5000,
+            'getTokenSilently timed out'
+        );
     } catch (err) {
         console.warn('Portal token unavailable:', err);
         return null;
@@ -257,8 +277,16 @@ async function fetchPortalData(studentId) {
     // data — files and Google Meet links — server-side.
     portalAuthToken = await getPortalToken();
     const headers = portalAuthToken ? { Authorization: `Bearer ${portalAuthToken}` } : {};
-    const response = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}`, { method: 'GET', headers });
-    return response.json();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    try {
+        const response = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}`, {
+            method: 'GET', headers, signal: controller.signal,
+        });
+        return await response.json();
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 // ---------- Files ----------
