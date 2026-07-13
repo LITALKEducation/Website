@@ -29,8 +29,9 @@ const auth0Client = (typeof auth0 !== 'undefined')
     : null;
 
 // Cloudflare Worker API (D1 database) — replaces the old Google Apps
-// Script / Google Sheets backend.
-const dataApiUrl = 'https://litalk-files-api.n62c5gwghk.workers.dev';
+// Script / Google Sheets backend. Served on the litalkeducation.com
+// custom domain rather than the raw workers.dev subdomain.
+const dataApiUrl = 'https://istudent.litalkeducation.com';
 
 // Auth0's hidden-iframe silent auth can hang indefinitely instead of
 // rejecting — notably in the LINE/Facebook in-app browser and other
