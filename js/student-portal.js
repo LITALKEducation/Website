@@ -704,3 +704,79 @@ function renderPayments(container, payments, options = {}) {
 
     container.innerHTML = html;
 }
+
+// ---------- AI chat assistant ----------
+// Shared by students and parents alike — the portal has no separate parent
+// login, so anyone with the student's portal link reaches this the same way
+// they reach the rest of the dashboard (see resolvePortalStudentId).
+let aiChatConversationId = null;
+let aiChatStudentId = null;
+let aiChatBusy = false;
+
+function initAIChatWidget(studentId) {
+    aiChatStudentId = studentId;
+    const fab = document.getElementById('ai-chat-fab');
+    if (fab) fab.style.display = 'flex';
+}
+
+function toggleAIChat(force) {
+    const panel = document.getElementById('ai-chat-panel');
+    if (!panel) return;
+    const open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
+    panel.classList.toggle('open', open);
+    if (open) {
+        const input = document.getElementById('ai-chat-input');
+        if (input) input.focus();
+        const messages = document.getElementById('ai-chat-messages');
+        if (messages && !messages.childElementCount) {
+            appendAIChatMessage('assistant', 'สวัสดีค่ะ ถามเกี่ยวกับตารางเรียน เครดิตคงเหลือ หรือการชำระเงินของคุณได้เลยค่ะ');
+        }
+    }
+}
+
+function appendAIChatMessage(role, text) {
+    const messages = document.getElementById('ai-chat-messages');
+    const el = document.createElement('div');
+    el.className = 'ai-chat-msg ai-chat-msg--' + role;
+    el.textContent = text;
+    messages.appendChild(el);
+    messages.scrollTop = messages.scrollHeight;
+    return el;
+}
+
+async function submitAIChat(event) {
+    event.preventDefault();
+    if (aiChatBusy || !aiChatStudentId) return false;
+    const input = document.getElementById('ai-chat-input');
+    const message = input.value.trim();
+    if (!message) return false;
+
+    appendAIChatMessage('user', message);
+    input.value = '';
+    aiChatBusy = true;
+    document.getElementById('ai-chat-send').disabled = true;
+    const pending = appendAIChatMessage('pending', 'กำลังตอบ...');
+
+    try {
+        const res = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(aiChatStudentId)}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ conversationId: aiChatConversationId, message }),
+        });
+        const data = await res.json().catch(() => ({}));
+        pending.remove();
+        if (!res.ok || data.status === 'error') {
+            appendAIChatMessage('error', data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+            return false;
+        }
+        aiChatConversationId = data.conversationId;
+        appendAIChatMessage('assistant', data.reply || '');
+    } catch (err) {
+        pending.remove();
+        appendAIChatMessage('error', 'เชื่อมต่อระบบ AI ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    } finally {
+        aiChatBusy = false;
+        document.getElementById('ai-chat-send').disabled = false;
+    }
+    return false;
+}
