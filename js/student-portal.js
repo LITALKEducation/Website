@@ -734,11 +734,69 @@ function toggleAIChat(force) {
     }
 }
 
+// Minimal, safe Markdown-to-HTML for AI replies: escapes HTML first, then
+// re-introduces only the small set of patterns LLMs actually use in chat
+// answers (bold, italic, inline/fenced code, links, lists, paragraphs).
+// Not a full CommonMark parser by design.
+function renderChatMarkdown(text) {
+    const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const inline = (s) => escapeHtml(s)
+        .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    const codeBlocks = [];
+    const withPlaceholders = String(text).replace(/```[a-zA-Z0-9]*\n?([\s\S]*?)```/g, (_, code) => {
+        codeBlocks.push(escapeHtml(code.replace(/\n$/, '')));
+        return '\nCODEBLOCK' + (codeBlocks.length - 1) + '\n';
+    });
+
+    const out = [];
+    let para = [];
+    let list = null;
+    const flushPara = () => { if (para.length) { out.push('<p>' + para.join('<br>') + '</p>'); para = []; } };
+    const flushList = () => { if (list) { out.push('<' + list.type + '>' + list.items.map((i) => '<li>' + i + '</li>').join('') + '</' + list.type + '>'); list = null; } };
+    for (const rawLine of withPlaceholders.split('\n')) {
+        const line = rawLine.trim();
+        const codeMatch = line.match(/^CODEBLOCK(\d+)$/);
+        const ul = line.match(/^[-*]\s+(.*)$/);
+        const ol = line.match(/^\d+\.\s+(.*)$/);
+        if (codeMatch) {
+            flushPara();
+            flushList();
+            out.push('<pre><code>' + codeBlocks[Number(codeMatch[1])] + '</code></pre>');
+        } else if (ul) {
+            flushPara();
+            if (!list || list.type !== 'ul') { flushList(); list = { type: 'ul', items: [] }; }
+            list.items.push(inline(ul[1]));
+        } else if (ol) {
+            flushPara();
+            if (!list || list.type !== 'ol') { flushList(); list = { type: 'ol', items: [] }; }
+            list.items.push(inline(ol[1]));
+        } else if (line === '') {
+            flushPara();
+            flushList();
+        } else {
+            flushList();
+            para.push(inline(line));
+        }
+    }
+    flushPara();
+    flushList();
+
+    return out.join('');
+}
+
 function appendAIChatMessage(role, text) {
     const messages = document.getElementById('ai-chat-messages');
     const el = document.createElement('div');
     el.className = 'ai-chat-msg ai-chat-msg--' + role;
-    el.textContent = text;
+    if (role === 'assistant') {
+        el.innerHTML = renderChatMarkdown(text);
+    } else {
+        el.textContent = text;
+    }
     messages.appendChild(el);
     messages.scrollTop = messages.scrollHeight;
     return el;
