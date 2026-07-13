@@ -717,6 +717,16 @@ function initAIChatWidget(studentId) {
     aiChatStudentId = studentId;
     const fab = document.getElementById('ai-chat-fab');
     if (fab) fab.style.display = 'flex';
+
+    const messages = document.getElementById('ai-chat-messages');
+    const scrollBtn = document.getElementById('ai-chat-scroll-btn');
+    if (messages && scrollBtn && !messages.dataset.scrollBtnBound) {
+        messages.dataset.scrollBtnBound = '1';
+        messages.addEventListener('scroll', () => {
+            const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 60;
+            scrollBtn.classList.toggle('show', !nearBottom);
+        });
+    }
 }
 
 function toggleAIChat(force) {
@@ -728,10 +738,23 @@ function toggleAIChat(force) {
         const input = document.getElementById('ai-chat-input');
         if (input) input.focus();
         const messages = document.getElementById('ai-chat-messages');
-        if (messages && !messages.childElementCount) {
-            appendAIChatMessage('assistant', 'สวัสดีค่ะ ถามเกี่ยวกับตารางเรียน เครดิตคงเหลือ หรือการชำระเงินของคุณได้เลยค่ะ');
+        if (messages && !messages.querySelector('.ai-chat-msg, .ai-chat-msg-row')) {
+            appendAIChatMessage('assistant', 'สวัสดีค่ะ หนูชื่อน้องลิลลี่ ถามเกี่ยวกับตารางเรียน เครดิตคงเหลือ หรือการชำระเงินของคุณได้เลยค่ะ');
         }
     }
+}
+
+function startNewAIChat() {
+    aiChatConversationId = null;
+    const messages = document.getElementById('ai-chat-messages');
+    if (!messages) return;
+    messages.querySelectorAll('.ai-chat-msg, .ai-chat-msg-row').forEach((el) => el.remove());
+    appendAIChatMessage('assistant', 'สวัสดีค่ะ หนูชื่อน้องลิลลี่ เริ่มการสนทนาใหม่แล้วนะคะ ถามอะไรได้เลย');
+}
+
+function scrollAIChatToBottom() {
+    const messages = document.getElementById('ai-chat-messages');
+    if (messages) messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
 }
 
 // Minimal, safe Markdown-to-HTML for AI replies: escapes HTML first, then
@@ -794,10 +817,18 @@ function appendAIChatMessage(role, text) {
     el.className = 'ai-chat-msg ai-chat-msg--' + role;
     if (role === 'assistant') {
         el.innerHTML = renderChatMarkdown(text);
+        const row = document.createElement('div');
+        row.className = 'ai-chat-msg-row';
+        const avatar = document.createElement('span');
+        avatar.className = 'ai-chat-msg-avatar';
+        avatar.textContent = '🌷';
+        row.appendChild(avatar);
+        row.appendChild(el);
+        messages.appendChild(row);
     } else {
         el.textContent = text;
+        messages.appendChild(el);
     }
-    messages.appendChild(el);
     messages.scrollTop = messages.scrollHeight;
     return el;
 }
