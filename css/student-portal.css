@@ -2658,6 +2658,10 @@ body::before {
        to the bottom on mobile — see .bottom-nav and .fab above). */
     .ai-chat-fab { right: 16px; bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 84px); }
 
+    /* WebKit: iOS Safari auto-zooms into fields under 16px — keep the chat
+       box at 16px so typing in the full-screen popup doesn't zoom the page. */
+    .ai-chat-panel__input { font-size: 16px; }
+
     /* On phones the chat opens as a FULL-SCREEN popup instead of a small
        floating panel — it covers the whole page (including the bottom nav)
        until closed, like a dedicated chat page. */
