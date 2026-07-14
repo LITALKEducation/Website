@@ -131,6 +131,16 @@ function toggleTheme() {
     updateThemeIcons(newTheme);
 }
 
+// Automatic dark mode: while the user hasn't picked a theme manually, keep
+// following the OS setting live (the initial value comes from the inline
+// head script on each portal page).
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (localStorage.getItem('theme')) return;
+    const theme = e.matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeIcons(theme);
+});
+
 function updateThemeIcons(theme) {
     const loginIcon = document.getElementById('theme-toggle-icon');
     const dashIcon = document.getElementById('theme-toggle-icon-dash');
@@ -762,6 +772,11 @@ function toggleAIChat(force) {
     if (!panel) return;
     const open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
     panel.classList.toggle('open', open);
+    // On phones the panel is a full-screen popup (see student-portal.css),
+    // so freeze the page behind it while it's open.
+    if (window.matchMedia('(max-width: 768px)').matches) {
+        document.body.style.overflow = open ? 'hidden' : '';
+    }
     if (open) {
         const input = document.getElementById('ai-chat-input');
         if (input) input.focus();

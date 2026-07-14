@@ -70,32 +70,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 })();
 
 /* ============================================================
-   LANGUAGE SWITCHER
+   LANGUAGE TOGGLE — one switch that flips EN ⇄ TH
    ============================================================ */
-(function initLangSwitcher() {
+(function initLangToggle() {
   let currentLang = localStorage.getItem('litalk-lang') || 'en';
-
-  function updateLangPills(animate = true) {
-    $$('.lang-switcher.t-tabs').forEach(switcher => {
-      const pill = switcher.querySelector('.t-tabs-pill');
-      if (!pill) return;
-
-      const activeBtn = switcher.querySelector('.lang-btn.active');
-      if (!activeBtn) return;
-
-      if (!animate) {
-        const prev = pill.style.transition;
-        pill.style.transition = 'none';
-        pill.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
-        pill.style.width = `${activeBtn.offsetWidth}px`;
-        void pill.offsetWidth;
-        pill.style.transition = prev;
-      } else {
-        pill.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
-        pill.style.width = `${activeBtn.offsetWidth}px`;
-      }
-    });
-  }
 
   function applyLang(lang) {
     currentLang = lang;
@@ -115,34 +93,59 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
       if (ph) el.setAttribute('placeholder', ph);
     });
 
-    // Update all lang buttons
-    $$('.lang-btn').forEach(btn => {
-      const target = btn.getAttribute('data-lang-target');
-      const isActive = target === lang;
-      btn.classList.toggle('active', isActive);
-      btn.setAttribute('aria-pressed', String(isActive));
+    // Slide every toggle's thumb to the active side
+    $$('.lang-toggle').forEach(toggle => {
+      toggle.setAttribute('data-active', lang);
+      $$('.lang-toggle__opt', toggle).forEach(opt => {
+        opt.classList.toggle('active', opt.getAttribute('data-opt') === lang);
+      });
     });
 
-    // Animate switcher pills to the active buttons
-    updateLangPills(true);
+    // Let dynamically rendered content (e.g. blog cards) follow along
+    document.dispatchEvent(new CustomEvent('litalk:langchange', { detail: { lang } }));
   }
 
-  // Attach click handlers to all lang buttons
-  $$('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const lang = btn.getAttribute('data-lang-target');
-      if (lang && lang !== currentLang) {
-        applyLang(lang);
-      }
+  // One click flips to the other language
+  $$('.lang-toggle').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      applyLang(currentLang === 'en' ? 'th' : 'en');
     });
   });
 
+  window.litalkGetLang = () => currentLang;
+
   // Apply saved / default lang on load
   applyLang(currentLang);
+})();
 
-  // Measure pills initial position once layout has settled
-  requestAnimationFrame(() => updateLangPills(false));
-  window.addEventListener('resize', () => updateLangPills(false));
+/* ============================================================
+   LOGIN MENU (nav dropdown)
+   ============================================================ */
+(function initLoginMenu() {
+  $$('.login-menu').forEach(menu => {
+    const btn = $('.login-menu__btn', menu);
+    if (!btn) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target)) {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
 })();
 
 /* ============================================================
@@ -395,12 +398,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
     const lang = document.documentElement.getAttribute('data-lang') || 'en';
     submitBtn.textContent = lang === 'th' ? 'ส่งแล้ว ✓' : 'Sent ✓';
-    submitBtn.style.background = '#1F1F1F';
 
     setTimeout(() => {
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
-      submitBtn.style.background = '';
       form.reset();
     }, 3000);
   });

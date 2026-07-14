@@ -9,7 +9,8 @@
   <meta property="og:title" content="About LITALK — Language Creates Opportunities">
   <meta property="og:description" content="LITALK is a modern English learning platform built on a simple belief: language creates opportunities.">
   <meta property="og:type" content="website">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
@@ -27,22 +28,44 @@
         <div class="nav__inner">
 
           <a href="/" class="nav__logo" aria-label="LITALK Home">
-            <img src="img/LITALK-Black.png" alt="LITALK Education" width="120" height="28">
+            <img src="img/LITALK-Black.png" alt="LITALK Education" class="theme-invertable" width="120" height="28">
           </a>
 
           <ul class="nav__links" role="list">
             <li><a href="programs" class="nav__link" data-en="Programs" data-th="หลักสูตร">Programs</a></li>
             <li><a href="about" class="nav__link nav__link--active" data-en="About" data-th="เกี่ยวกับเรา">About</a></li>
-            <li><a href="/#teachers" class="nav__link" data-en="Teachers" data-th="อาจารย์">Teachers</a></li>
-            <li><a href="/#blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a></li>
+            <li><a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a></li>
             <li><a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
           </ul>
 
           <div class="nav__actions">
-            <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
-              <span class="t-tabs-pill" aria-hidden="true"></span>
-              <button class="lang-btn t-tab active" data-lang-target="en" aria-pressed="true">EN</button>
-              <button class="lang-btn t-tab" data-lang-target="th" aria-pressed="false">TH</button>
+            <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
+              <span class="lang-toggle__thumb" aria-hidden="true"></span>
+              <span class="lang-toggle__opt active" data-opt="en">EN</span>
+              <span class="lang-toggle__opt" data-opt="th">ไทย</span>
+            </button>
+            <div class="login-menu">
+              <button class="login-menu__btn" type="button" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-user" aria-hidden="true" style="font-size:11px;"></i>
+                <span data-en="Log in" data-th="เข้าสู่ระบบ">Log in</span>
+                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+              </button>
+              <div class="login-menu__panel" role="menu" aria-label="Login options">
+                <a href="student" class="login-menu__item" role="menuitem">
+                  <span class="login-menu__item-icon" aria-hidden="true"><i class="fas fa-user-graduate"></i></span>
+                  <span>
+                    <strong class="login-menu__item-title" data-en="Student &amp; Parent" data-th="นักเรียนและผู้ปกครอง">Student &amp; Parent</strong>
+                    <span class="login-menu__item-sub" data-en="Study log, schedule &amp; payments" data-th="บันทึกการเรียน ตารางเรียน และการชำระเงิน">Study log, schedule &amp; payments</span>
+                  </span>
+                </a>
+                <a href="https://admin.litalkeducation.com" class="login-menu__item" role="menuitem" target="_blank" rel="noopener noreferrer">
+                  <span class="login-menu__item-icon" aria-hidden="true"><i class="fas fa-chalkboard-user"></i></span>
+                  <span>
+                    <strong class="login-menu__item-title" data-en="Teacher &amp; Staff" data-th="ครูและเจ้าหน้าที่">Teacher &amp; Staff</strong>
+                    <span class="login-menu__item-sub" data-en="Teaching admin console" data-th="ระบบจัดการการสอน">Teaching admin console</span>
+                  </span>
+                </a>
+              </div>
             </div>
             <a href="/#contact" class="btn btn--primary btn--sm" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
           </div>
@@ -57,16 +80,29 @@
       <div class="nav__drawer" id="mobile-drawer" role="navigation" aria-label="Mobile navigation">
         <a href="programs" class="nav__link" data-en="Programs" data-th="หลักสูตร">Programs</a>
         <a href="about" class="nav__link nav__link--active" data-en="About" data-th="เกี่ยวกับเรา">About</a>
-        <a href="/#teachers" class="nav__link" data-en="Teachers" data-th="อาจารย์">Teachers</a>
-        <a href="/#blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a>
+        <a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a>
         <a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a>
         <div class="nav__actions">
-          <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
-            <span class="t-tabs-pill" aria-hidden="true"></span>
-            <button class="lang-btn t-tab active" data-lang-target="en" aria-pressed="true">EN</button>
-            <button class="lang-btn t-tab" data-lang-target="th" aria-pressed="false">TH</button>
-          </div>
-          <a href="/#contact" class="btn btn--primary btn--sm" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
+          <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
+              <span class="lang-toggle__thumb" aria-hidden="true"></span>
+              <span class="lang-toggle__opt active" data-opt="en">EN</span>
+              <span class="lang-toggle__opt" data-opt="th">ไทย</span>
+            </button>
+        <div class="nav__drawer-login-label" data-en="Log in" data-th="เข้าสู่ระบบ">Log in</div>
+                <a href="student" class="login-menu__item">
+                  <span class="login-menu__item-icon" aria-hidden="true"><i class="fas fa-user-graduate"></i></span>
+                  <span>
+                    <strong class="login-menu__item-title" data-en="Student &amp; Parent" data-th="นักเรียนและผู้ปกครอง">Student &amp; Parent</strong>
+                    <span class="login-menu__item-sub" data-en="Study log, schedule &amp; payments" data-th="บันทึกการเรียน ตารางเรียน และการชำระเงิน">Study log, schedule &amp; payments</span>
+                  </span>
+                </a>
+                <a href="https://admin.litalkeducation.com" class="login-menu__item" target="_blank" rel="noopener noreferrer">
+                  <span class="login-menu__item-icon" aria-hidden="true"><i class="fas fa-chalkboard-user"></i></span>
+                  <span>
+                    <strong class="login-menu__item-title" data-en="Teacher &amp; Staff" data-th="ครูและเจ้าหน้าที่">Teacher &amp; Staff</strong>
+                    <span class="login-menu__item-sub" data-en="Teaching admin console" data-th="ระบบจัดการการสอน">Teaching admin console</span>
+                  </span>
+                </a>
         </div>
       </div>
     </nav>
@@ -376,7 +412,7 @@
       <div class="footer__top">
 
         <div class="footer__brand">
-          <img src="img/LITALK-Black.png" alt="LITALK Education" width="120" height="28">
+          <img src="img/LITALK-Black.png" alt="LITALK Education" class="theme-invertable" width="120" height="28">
           <p class="footer__tagline" data-en="Building confident English communicators, one lesson at a time." data-th="สร้างนักสื่อสารภาษาอังกฤษที่มั่นใจ ทีละบทเรียน">
             Building confident English communicators, one lesson at a time.
           </p>
@@ -410,7 +446,6 @@
           <h3 class="footer__col-title" data-en="Company" data-th="บริษัท">Company</h3>
           <ul class="footer__links" role="list">
             <li><a href="about" class="footer__link" data-en="About Us" data-th="เกี่ยวกับเรา">About Us</a></li>
-            <li><a href="/#teachers" class="footer__link" data-en="Our Teachers" data-th="อาจารย์">Our Teachers</a></li>
             <li><a href="student" class="footer__link" data-en="Student Portal" data-th="พอร์ทัลนักเรียน">Student Portal</a></li>
             <li><a href="/#contact" class="footer__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
           </ul>
@@ -419,7 +454,7 @@
         <div>
           <h3 class="footer__col-title" data-en="Resources" data-th="ทรัพยากร">Resources</h3>
           <ul class="footer__links" role="list">
-            <li><a href="/#blog" class="footer__link" data-en="Blog" data-th="บทความ">Blog</a></li>
+            <li><a href="blog" class="footer__link" data-en="Blog" data-th="บทความ">Blog</a></li>
             <li><a href="/#faq" class="footer__link" data-en="FAQ" data-th="คำถามที่พบบ่อย">FAQ</a></li>
             <li><a href="privacy-policy" class="footer__link" data-en="Privacy Policy" data-th="นโยบายความเป็นส่วนตัว">Privacy Policy</a></li>
             <li><a href="terms-of-service" class="footer__link" data-en="Terms of Service" data-th="ข้อกำหนดการใช้งาน">Terms of Service</a></li>
@@ -437,11 +472,11 @@
             <a href="https://x.com/LITALKOfficial" target="_blank" rel="noopener noreferrer" aria-label="X">X</a>
             <a href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener noreferrer" aria-label="Line OA">LINE</a>
           </div>
-          <div class="lang-switcher t-tabs" role="group" aria-label="Language switcher">
-            <span class="t-tabs-pill" aria-hidden="true"></span>
-            <button class="lang-btn t-tab active" data-lang-target="en" aria-pressed="true">EN</button>
-            <button class="lang-btn t-tab" data-lang-target="th" aria-pressed="false">TH</button>
-          </div>
+          <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
+              <span class="lang-toggle__thumb" aria-hidden="true"></span>
+              <span class="lang-toggle__opt active" data-opt="en">EN</span>
+              <span class="lang-toggle__opt" data-opt="th">ไทย</span>
+            </button>
         </div>
       </div>
     </div>
