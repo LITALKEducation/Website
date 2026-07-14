@@ -19,8 +19,8 @@
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
-  <link rel="stylesheet" href="css/fonts.css?v=20260714a">
-  <link rel="stylesheet" href="css/style.css?v=20260714a">
+  <link rel="stylesheet" href="css/fonts.css?v=20260714b">
+  <link rel="stylesheet" href="css/style.css?v=20260714b">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -125,6 +125,7 @@
           <a href="blog" class="post-back"><i class="fas fa-arrow-left" aria-hidden="true"></i><span data-en="All articles" data-th="บทความทั้งหมด">All articles</span></a><br>
           <span class="post-hero__category" id="post-category" hidden></span>
           <h1 class="post-hero__title" id="post-title"><span class="skeleton">..............................</span></h1>
+          <p class="post-hero__excerpt" id="post-excerpt" hidden></p>
           <div class="post-hero__meta">
             <span id="post-author" hidden></span>
             <span class="dot" id="post-meta-dot" aria-hidden="true" hidden>•</span>
@@ -244,8 +245,8 @@
   </footer>
 
   <!-- JavaScript -->
-  <script src="js/main.js?v=20260714a" defer></script>
-  <script src="js/blog.js?v=20260714a" defer></script>
+  <script src="js/main.js?v=20260714b" defer></script>
+  <script src="js/blog.js?v=20260714b" defer></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);
@@ -283,6 +284,17 @@
 
         const cat = document.getElementById('post-category');
         if (post.category) { cat.hidden = false; cat.textContent = post.category; }
+
+        const excerpt = LitalkBlog.pick(post, 'excerpt');
+        const excerptEl = document.getElementById('post-excerpt');
+        if (excerpt) {
+          excerptEl.hidden = false;
+          excerptEl.textContent = excerpt;
+          excerptEl.setAttribute('data-en', post.excerpt || post.excerptTh || '');
+          excerptEl.setAttribute('data-th', post.excerptTh || post.excerpt || '');
+        } else {
+          excerptEl.hidden = true;
+        }
 
         const author = document.getElementById('post-author');
         if (post.authorName) {

@@ -126,16 +126,23 @@
     const title = pick(post, 'title');
     const titleEn = post.title || post.titleTh || '';
     const titleTh = post.titleTh || post.title || '';
+    const excerpt = pick(post, 'excerpt');
+    const excerptEn = post.excerpt || post.excerptTh || '';
+    const excerptTh = post.excerptTh || post.excerpt || '';
     const cat = escapeHtml(post.category || 'Article');
     const img = cover
       ? `<div class="blog-card__img"><img src="${cover}" alt="${escapeHtml(titleEn)}" loading="lazy" width="400" height="225"></div>`
       : `<div class="blog-card__img blog-card__img--placeholder" aria-hidden="true">LITALK</div>`;
+    const excerptHtml = excerpt
+      ? `<p class="blog-card__excerpt" data-en="${escapeHtml(excerptEn)}" data-th="${escapeHtml(excerptTh)}">${escapeHtml(excerpt)}</p>`
+      : '';
     return `
       <article class="blog-card">
         <a href="blog-post?slug=${encodeURIComponent(post.slug)}" aria-label="${escapeHtml(title)}">${img}</a>
         <div class="blog-card__body">
           <span class="blog-card__tag">${cat}</span>
           <h3 class="blog-card__title" data-en="${escapeHtml(titleEn)}" data-th="${escapeHtml(titleTh)}">${escapeHtml(title)}</h3>
+          ${excerptHtml}
           <div class="blog-card__meta">
             <span class="blog-card__date" data-post-date="${escapeHtml(post.publishedAt || '')}">${fmtDate(post.publishedAt)}</span>
             <a href="blog-post?slug=${encodeURIComponent(post.slug)}" class="blog-card__link" data-en="Read more →" data-th="อ่านเพิ่มเติม →">${lang() === 'th' ? 'อ่านเพิ่มเติม →' : 'Read more →'}</a>
