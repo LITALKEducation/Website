@@ -12,8 +12,8 @@
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
-  <link rel="stylesheet" href="css/fonts.css?v=20260714">
-  <link rel="stylesheet" href="css/style.css?v=20260714">
+  <link rel="stylesheet" href="css/fonts.css?v=20260714a">
+  <link rel="stylesheet" href="css/style.css?v=20260714a">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -123,6 +123,27 @@
             <span class="dot" id="post-meta-dot" aria-hidden="true" hidden>•</span>
             <span id="post-date"></span>
           </div>
+
+          <!-- Copy / share the article link -->
+          <div class="post-share" id="post-share" hidden aria-label="Share this article">
+            <button type="button" class="post-share__btn" id="post-copy-link" title="Copy link / คัดลอกลิงก์">
+              <i class="fas fa-link" aria-hidden="true"></i>
+              <span data-en="Copy link" data-th="คัดลอกลิงก์">Copy link</span>
+            </button>
+            <button type="button" class="post-share__btn" id="post-native-share" hidden title="Share / แชร์">
+              <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i>
+              <span data-en="Share" data-th="แชร์">Share</span>
+            </button>
+            <a class="post-share__btn post-share__btn--icon" id="post-share-line" target="_blank" rel="noopener noreferrer" aria-label="Share on LINE">
+              <i class="fab fa-line" aria-hidden="true"></i>
+            </a>
+            <a class="post-share__btn post-share__btn--icon" id="post-share-fb" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
+              <i class="fab fa-facebook-f" aria-hidden="true"></i>
+            </a>
+            <a class="post-share__btn post-share__btn--icon" id="post-share-x" target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+              <i class="fab fa-x-twitter" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -216,8 +237,8 @@
   </footer>
 
   <!-- JavaScript -->
-  <script src="js/main.js?v=20260714" defer></script>
-  <script src="js/blog.js?v=20260714" defer></script>
+  <script src="js/main.js?v=20260714a" defer></script>
+  <script src="js/blog.js?v=20260714a" defer></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);
@@ -279,6 +300,46 @@
 
       renderPost();
       document.addEventListener('litalk:langchange', renderPost);
+
+      // ----- Copy / share the article link -----
+      const shareBar = document.getElementById('post-share');
+      const postUrl = 'https://litalkeducation.com/blog-post?slug=' + encodeURIComponent(slug);
+      shareBar.hidden = false;
+
+      const copyBtn = document.getElementById('post-copy-link');
+      copyBtn.addEventListener('click', async () => {
+        const label = copyBtn.querySelector('span');
+        try {
+          await navigator.clipboard.writeText(postUrl);
+        } catch {
+          // Older WebKit without the async clipboard API — fall back to
+          // a temporary input + execCommand.
+          const tmp = document.createElement('input');
+          tmp.value = postUrl;
+          document.body.appendChild(tmp);
+          tmp.select();
+          document.execCommand('copy');
+          tmp.remove();
+        }
+        label.textContent = LitalkBlog.lang() === 'th' ? 'คัดลอกแล้ว ✓' : 'Copied ✓';
+        setTimeout(() => {
+          label.textContent = LitalkBlog.lang() === 'th' ? 'คัดลอกลิงก์' : 'Copy link';
+        }, 2000);
+      });
+
+      // Native share sheet (iOS/Android) when available
+      const nativeBtn = document.getElementById('post-native-share');
+      if (navigator.share) {
+        nativeBtn.hidden = false;
+        nativeBtn.addEventListener('click', () => {
+          navigator.share({ title: document.title, url: postUrl }).catch(() => {});
+        });
+      }
+
+      const enc = encodeURIComponent(postUrl);
+      document.getElementById('post-share-line').href = 'https://social-plugins.line.me/lineit/share?url=' + enc;
+      document.getElementById('post-share-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + enc;
+      document.getElementById('post-share-x').href = 'https://twitter.com/intent/tweet?url=' + enc;
     });
   </script>
 

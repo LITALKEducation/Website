@@ -2913,3 +2913,41 @@ textarea {
 }
 
 .post-back:hover { color: var(--clr-black); gap: 12px; }
+
+/* ============================================================
+   POST SHARE BAR (blog-post.html) — copy / attach the article link
+   ============================================================ */
+.post-share {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.post-share__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-pill);
+  background: var(--clr-bg);
+  color: var(--clr-muted);
+  font-size: 13px;
+  font-weight: 600;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.post-share__btn:hover {
+  color: var(--clr-black);
+  border-color: var(--clr-muted);
+}
+
+.post-share__btn--icon {
+  padding: 9px 13px;
+}
+
+.post-share__btn i {
+  font-size: 14px;
+}
