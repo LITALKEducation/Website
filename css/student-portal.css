@@ -2657,5 +2657,22 @@ body::before {
     /* Stack above the bottom nav bar and the LINE contact FAB (both fixed
        to the bottom on mobile — see .bottom-nav and .fab above). */
     .ai-chat-fab { right: 16px; bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 84px); }
-    .ai-chat-panel { right: 16px; bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 148px); }
+
+    /* On phones the chat opens as a FULL-SCREEN popup instead of a small
+       floating panel — it covers the whole page (including the bottom nav)
+       until closed, like a dedicated chat page. */
+    .ai-chat-panel {
+        inset: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        max-height: none;
+        border-radius: 0;
+        border: none;
+        z-index: 1300;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
 }

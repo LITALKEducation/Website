@@ -4,14 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Not Found — LITALK Education</title>
-  <meta name="description" content="ไม่พบหน้าที่คุณต้องการ - LITALK Education">
+  <title>Blog — LITALK Education</title>
+  <meta name="description" content="Articles, tips and guides from the LITALK team to support your English learning journey.">
+  <meta property="og:title" content="Blog — LITALK Education">
+  <meta property="og:description" content="Articles, tips and guides from the LITALK team to support your English learning journey.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
-
-  <!-- Fonts -->
   <link rel="stylesheet" href="css/fonts.css">
-
-  <!-- Styles -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -26,20 +27,17 @@
       <div class="container">
         <div class="nav__inner">
 
-          <!-- Logo -->
           <a href="/" class="nav__logo" aria-label="LITALK Home">
             <img src="img/LITALK-Black.png" alt="LITALK Education" class="theme-invertable" width="120" height="28">
           </a>
 
-          <!-- Links -->
           <ul class="nav__links" role="list">
             <li><a href="programs" class="nav__link" data-en="Programs" data-th="หลักสูตร">Programs</a></li>
             <li><a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a></li>
-            <li><a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a></li>
+            <li><a href="blog" class="nav__link nav__link--active" data-en="Blog" data-th="บทความ">Blog</a></li>
             <li><a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
           </ul>
 
-          <!-- Actions -->
           <div class="nav__actions">
             <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
               <span class="lang-toggle__thumb" aria-hidden="true"></span>
@@ -72,21 +70,17 @@
             <a href="/#contact" class="btn btn--primary btn--sm" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
           </div>
 
-          <!-- Hamburger -->
           <button class="nav__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-drawer">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
           </button>
 
         </div>
       </div>
 
-      <!-- Mobile Drawer -->
       <div class="nav__drawer" id="mobile-drawer" role="navigation" aria-label="Mobile navigation">
         <a href="programs" class="nav__link" data-en="Programs" data-th="หลักสูตร">Programs</a>
         <a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a>
-        <a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a>
+        <a href="blog" class="nav__link nav__link--active" data-en="Blog" data-th="บทความ">Blog</a>
         <a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a>
         <div class="nav__actions">
           <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
@@ -113,52 +107,79 @@
       </div>
     </nav>
   </header>
-
   <main id="main-content">
 
     <!-- ============================================================
-         404 PAGE HERO
+         PAGE HERO
          ============================================================ -->
-    <section class="page-hero" aria-labelledby="error-heading">
+    <section class="page-hero" aria-labelledby="blog-page-heading" style="padding-bottom: 48px;">
       <div class="container">
         <nav class="page-hero__breadcrumb" aria-label="Breadcrumb">
           <a href="/" data-en="Home" data-th="หน้าหลัก">Home</a>
           <span class="sep" aria-hidden="true">/</span>
-          <span data-en="404 Not Found" data-th="ไม่พบหน้า">404 Not Found</span>
+          <span data-en="Blog" data-th="บทความ">Blog</span>
         </nav>
-        <span class="page-hero__label">404 Error</span>
-        <h1 class="page-hero__title" id="error-heading">
-          <span data-en="Page Not Found" data-th="ไม่พบหน้าที่คุณต้องการ">Page Not Found</span>
+        <span class="page-hero__label" data-en="Blog &amp; Resources" data-th="บทความและทรัพยากร">Blog &amp; Resources</span>
+        <h1 class="page-hero__title" id="blog-page-heading">
+          <span data-en="Keep learning," data-th="เรียนรู้ได้">Keep learning,</span><br>
+          <span data-en="every day." data-th="ทุกวัน">every day.</span>
         </h1>
-        <p class="page-hero__sub" data-en="The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Please check the URL again." data-th="ลิงก์ที่คุณเข้าถึงอาจจะไม่ถูกต้อง หรือหน้าเว็บดังกล่าวถูกย้ายหรือลบไปเรียบร้อยแล้ว กรุณาตรวจสอบลิงก์อีกครั้ง">
-          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Please check the URL again.
+        <p class="page-hero__sub" data-en="Articles, tips and guides from the LITALK team and our teachers to support your English journey between lessons." data-th="บทความ เคล็ดลับ และคู่มือจากทีม LITALK และอาจารย์ของเรา เพื่อสนับสนุนการเรียนภาษาอังกฤษของคุณระหว่างบทเรียน">
+          Articles, tips and guides from the LITALK team and our teachers to support your English journey between lessons.
         </p>
-        <div class="page-hero__cta">
-          <a href="/" class="btn btn--primary btn--lg" data-en="Back to Home" data-th="กลับสู่หน้าหลัก">Back to Home</a>
-          <a href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener noreferrer" class="btn btn--outline btn--lg">
-            <i class="fab fa-line" style="margin-right: 8px;"></i>
-            <span data-en="Contact Support on Line" data-th="ติดต่อฝ่ายสนับสนุนทาง Line">Contact Support on Line</span>
-          </a>
+        <div class="blog-filter" id="blog-filter" role="group" aria-label="Filter by category" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         POSTS
+         ============================================================ -->
+    <section class="section" aria-label="Blog posts" style="padding-top: 56px;">
+      <div class="container">
+        <div class="blog__grid" id="blog-grid" style="margin-top: 0;">
+          <article class="blog-card" aria-hidden="true">
+            <div class="blog-card__img skeleton"></div>
+            <div class="blog-card__body">
+              <span class="blog-card__tag skeleton">......</span>
+              <h3 class="blog-card__title skeleton">..........................</h3>
+              <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
+            </div>
+          </article>
+          <article class="blog-card" aria-hidden="true">
+            <div class="blog-card__img skeleton"></div>
+            <div class="blog-card__body">
+              <span class="blog-card__tag skeleton">......</span>
+              <h3 class="blog-card__title skeleton">..........................</h3>
+              <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
+            </div>
+          </article>
+          <article class="blog-card" aria-hidden="true">
+            <div class="blog-card__img skeleton"></div>
+            <div class="blog-card__body">
+              <span class="blog-card__tag skeleton">......</span>
+              <h3 class="blog-card__title skeleton">..........................</h3>
+              <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
+            </div>
+          </article>
+        </div>
+        <div class="blog-empty" id="blog-empty" hidden>
+          <i class="fas fa-feather" aria-hidden="true"></i>
+          <span data-en="No articles published yet — check back soon." data-th="ยังไม่มีบทความเผยแพร่ — กลับมาดูใหม่เร็ว ๆ นี้"></span>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- ============================================================
-       FOOTER
-       ============================================================ -->
   <footer class="footer" role="contentinfo" aria-label="Site footer">
     <div class="container">
       <div class="footer__top">
 
-        <!-- Brand -->
         <div class="footer__brand">
           <img src="img/LITALK-Black.png" alt="LITALK Education" class="theme-invertable" width="120" height="28">
           <p class="footer__tagline" data-en="Building confident English communicators, one lesson at a time." data-th="สร้างนักสื่อสารภาษาอังกฤษที่มั่นใจ ทีละบทเรียน">
             Building confident English communicators, one lesson at a time.
           </p>
-          <!-- Social Icons -->
           <div class="footer__socials" aria-label="Social media">
             <a href="https://www.facebook.com/LITALKOfficial" class="footer__social-icon" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
               <i class="fab fa-facebook-f"></i>
@@ -175,7 +196,6 @@
           </div>
         </div>
 
-        <!-- Programs -->
         <div>
           <h3 class="footer__col-title" data-en="Programs" data-th="หลักสูตร">Programs</h3>
           <ul class="footer__links" role="list">
@@ -186,7 +206,6 @@
           </ul>
         </div>
 
-        <!-- Company -->
         <div>
           <h3 class="footer__col-title" data-en="Company" data-th="บริษัท">Company</h3>
           <ul class="footer__links" role="list">
@@ -196,7 +215,6 @@
           </ul>
         </div>
 
-        <!-- Resources -->
         <div>
           <h3 class="footer__col-title" data-en="Resources" data-th="ทรัพยากร">Resources</h3>
           <ul class="footer__links" role="list">
@@ -230,7 +248,58 @@
 
   <!-- JavaScript -->
   <script src="js/main.js" defer></script>
+  <script src="js/blog.js" defer></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const grid = document.getElementById('blog-grid');
+      const empty = document.getElementById('blog-empty');
+      const filter = document.getElementById('blog-filter');
+      let posts = [];
+      let activeCat = null;
+
+      function render() {
+        const shown = activeCat ? posts.filter(p => (p.category || 'Article') === activeCat) : posts;
+        if (shown.length === 0) {
+          grid.innerHTML = '';
+          empty.hidden = false;
+        } else {
+          empty.hidden = true;
+          grid.innerHTML = shown.map(LitalkBlog.cardHtml).join('');
+        }
+      }
+
+      function renderFilter() {
+        const cats = [...new Set(posts.map(p => p.category || 'Article'))];
+        if (cats.length < 2) { filter.hidden = true; return; }
+        filter.hidden = false;
+        const isTh = LitalkBlog.lang() === 'th';
+        filter.innerHTML = '<button class="blog-filter__chip active" data-cat="" data-en="All" data-th="ทั้งหมด">' + (isTh ? 'ทั้งหมด' : 'All') + '</button>' +
+          cats.map(c => `<button class="blog-filter__chip" data-cat="${LitalkBlog.escapeHtml(c)}">${LitalkBlog.escapeHtml(c)}</button>`).join('');
+        filter.querySelectorAll('.blog-filter__chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            activeCat = chip.getAttribute('data-cat') || null;
+            filter.querySelectorAll('.blog-filter__chip').forEach(c => c.classList.toggle('active', c === chip));
+            render();
+          });
+        });
+      }
+
+      try {
+        posts = await LitalkBlog.fetchPosts();
+        renderFilter();
+        render();
+      } catch (err) {
+        console.warn('blog: failed to load posts', err);
+        grid.innerHTML = '';
+        empty.hidden = false;
+        empty.querySelector('span').setAttribute('data-en', 'Could not load articles right now — please try again later.');
+        empty.querySelector('span').setAttribute('data-th', 'ไม่สามารถโหลดบทความได้ในขณะนี้ กรุณาลองใหม่ภายหลัง');
+        empty.querySelector('span').textContent = LitalkBlog.lang() === 'th'
+          ? 'ไม่สามารถโหลดบทความได้ในขณะนี้ กรุณาลองใหม่ภายหลัง'
+          : 'Could not load articles right now — please try again later.';
+      }
+    });
+  </script>
 
 </body>
-
 </html>
