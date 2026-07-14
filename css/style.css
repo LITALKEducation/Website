@@ -3042,3 +3042,131 @@ textarea {
 .post-share__btn i {
   font-size: 14px;
 }
+
+/* ============================================================
+   POST READING TOOLS (blog-post.html) — font picker + print/PDF
+   ============================================================ */
+.post-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.reading-font { position: relative; }
+
+.reading-font__panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 230px;
+  background: var(--clr-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+  z-index: 1200;
+
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(var(--panel-translate-y));
+  filter: blur(var(--panel-blur));
+  pointer-events: none;
+  transition:
+    transform var(--panel-close-dur) var(--panel-ease),
+    opacity   var(--panel-close-dur) var(--panel-ease),
+    filter    var(--panel-close-dur) var(--panel-ease),
+    visibility var(--panel-close-dur) var(--panel-ease);
+}
+
+.reading-font.open .reading-font__panel {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+  pointer-events: auto;
+  transition:
+    transform var(--panel-open-dur) var(--panel-ease),
+    opacity   var(--panel-open-dur) var(--panel-ease),
+    filter    var(--panel-open-dur) var(--panel-ease),
+    visibility 0s linear;
+}
+
+.reading-font__opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--clr-secondary);
+  transition: background var(--transition);
+  text-align: left;
+}
+
+.reading-font__opt:hover { background: var(--clr-light-bg); }
+
+.reading-font__opt.active { color: var(--clr-black); font-weight: 700; }
+
+.reading-font__opt .fa-check { font-size: 11px; opacity: 0; color: var(--clr-black); }
+.reading-font__opt.active .fa-check { opacity: 1; }
+
+/* Preview each option set in its own typeface */
+.reading-font__opt[data-font="system"] { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.reading-font__opt[data-font="sarabun"] { font-family: 'Sarabun', var(--font-th); }
+.reading-font__opt[data-font="looped"] { font-family: 'Noto Sans Thai Looped', var(--font-th); }
+.reading-font__opt[data-font="times"] { font-family: 'Times New Roman', Times, serif; }
+
+/* Applied choice — font-family is inherited, so setting it on <article>
+   covers the title, excerpt and body together. */
+article.reading-font-system { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+article.reading-font-sarabun { font-family: 'Sarabun', var(--font-th); }
+article.reading-font-looped { font-family: 'Noto Sans Thai Looped', var(--font-th); }
+article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
+
+/* ============================================================
+   PRINT — clean article output for browser Print / Save as PDF
+   ============================================================ */
+@media print {
+  :root {
+    /* Force a light, high-contrast palette on paper regardless of the
+       reader's OS dark-mode setting (placed last so it wins the cascade
+       over the prefers-color-scheme:dark block above). */
+    color-scheme: light;
+    --clr-black: #000000;
+    --clr-bg: #FFFFFF;
+    --clr-secondary: #1A1A1A;
+    --clr-border: #CCCCCC;
+    --clr-muted: #444444;
+    --clr-light-bg: #F3F3F3;
+  }
+
+  .nav, .footer, .post-share, .post-tools, .post-back,
+  .blog-filter, .login-menu {
+    display: none !important;
+  }
+
+  body { padding-top: 0 !important; }
+  .post-hero { padding-top: 0; }
+
+  .post-content { max-width: none; }
+
+  /* Print keeps the URL visible for external links since the underline
+     alone is meaningless on paper/PDF. */
+  .post-content a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    font-weight: 400;
+    color: var(--clr-muted);
+    word-break: break-all;
+  }
+
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  img, table, pre, blockquote { break-inside: avoid; }
+
+  .post-cover { box-shadow: none; }
+}

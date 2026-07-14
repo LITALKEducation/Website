@@ -19,8 +19,8 @@
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
-  <link rel="stylesheet" href="css/fonts.css?v=20260714c">
-  <link rel="stylesheet" href="css/style.css?v=20260714c">
+  <link rel="stylesheet" href="css/fonts.css?v=20260714d">
+  <link rel="stylesheet" href="css/style.css?v=20260714d">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -152,6 +152,43 @@
               <i class="fab fa-x-twitter" aria-hidden="true"></i>
             </a>
           </div>
+
+          <!-- Reading tools: font picker + print / save as PDF -->
+          <div class="post-tools" aria-label="Reading tools">
+            <div class="reading-font" id="reading-font">
+              <button type="button" class="post-share__btn" id="reading-font-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-font" aria-hidden="true"></i>
+                <span data-en="Font" data-th="ฟอนต์">Font</span>
+                <i class="fas fa-chevron-down" aria-hidden="true" style="font-size:10px;"></i>
+              </button>
+              <div class="reading-font__panel" role="menu" aria-label="Choose reading font">
+                <button type="button" class="reading-font__opt" data-font="default" role="menuitemradio">
+                  <span data-en="Site default" data-th="ค่าเริ่มต้นเว็บไซต์">Site default</span>
+                  <i class="fas fa-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="reading-font__opt" data-font="system" role="menuitemradio">
+                  <span data-en="System font" data-th="ฟอนต์ระบบ">System font</span>
+                  <i class="fas fa-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="reading-font__opt" data-font="sarabun" role="menuitemradio">
+                  <span>Sarabun (สารบรรณ)</span>
+                  <i class="fas fa-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="reading-font__opt" data-font="looped" role="menuitemradio">
+                  <span>Noto Sans Thai Looped (มีหัว)</span>
+                  <i class="fas fa-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="reading-font__opt" data-font="times" role="menuitemradio">
+                  <span>Times New Roman</span>
+                  <i class="fas fa-check" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <button type="button" class="post-share__btn" id="post-print-btn" title="Print / Save as PDF">
+              <i class="fas fa-print" aria-hidden="true"></i>
+              <span data-en="Print / PDF" data-th="พิมพ์ / PDF">Print / PDF</span>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -249,8 +286,8 @@
        mdToHtml/sanitizeHtml). Pinned version — deferred scripts run in
        document order, so this is guaranteed to load before blog.js. -->
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js" defer></script>
-  <script src="js/main.js?v=20260714c" defer></script>
-  <script src="js/blog.js?v=20260714c" defer></script>
+  <script src="js/main.js?v=20260714d" defer></script>
+  <script src="js/blog.js?v=20260714d" defer></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);
@@ -363,6 +400,81 @@
       document.getElementById('post-share-line').href = 'https://social-plugins.line.me/lineit/share?url=' + enc;
       document.getElementById('post-share-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + enc;
       document.getElementById('post-share-x').href = 'https://twitter.com/intent/tweet?url=' + enc;
+    });
+  </script>
+
+  <!-- Reading font picker + print/PDF — independent of the article fetch
+       above, so it works immediately regardless of load state. -->
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      const FONT_STYLESHEETS = {
+        sarabun: 'https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap',
+        looped: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@400;500;600;700&display=swap',
+      };
+      const FONT_CLASSES = ['reading-font-system', 'reading-font-sarabun', 'reading-font-looped', 'reading-font-times'];
+      const loadedFonts = new Set();
+
+      // Google Fonts are only fetched once the reader actually picks Sarabun
+      // or Noto Sans Thai Looped — no extra request for everyone else.
+      function loadFontStylesheet(key) {
+        if (!FONT_STYLESHEETS[key] || loadedFonts.has(key)) return;
+        loadedFonts.add(key);
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = FONT_STYLESHEETS[key];
+        document.head.appendChild(link);
+      }
+
+      const article = document.querySelector('#main-content article');
+      const wrap = document.getElementById('reading-font');
+      const btn = document.getElementById('reading-font-btn');
+      const opts = document.querySelectorAll('.reading-font__opt');
+      if (!article || !wrap || !btn) return;
+
+      function applyReadingFont(key, { persist = true } = {}) {
+        article.classList.remove(...FONT_CLASSES);
+        if (key && key !== 'default') {
+          article.classList.add('reading-font-' + key);
+          loadFontStylesheet(key);
+        }
+        opts.forEach((opt) => {
+          opt.classList.toggle('active', (opt.getAttribute('data-font') || 'default') === (key || 'default'));
+        });
+        if (persist) localStorage.setItem('litalk-reading-font', key || 'default');
+      }
+
+      opts.forEach((opt) => {
+        opt.addEventListener('click', () => {
+          applyReadingFont(opt.getAttribute('data-font'));
+          wrap.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        });
+      });
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = wrap.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(isOpen));
+      });
+      document.addEventListener('click', (e) => {
+        if (!wrap.contains(e.target)) {
+          wrap.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          wrap.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Restore the reader's saved choice (falls back to the site's own
+      // font when nothing has been picked yet).
+      applyReadingFont(localStorage.getItem('litalk-reading-font'), { persist: false });
+
+      const printBtn = document.getElementById('post-print-btn');
+      if (printBtn) printBtn.addEventListener('click', () => window.print());
     });
   </script>
 
