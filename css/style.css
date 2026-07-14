@@ -2992,6 +2992,51 @@ textarea {
   margin: 8px 0 20px;
 }
 
+/* ============================================================
+   END-OF-ARTICLE MARK (blog-post.html) — closes the reading
+   experience before the recommended-articles section
+   ============================================================ */
+.post-end-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  max-width: 720px;
+  margin: 8px auto 0;
+  padding-bottom: 56px;
+}
+
+.post-end-mark::before,
+.post-end-mark::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  max-width: 100px;
+  background: var(--clr-border);
+}
+
+.post-end-mark img {
+  height: 20px;
+  width: auto;
+  opacity: 0.55;
+}
+
+/* ============================================================
+   RECOMMENDED ARTICLES (blog-post.html) — latest posts to read next
+   ============================================================ */
+.post-recommend {
+  padding: 56px 0 var(--section-py);
+  border-top: 1px solid var(--clr-border);
+}
+
+.post-recommend__title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
 .post-back {
   display: inline-flex;
   align-items: center;
@@ -3146,7 +3191,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   }
 
   .nav, .footer, .post-share, .post-tools, .post-back,
-  .blog-filter, .login-menu {
+  .blog-filter, .login-menu, .post-end-mark, .post-recommend {
     display: none !important;
   }
 
