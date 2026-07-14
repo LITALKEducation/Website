@@ -144,6 +144,9 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  /* WebKit: stop iOS Safari from inflating text in landscape */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -153,6 +156,8 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  /* WebKit: no grey flash when tapping buttons/links on iOS */
+  -webkit-tap-highlight-color: transparent;
 }
 
 [lang="th"] body,
@@ -180,6 +185,31 @@ button {
   font-family: inherit;
   border: none;
   background: none;
+  /* WebKit: strip the iOS system button style (blue text, rounded chrome)
+     so a button never renders with UA styling, even before/without its
+     component styles. */
+  -webkit-appearance: none;
+  appearance: none;
+  color: inherit;
+  font-size: inherit;
+  text-align: inherit;
+  touch-action: manipulation;
+}
+
+input,
+textarea,
+select {
+  /* WebKit: form controls don't inherit fonts by default */
+  font-family: inherit;
+}
+
+/* WebKit: strip iOS's inner shadows/rounded chrome from text fields —
+   :where() keeps specificity at zero so component styles still win
+   (checkboxes/radios keep their native appearance). */
+input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"])),
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 /* ---------- Prefers Reduced Motion ---------- */
@@ -522,6 +552,9 @@ button {
 .hero {
   position: relative;
   min-height: 100vh;
+  /* WebKit: small-viewport unit tracks Safari's collapsing toolbar,
+     so the hero never jumps while scrolling on iPhone/iPad */
+  min-height: 100svh;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -1889,6 +1922,14 @@ button {
 @media (max-width: 768px) {
   :root { --section-py: 64px; --container-px: 20px; }
 
+  /* WebKit: iOS Safari auto-zooms into any focused field whose font is
+     under 16px — keep every text field at 16px on phones. */
+  .form-input,
+  .form-textarea,
+  .newsletter__input {
+    font-size: 16px;
+  }
+
   .nav__links { display: none; }
   .nav__actions .btn,
   .nav__actions .login-menu { display: none; }
@@ -2331,6 +2372,7 @@ button {
    ============================================================ */
 .compare-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-lg);
   margin-top: 56px;
