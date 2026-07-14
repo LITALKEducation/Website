@@ -19,8 +19,8 @@
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
-  <link rel="stylesheet" href="css/fonts.css?v=20260714b">
-  <link rel="stylesheet" href="css/style.css?v=20260714b">
+  <link rel="stylesheet" href="css/fonts.css?v=20260714c">
+  <link rel="stylesheet" href="css/style.css?v=20260714c">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -245,8 +245,12 @@
   </footer>
 
   <!-- JavaScript -->
-  <script src="js/main.js?v=20260714b" defer></script>
-  <script src="js/blog.js?v=20260714b" defer></script>
+  <!-- Full Markdown rendering for article content (see js/blog.js
+       mdToHtml/sanitizeHtml). Pinned version — deferred scripts run in
+       document order, so this is guaranteed to load before blog.js. -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js" defer></script>
+  <script src="js/main.js?v=20260714c" defer></script>
+  <script src="js/blog.js?v=20260714c" defer></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);

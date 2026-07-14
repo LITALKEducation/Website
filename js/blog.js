@@ -60,28 +60,145 @@
       { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  /* ---------- Minimal, safe Markdown renderer ----------
-     Input is escaped BEFORE any markup is generated, so post content can
-     never inject HTML — only the tags produced here are emitted. */
-  function mdToHtml(md) {
+  /* ---------- Full Markdown rendering ----------
+     Uses marked (loaded by blog-post.html) for spec-compliant CommonMark +
+     GFM: nested lists, tables, blockquotes, fenced code, strikethrough,
+     task lists, autolinks, setext headings, hard line breaks, etc.
+
+     marked renders whatever HTML the Markdown asks for — including raw
+     <script>/<img onerror> that a writer (or a compromised staff account)
+     could type directly into the source. Every article renders on the
+     public site for every visitor, so the HTML that comes back is run
+     through sanitizeHtml() below: an allowlist of tags/attributes, with
+     unknown tags unwrapped (children kept, wrapper dropped) rather than
+     trusted, and unsafe link/image URL schemes (javascript:, data:*
+     except inline images) stripped. */
+
+  const ALLOWED_TAGS = new Set([
+    'P', 'BR', 'HR', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+    'STRONG', 'B', 'EM', 'I', 'S', 'DEL', 'BLOCKQUOTE',
+    'UL', 'OL', 'LI', 'CODE', 'PRE', 'A', 'IMG',
+    'TABLE', 'THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'INPUT',
+  ]);
+  // Removed outright (with their contents) rather than unwrapped.
+  const HARD_REMOVE_TAGS = new Set([
+    'SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'FORM',
+    'LINK', 'META', 'BASE', 'SVG', 'MATH', 'NOSCRIPT', 'TEMPLATE',
+  ]);
+
+  function isSafeLinkHref(value) {
+    const v = (value || '').trim();
+    if (!v) return false;
+    // No scheme (relative path, #anchor, etc.) is safe; an explicit scheme
+    // must be one of the ones below — this blocks javascript:/data:/etc.
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(v)) return true;
+    return /^(https?:|mailto:|tel:)/i.test(v);
+  }
+
+  function isSafeImageSrc(value) {
+    const v = (value || '').trim();
+    if (!v) return false;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(v)) return true; // relative path
+    if (/^https?:/i.test(v)) return true;
+    // Inline base64 raster images only — data:image/svg+xml can carry a
+    // <script> inside the SVG's XML and is deliberately excluded.
+    return /^data:image\/(png|jpe?g|gif|webp|avif);base64,/i.test(v);
+  }
+
+  // Bottom-up: clean a node's children before deciding the node's own fate,
+  // so an unwrapped wrapper's children are already sanitized when they get
+  // hoisted up to their grandparent.
+  function sanitizeNode(root) {
+    Array.from(root.childNodes).forEach((node) => {
+      if (node.nodeType === Node.COMMENT_NODE) {
+        node.remove();
+        return;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+      const tag = node.tagName;
+      if (HARD_REMOVE_TAGS.has(tag)) {
+        node.remove();
+        return;
+      }
+
+      sanitizeNode(node);
+
+      if (tag === 'INPUT') {
+        // Only GFM task-list checkboxes survive (marked renders them
+        // disabled already; the disabled state is reasserted below anyway).
+        const isCheckbox = (node.getAttribute('type') || '').toLowerCase() === 'checkbox';
+        if (!isCheckbox) { node.remove(); return; }
+        const checked = node.hasAttribute('checked');
+        Array.from(node.attributes).forEach((a) => node.removeAttribute(a.name));
+        node.setAttribute('type', 'checkbox');
+        node.setAttribute('disabled', '');
+        if (checked) node.setAttribute('checked', '');
+        return;
+      }
+
+      if (!ALLOWED_TAGS.has(tag)) {
+        // Unknown/disallowed tag (raw <div>, <span style=...>, etc.) —
+        // keep its already-sanitized children, drop the wrapper itself.
+        while (node.firstChild) root.insertBefore(node.firstChild, node);
+        node.remove();
+        return;
+      }
+
+      if (tag === 'A' && !isSafeLinkHref(node.getAttribute('href'))) {
+        while (node.firstChild) root.insertBefore(node.firstChild, node);
+        node.remove();
+        return;
+      }
+      if (tag === 'IMG' && !isSafeImageSrc(node.getAttribute('src'))) {
+        node.remove();
+        return;
+      }
+
+      Array.from(node.attributes).forEach((attr) => {
+        const name = attr.name.toLowerCase();
+        let keep = false;
+        if (tag === 'A') keep = name === 'href' || name === 'title';
+        else if (tag === 'IMG') keep = name === 'src' || name === 'alt' || name === 'title';
+        else if (tag === 'CODE') keep = name === 'class' && /^language-[\w-]+$/.test(attr.value);
+        else if (tag === 'TH' || tag === 'TD') keep = name === 'align' || name === 'colspan' || name === 'rowspan';
+        else if (tag === 'OL') keep = name === 'start' && /^\d+$/.test(attr.value);
+        if (!keep) node.removeAttribute(attr.name);
+      });
+
+      if (tag === 'A' && /^https?:/i.test((node.getAttribute('href') || '').trim())) {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
+      if (tag === 'IMG') {
+        node.setAttribute('loading', 'lazy');
+      }
+    });
+  }
+
+  function sanitizeHtml(rawHtml) {
+    const doc = new DOMParser().parseFromString(rawHtml, 'text/html');
+    sanitizeNode(doc.body);
+    return doc.body.innerHTML;
+  }
+
+  // Minimal fallback for the rare case the marked CDN failed to load —
+  // headings/lists/bold/italic/code/links only, but never renders raw HTML
+  // since the source is escaped up front.
+  function mdToHtmlFallback(md) {
     const esc = escapeHtml(md).replace(/\r\n/g, '\n');
     const lines = esc.split('\n');
     const out = [];
-    let list = null;      // 'ul' | 'ol' | null
+    let list = null;
     let inCode = false;
-
     const closeList = () => { if (list) { out.push(`</${list}>`); list = null; } };
-
     const inline = (s) => s
       .replace(/!\[([^\]]*)\]\((https?:[^)\s]+)\)/g, '<img src="$2" alt="$1" loading="lazy">')
       .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>')
       .replace(/`([^`]+)`/g, '<code>$1</code>');
-
-    for (const raw of lines) {
-      const line = raw;
-
+    for (const line of lines) {
       if (line.trim().startsWith('```')) {
         closeList();
         out.push(inCode ? '</code></pre>' : '<pre><code>');
@@ -89,27 +206,14 @@
         continue;
       }
       if (inCode) { out.push(line); continue; }
-
       const h = line.match(/^(#{1,3})\s+(.*)$/);
       if (h) { closeList(); const l = h[1].length + 1; out.push(`<h${l}>${inline(h[2])}</h${l}>`); continue; }
-
       const q = line.match(/^&gt;\s?(.*)$/);
       if (q) { closeList(); out.push(`<blockquote><p>${inline(q[1])}</p></blockquote>`); continue; }
-
       const ul = line.match(/^\s*[-*]\s+(.*)$/);
-      if (ul) {
-        if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul'; }
-        out.push(`<li>${inline(ul[1])}</li>`);
-        continue;
-      }
-
+      if (ul) { if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul'; } out.push(`<li>${inline(ul[1])}</li>`); continue; }
       const ol = line.match(/^\s*\d+[.)]\s+(.*)$/);
-      if (ol) {
-        if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol'; }
-        out.push(`<li>${inline(ol[1])}</li>`);
-        continue;
-      }
-
+      if (ol) { if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol'; } out.push(`<li>${inline(ol[1])}</li>`); continue; }
       closeList();
       if (line.trim() === '') continue;
       out.push(`<p>${inline(line)}</p>`);
@@ -117,6 +221,11 @@
     closeList();
     if (inCode) out.push('</code></pre>');
     return out.join('\n');
+  }
+
+  function mdToHtml(md) {
+    if (typeof marked === 'undefined') return mdToHtmlFallback(md || '');
+    return sanitizeHtml(marked.parse(md || '', { gfm: true, breaks: false }));
   }
 
   /* ---------- Card rendering ---------- */

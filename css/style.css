@@ -2850,6 +2850,14 @@ textarea {
   color: var(--clr-secondary);
 }
 
+.post-content h1 {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--clr-black);
+  margin: 48px 0 18px;
+}
+
 .post-content h2 {
   font-size: 26px;
   font-weight: 800;
@@ -2865,6 +2873,13 @@ textarea {
   margin: 32px 0 12px;
 }
 
+.post-content h4, .post-content h5, .post-content h6 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--clr-black);
+  margin: 28px 0 10px;
+}
+
 .post-content p { margin-bottom: 20px; }
 
 .post-content ul,
@@ -2876,6 +2891,63 @@ textarea {
 .post-content ul { list-style: disc; }
 .post-content ol { list-style: decimal; }
 .post-content li { margin-bottom: 8px; }
+
+/* Nested lists sit inside a <li>, so drop the extra bottom margin */
+.post-content li > ul,
+.post-content li > ol {
+  margin: 8px 0 0;
+}
+
+/* "Loose" lists (blank line between items) wrap each item's text in <p> */
+.post-content li > p { margin-bottom: 8px; }
+.post-content li > p:last-child { margin-bottom: 0; }
+
+/* GFM task list checkboxes ([ ] / [x]) */
+.post-content li:has(> input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -24px;
+  padding-left: 24px;
+}
+.post-content input[type="checkbox"] {
+  margin-right: 8px;
+  accent-color: var(--clr-black);
+}
+
+.post-content hr {
+  border: none;
+  border-top: 1px solid var(--clr-border);
+  margin: 40px 0;
+}
+
+.post-content s,
+.post-content del {
+  color: var(--clr-muted);
+}
+
+.post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.post-content th,
+.post-content td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.post-content th {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--clr-muted);
+  background: var(--clr-light-bg);
+}
+
+.post-content td { color: var(--clr-secondary); }
 
 .post-content a {
   color: var(--clr-black);
