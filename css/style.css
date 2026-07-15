@@ -1322,14 +1322,18 @@ textarea {
   background: var(--clr-light-bg);
 }
 
-.blog-card__img img {
+.blog-card__img img,
+.blog-card__img video {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-md);
+  pointer-events: none; /* card video is a silent looping preview, not a player */
 }
 
-.blog-card:hover .blog-card__img img { transform: scale(1.04); }
+.blog-card:hover .blog-card__img img,
+.blog-card:hover .blog-card__img video { transform: scale(1.04); }
 
 .blog-card__body {
   padding: 24px 24px 28px;
@@ -2835,9 +2839,12 @@ textarea {
   max-height: 480px;
 }
 
-.post-cover img {
+.post-cover img,
+.post-cover video {
+  display: block;
   width: 100%;
   height: 100%;
+  max-height: 480px;
   object-fit: cover;
 }
 
