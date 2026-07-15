@@ -37,6 +37,11 @@
     return post.hasCover ? `${BLOG_API}/blog/posts/${encodeURIComponent(post.slug)}/cover` : null;
   }
 
+  // A cover can be a short (≤15s) video clip instead of a still image.
+  function isVideoCover(post) {
+    return !!(post.coverMime && post.coverMime.startsWith('video/'));
+  }
+
   /* ---------- Text helpers ---------- */
 
   function escapeHtml(str) {
@@ -239,8 +244,13 @@
     const excerptEn = post.excerpt || post.excerptTh || '';
     const excerptTh = post.excerptTh || post.excerpt || '';
     const cat = escapeHtml(post.category || 'Article');
-    const img = cover
-      ? `<div class="blog-card__img"><img src="${cover}" alt="${escapeHtml(titleEn)}" loading="lazy" width="400" height="225"></div>`
+    const coverMedia = cover
+      ? (isVideoCover(post)
+        ? `<video src="${cover}" autoplay muted loop playsinline disablepictureinpicture aria-label="${escapeHtml(titleEn)}"></video>`
+        : `<img src="${cover}" alt="${escapeHtml(titleEn)}" loading="lazy" width="400" height="225">`)
+      : null;
+    const img = coverMedia
+      ? `<div class="blog-card__img">${coverMedia}</div>`
       : `<div class="blog-card__img blog-card__img--placeholder" aria-hidden="true">LITALK</div>`;
     const excerptHtml = excerpt
       ? `<p class="blog-card__excerpt" data-en="${escapeHtml(excerptEn)}" data-th="${escapeHtml(excerptTh)}">${escapeHtml(excerpt)}</p>`
@@ -286,5 +296,5 @@
 
   document.addEventListener('DOMContentLoaded', initHomeLatest);
 
-  window.LitalkBlog = { fetchPosts, fetchPost, coverUrl, cardHtml, mdToHtml, fmtDate, pick, escapeHtml, lang };
+  window.LitalkBlog = { fetchPosts, fetchPost, coverUrl, isVideoCover, cardHtml, mdToHtml, fmtDate, pick, escapeHtml, lang };
 })();
