@@ -34,6 +34,9 @@
                     <span class="nav-brand-text">Student Portal</span>
                 </a>
                 <div class="nav-actions">
+                    <button class="btn-edit-profile-header" onclick="openProfileModal()" aria-label="แก้ไขข้อมูลส่วนตัว" title="แก้ไขข้อมูลส่วนตัว" style="display:none;">
+                        <i class="fas fa-user-pen"></i>
+                    </button>
                     <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-toggle-icon-dash" class="fas fa-moon"></i>
                     </button>
@@ -61,6 +64,10 @@
                 <a href="about" class="drawer-link"><i class="fas fa-info-circle"></i> เกี่ยวกับเรา</a>
                 <div class="drawer-divider"></div>
                 <div class="drawer-actions">
+                    <button class="drawer-action-btn btn-edit-profile-header" onclick="openProfileModal()" style="display:none;">
+                        <i class="fas fa-user-pen"></i>
+                        <span>แก้ไขข้อมูลส่วนตัว</span>
+                    </button>
                     <button class="drawer-action-btn theme-toggle-btn-mobile" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-toggle-icon-mobile" class="fas fa-moon"></i>
                         <span id="theme-text-mobile">โหมดมืด</span>
@@ -187,6 +194,39 @@
             }
         };
     </script>
+
+    <!-- Profile self-edit modal (nickname + photo) -->
+    <div class="profile-modal-overlay" id="profileModalOverlay" onclick="if(event.target===this) closeProfileModal()">
+        <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+            <div class="profile-modal-header">
+                <h3 id="profileModalTitle"><i class="fas fa-user-pen"></i> แก้ไขข้อมูลส่วนตัว</h3>
+                <button type="button" class="profile-modal-close" onclick="closeProfileModal()" aria-label="ปิด"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="profile-modal-body">
+                <div class="profile-avatar-edit">
+                    <img id="profileModalAvatar" class="profile-avatar-preview" alt="รูปโปรไฟล์">
+                    <div class="profile-avatar-actions">
+                        <label class="profile-avatar-upload-btn" for="profileUploadInput"><i class="fas fa-camera"></i> เปลี่ยนรูป</label>
+                        <input type="file" id="profileUploadInput" accept="image/*" hidden onchange="previewProfileImage(event)">
+                        <button type="button" class="profile-avatar-remove-btn" onclick="removeProfileImage()"><i class="fas fa-trash"></i> ลบรูป</button>
+                    </div>
+                    <div class="profile-modal-error" id="profileModalAvatarError" style="display:none;"></div>
+                </div>
+                <div class="profile-field">
+                    <label for="profileInputNickname">ชื่อเล่น</label>
+                    <input type="text" id="profileInputNickname" maxlength="50" placeholder="ชื่อเล่นของคุณ">
+                </div>
+                <div class="profile-field">
+                    <label>รหัสนักเรียน</label>
+                    <div class="profile-field-readonly" id="profileModalStudentId">-</div>
+                </div>
+            </div>
+            <div class="profile-modal-footer">
+                <button type="button" class="btn profile-btn-cancel" onclick="closeProfileModal()">ยกเลิก</button>
+                <button type="button" class="btn btn-primary profile-btn-save" onclick="saveProfileData()">บันทึก</button>
+            </div>
+        </div>
+    </div>
 
     <!-- AI chat assistant -->
     <button class="ai-chat-fab" id="ai-chat-fab" onclick="toggleAIChat()" aria-label="น้องลิลลี่" title="น้องลิลลี่" style="display:none;"><i class="fas fa-robot"></i></button>

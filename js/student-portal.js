@@ -68,6 +68,10 @@ async function getPortalToken() {
 // Holds the current portal token so file-download handlers can reuse it.
 let portalAuthToken = null;
 
+// Basic profile info cached from the last fetchPortalData call, so the
+// profile-edit modal can pre-fill without a second round-trip.
+let currentPortalInfo = null;
+
 // ---------- Cookie helpers ----------
 function setCookie(name, value, days) {
     let expires = "";
@@ -293,10 +297,24 @@ async function fetchPortalData(studentId) {
         const response = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}`, {
             method: 'GET', headers, signal: controller.signal,
         });
-        return await response.json();
+        const result = await response.json();
+        if (result.status === 'success') {
+            currentPortalInfo = { studentId, nickname: result.data.info.nickname || '', hasAvatar: !!result.data.info.hasAvatar };
+        }
+        updateProfileNavButton();
+        return result;
     } finally {
         clearTimeout(timer);
     }
+}
+
+// Shows the nav "edit profile" entry point only for students who actually
+// signed in through Auth0 — the ?id=/cookie shortcut can't prove ownership,
+// so those sessions stay read-only (matches the files/Meet-link gating).
+function updateProfileNavButton() {
+    document.querySelectorAll('.btn-edit-profile-header').forEach((btn) => {
+        btn.style.display = (portalAuthToken && currentPortalInfo) ? '' : 'none';
+    });
 }
 
 // ---------- Files ----------
@@ -741,6 +759,149 @@ function renderPayments(container, payments, options = {}) {
     }
 
     container.innerHTML = html;
+}
+
+// ---------- Profile self-edit (nickname + photo) ----------
+// Auth0-signed-in students only (see updateProfileNavButton) — the
+// PATCH/POST/DELETE endpoints are gated server-side by the same ownership
+// check, but the button is hidden for ?id=/cookie sessions since they'd
+// just get a 401.
+let profileAvatarRemoved = false;
+let profileAvatarFile = null;
+
+function openProfileModal() {
+    if (!currentPortalInfo) return;
+    const overlay = document.getElementById('profileModalOverlay');
+    const avatar = document.getElementById('profileModalAvatar');
+    const idEl = document.getElementById('profileModalStudentId');
+    const nicknameInput = document.getElementById('profileInputNickname');
+    const errorEl = document.getElementById('profileModalAvatarError');
+    if (!overlay || !avatar || !nicknameInput) return;
+
+    profileAvatarRemoved = false;
+    profileAvatarFile = null;
+    const fileInput = document.getElementById('profileUploadInput');
+    if (fileInput) fileInput.value = '';
+    if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+
+    avatar.src = currentPortalInfo.hasAvatar
+        ? `${dataApiUrl}/portal/${encodeURIComponent(currentPortalInfo.studentId)}/avatar?v=${Date.now()}`
+        : 'img/LITALK-Icon.png';
+    idEl.textContent = currentPortalInfo.studentId;
+    nicknameInput.value = currentPortalInfo.nickname || '';
+
+    overlay.classList.add('open');
+}
+
+function closeProfileModal() {
+    const overlay = document.getElementById('profileModalOverlay');
+    if (overlay) overlay.classList.remove('open');
+}
+
+function previewProfileImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const errorEl = document.getElementById('profileModalAvatarError');
+    if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+
+    if (!file.type.startsWith('image/')) {
+        if (errorEl) { errorEl.textContent = 'กรุณาเลือกไฟล์รูปภาพ'; errorEl.style.display = 'block'; }
+        event.target.value = '';
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        if (errorEl) { errorEl.textContent = 'ขนาดไฟล์เกิน 5MB'; errorEl.style.display = 'block'; }
+        event.target.value = '';
+        return;
+    }
+
+    profileAvatarRemoved = false;
+    profileAvatarFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const avatar = document.getElementById('profileModalAvatar');
+        if (avatar) avatar.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeProfileImage() {
+    profileAvatarFile = null;
+    profileAvatarRemoved = true;
+    const avatar = document.getElementById('profileModalAvatar');
+    const fileInput = document.getElementById('profileUploadInput');
+    if (avatar) avatar.src = 'img/LITALK-Icon.png';
+    if (fileInput) fileInput.value = '';
+}
+
+async function saveProfileData() {
+    if (!currentPortalInfo || !portalAuthToken) return;
+    const saveBtn = document.querySelector('.profile-btn-save');
+    const nicknameInput = document.getElementById('profileInputNickname');
+    if (!saveBtn || !nicknameInput) return;
+    const origLabel = saveBtn.innerHTML;
+
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
+    saveBtn.disabled = true;
+
+    try {
+        const headers = { Authorization: `Bearer ${portalAuthToken}` };
+        const studentId = currentPortalInfo.studentId;
+
+        const profileRes = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}/profile`, {
+            method: 'PATCH',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nickname: nicknameInput.value.trim() }),
+        });
+        const profileData = await profileRes.json().catch(() => ({}));
+        if (!profileRes.ok || profileData.status === 'error') {
+            throw new Error(profileData.message || 'บันทึกชื่อเล่นไม่สำเร็จ');
+        }
+
+        if (profileAvatarFile) {
+            const form = new FormData();
+            form.append('file', profileAvatarFile);
+            const avatarRes = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}/avatar`, {
+                method: 'POST', headers, body: form,
+            });
+            const avatarData = await avatarRes.json().catch(() => ({}));
+            if (!avatarRes.ok || avatarData.status === 'error') {
+                throw new Error(avatarData.message || 'อัปโหลดรูปภาพไม่สำเร็จ');
+            }
+        } else if (profileAvatarRemoved) {
+            const avatarRes = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}/avatar`, {
+                method: 'DELETE', headers,
+            });
+            const avatarData = await avatarRes.json().catch(() => ({}));
+            if (!avatarRes.ok || avatarData.status === 'error') {
+                throw new Error(avatarData.message || 'ลบรูปภาพไม่สำเร็จ');
+            }
+        }
+
+        closeProfileModal();
+        // Reflect the change immediately without a full page reload.
+        currentPortalInfo.nickname = nicknameInput.value.trim();
+        currentPortalInfo.hasAvatar = profileAvatarRemoved ? false : (profileAvatarFile ? true : currentPortalInfo.hasAvatar);
+        const nicknameDisplay = document.getElementById('display-nickname');
+        if (nicknameDisplay) nicknameDisplay.innerText = currentPortalInfo.nickname;
+        const avatarEl = document.getElementById('display-avatar');
+        const avatarFallbackEl = document.getElementById('display-avatar-fallback');
+        if (avatarEl && avatarFallbackEl) {
+            if (currentPortalInfo.hasAvatar) {
+                avatarEl.src = `${dataApiUrl}/portal/${encodeURIComponent(studentId)}/avatar?v=${Date.now()}`;
+                avatarEl.style.display = '';
+                avatarFallbackEl.hidden = true;
+            } else {
+                avatarEl.style.display = 'none';
+                avatarFallbackEl.hidden = false;
+            }
+        }
+    } catch (err) {
+        alert('เกิดข้อผิดพลาด: ' + err.message);
+    } finally {
+        saveBtn.innerHTML = origLabel;
+        saveBtn.disabled = false;
+    }
 }
 
 // ---------- AI chat assistant ----------
