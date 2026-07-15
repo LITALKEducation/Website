@@ -772,12 +772,26 @@ body::before {
     align-items: center;
     gap: 26px;
     position: relative;
-    overflow: hidden;
     color: var(--hero-text);
     box-shadow: var(--hero-shadow);
 }
 
-.welcome-hero::before {
+/* Clips only the decorative glow circles to the card's rounded corners.
+   This used to be `overflow: hidden` directly on .welcome-hero, but that
+   also clipped the "..." menu-dropdown-panel (position: absolute) whenever
+   it opened near the card's edge — the panel would render but its links
+   fell outside the clipped, hit-testable area. Isolating the clip to its
+   own layer behind the real content (z-index: 0) fixes that. */
+.welcome-hero-decor {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.welcome-hero-decor::before {
     content: '';
     position: absolute;
     top: -60%;
@@ -786,10 +800,9 @@ body::before {
     height: 340px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
-    pointer-events: none;
 }
 
-.welcome-hero::after {
+.welcome-hero-decor::after {
     content: '';
     position: absolute;
     bottom: -70%;
@@ -798,7 +811,6 @@ body::before {
     height: 300px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    pointer-events: none;
 }
 
 .hero-text {
@@ -1349,6 +1361,75 @@ body::before {
     font-size: 13px;
     color: var(--text-secondary);
     margin-top: 2px;
+}
+
+/* ============ Teacher card ============ */
+.teacher-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.teacher-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-secondary);
+}
+
+.teacher-avatar,
+.teacher-avatar-fallback {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.teacher-avatar {
+    object-fit: cover;
+}
+
+.teacher-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--brand-soft);
+    color: var(--brand-primary);
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.teacher-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.teacher-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.teacher-title {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.teacher-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--brand-primary);
+    text-decoration: none;
+    margin-top: 4px;
+}
+
+.teacher-phone:hover {
+    text-decoration: underline;
 }
 
 /* ============ Content Sections ============ */

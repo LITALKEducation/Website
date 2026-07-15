@@ -149,6 +149,7 @@
 
             <!-- Welcome Hero -->
             <div class="welcome-hero">
+                <div class="welcome-hero-decor" aria-hidden="true"></div>
                 <div class="hero-profile">
                     <img id="display-avatar" class="hero-avatar" alt="รูปโปรไฟล์" style="display: none;">
                     <div id="display-avatar-fallback" class="hero-avatar-fallback" aria-hidden="true"><i class="fas fa-user"></i></div>
@@ -228,6 +229,13 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Your Teacher (assigned via the admin's visibility/access screen) -->
+            <section class="content-section teacher-section" id="section-teacher" style="display: none;">
+                <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> ผู้สอนของคุณ</h2>
+                <p class="section-sub">ผู้สอนที่ดูแลรับผิดชอบคุณในขณะนี้ ติดต่อได้โดยตรงตามช่องทางด้านล่าง</p>
+                <div id="teacher-container"></div>
+            </section>
 
             <!-- Pending Payments Alert -->
             <section class="content-section pending-payments-section" id="section-pending-payments" style="display: none;">
@@ -450,6 +458,14 @@
 
                     // Documents / files — only present when the student is signed in
                     renderFiles(studentId, data.files || []);
+
+                    // Assigned teacher(s) — from the admin's visibility/access screen
+                    renderTeachers(
+                        document.getElementById('section-teacher'),
+                        document.getElementById('teacher-container'),
+                        studentId,
+                        data.teachers || []
+                    );
 
                     // Upcoming schedule: spotlight card for the next class,
                     // then the full table (already sorted soonest-first)

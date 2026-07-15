@@ -368,6 +368,36 @@ function renderFiles(studentId, files) {
     }).join('');
 }
 
+// ---------- Teacher(s) ----------
+// Whoever the admin assigned to this student via the visibility/access
+// screen (teacher_students). Phone numbers link out to tel:; the avatar is
+// proxied through a route scoped to this exact student (see worker/README).
+function renderTeachers(section, container, studentId, teachers) {
+    if (!section || !container) return;
+    if (!teachers || teachers.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = '';
+    container.innerHTML = `<div class="teacher-card-list">${teachers.map((t) => {
+        const avatarUrl = t.hasAvatar
+            ? `${dataApiUrl}/portal/${encodeURIComponent(studentId)}/teacher-avatar/${encodeURIComponent(t.identity)}`
+            : null;
+        const initial = String(t.name || '-').trim().charAt(0).toUpperCase() || '?';
+        return `
+        <div class="teacher-card">
+            ${avatarUrl
+                ? `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(t.name)}" class="teacher-avatar">`
+                : `<div class="teacher-avatar-fallback">${escapeHtml(initial)}</div>`}
+            <div class="teacher-info">
+                <div class="teacher-name">${escapeHtml(t.name || '-')}</div>
+                ${t.title ? `<div class="teacher-title">${escapeHtml(t.title)}</div>` : ''}
+                ${t.phone ? `<a href="tel:${escapeHtml(t.phone)}" class="teacher-phone"><i class="fas fa-phone"></i> ${escapeHtml(t.phone)}</a>` : ''}
+            </div>
+        </div>`;
+    }).join('')}</div>`;
+}
+
 // ---------- Schedule ----------
 function renderSchedule(container, schedule) {
     if (!container) return;
