@@ -368,6 +368,100 @@ function renderFiles(studentId, files) {
     }).join('');
 }
 
+// ---------- Learning progress (docs/UX-REDESIGN.md phase 4) ----------
+// Everything here derives from the portal payload the page already fetched
+// (study logs, upcoming schedule, credit balance) — no extra API calls.
+
+// Consecutive weeks (Mon-based) with at least one class, counting back from
+// this week. The current week not having a class yet does NOT break the
+// streak — the student may simply not have reached their slot yet.
+function computeWeekStreak(studyLogs) {
+    const WEEK = 7 * 86400000;
+    const weekKey = (date) => {
+        const t = new Date(date);
+        t.setHours(0, 0, 0, 0);
+        t.setDate(t.getDate() - ((t.getDay() + 6) % 7));
+        return t.getTime();
+    };
+    const weeks = new Set(
+        (studyLogs || [])
+            .map((l) => parseThaiDate(l.timestamp))
+            .filter((d) => d.getTime() !== 0)
+            .map(weekKey)
+    );
+    if (!weeks.size) return 0;
+    let cursor = weekKey(new Date());
+    if (!weeks.has(cursor)) cursor -= WEEK;
+    let streak = 0;
+    while (weeks.has(cursor)) {
+        streak++;
+        cursor -= WEEK;
+    }
+    return streak;
+}
+
+function renderLearningProgress(section, container, { studyLogs, upcoming, credit }) {
+    if (!section || !container) return;
+    const done = (studyLogs || []).length;
+    const total = done + upcoming + credit;
+    if (total <= 0) {
+        // Brand-new student with nothing booked yet — an empty progress ring
+        // would just be discouraging noise.
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = '';
+
+    const pct = Math.min(100, Math.round((done / total) * 100));
+    const streak = computeWeekStreak(studyLogs);
+
+    // Progress ring: single-value SVG donut. The adjacent facts carry the
+    // real numbers, so the ring is a summary, never the only encoding.
+    const r = 50;
+    const c = 2 * Math.PI * r;
+    const ring = `
+        <svg viewBox="0 0 120 120" class="progress-ring" role="img" aria-label="เรียนแล้ว ${done} จาก ${total} ชั่วโมง (${pct}%)">
+            <circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--border-color)" stroke-width="10"></circle>
+            <circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--brand-primary)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="${(pct / 100) * c} ${c}"
+                transform="rotate(-90 60 60)"></circle>
+            <text x="60" y="57" text-anchor="middle" font-size="24" font-weight="700" style="fill: var(--text-primary);">${pct}%</text>
+            <text x="60" y="76" text-anchor="middle" font-size="10.5" style="fill: var(--text-muted);">เรียนแล้ว</text>
+        </svg>`;
+
+    const facts = `
+        <div class="progress-facts">
+            <div class="progress-fact"><i class="fas fa-circle-check"></i><div><b>${done.toLocaleString('en-US')} ชม.</b><span>เรียนไปแล้ว</span></div></div>
+            <div class="progress-fact"><i class="fas fa-hourglass-half"></i><div><b>${(upcoming + credit).toLocaleString('en-US')} ชม.</b><span>เหลือในแผนการเรียน</span></div></div>
+            <div class="progress-fact"><i class="fas fa-fire"></i><div><b>${streak > 0 ? `${streak} สัปดาห์` : '—'}</b><span>เรียนต่อเนื่อง</span></div></div>
+        </div>`;
+
+    const milestones = [
+        { icon: 'fa-flag-checkered', label: 'คลาสแรก', earned: done >= 1, hint: 'เรียนคลาสแรกให้สำเร็จ' },
+        { icon: 'fa-star', label: '10 คลาส', earned: done >= 10, hint: `อีก ${Math.max(0, 10 - done)} คลาส` },
+        { icon: 'fa-medal', label: '25 คลาส', earned: done >= 25, hint: `อีก ${Math.max(0, 25 - done)} คลาส` },
+        { icon: 'fa-trophy', label: '50 คลาส', earned: done >= 50, hint: `อีก ${Math.max(0, 50 - done)} คลาส` },
+        { icon: 'fa-crown', label: '100 คลาส', earned: done >= 100, hint: `อีก ${Math.max(0, 100 - done)} คลาส` },
+        { icon: 'fa-fire', label: 'ต่อเนื่อง 4 สัปดาห์', earned: streak >= 4, hint: streak > 0 ? `ตอนนี้ ${streak} สัปดาห์ติดกัน` : 'เรียนติดต่อกันทุกสัปดาห์' },
+    ];
+    const badges = `
+        <div class="badge-grid">
+            ${milestones.map((m) => `
+            <div class="badge-item ${m.earned ? 'earned' : 'locked'}" title="${escapeHtml(m.earned ? 'ปลดล็อกแล้ว' : m.hint)}">
+                <span class="badge-icon"><i class="fas ${m.icon}"></i></span>
+                <span class="badge-label">${escapeHtml(m.label)}</span>
+                <span class="badge-state">${m.earned ? 'ปลดล็อกแล้ว' : escapeHtml(m.hint)}</span>
+            </div>`).join('')}
+        </div>`;
+
+    container.innerHTML = `
+        <div class="progress-layout">
+            <div class="progress-ring-wrap">${ring}</div>
+            ${facts}
+        </div>
+        ${badges}`;
+}
+
 // ---------- Teacher(s) ----------
 // Whoever the admin assigned to this student via the visibility/access
 // screen (teacher_students). Phone numbers link out to tel:; the avatar is
