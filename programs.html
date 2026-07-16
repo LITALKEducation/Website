@@ -628,5 +628,30 @@
 
   <script src="js/main.js?v=20260714h" defer></script>
 
+  <!-- AI chat assistant (general — not tied to a specific student account) -->
+  <button class="ai-chat-fab" id="ai-chat-fab" onclick="toggleAIChat()" aria-label="Nong Lilly" title="Nong Lilly"><i class="fas fa-robot"></i></button>
+  <div class="ai-chat-panel" id="ai-chat-panel">
+    <div class="ai-chat-panel__header">
+      <div class="ai-chat-panel__title">
+        <span class="ai-chat-panel__avatar">🌷</span>
+        <div>
+          <div class="ai-chat-panel__name" data-en="Nong Lilly" data-th="น้องลิลลี่">Nong Lilly</div>
+          <div class="ai-chat-panel__status"><span class="ai-chat-status-dot"></span><span data-en="Ready to help" data-th="พร้อมช่วยเหลือ">Ready to help</span></div>
+        </div>
+      </div>
+      <div class="ai-chat-panel__actions">
+        <button class="ai-chat-panel__icon-btn" id="ai-chat-newchat-btn" onclick="startNewAIChat()" aria-label="Start new conversation" title="Start new conversation"><i class="fas fa-rotate-right"></i></button>
+        <button class="ai-chat-panel__icon-btn ai-chat-panel__close" id="ai-chat-close-btn" onclick="toggleAIChat(false)" aria-label="Close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="ai-chat-panel__messages" id="ai-chat-messages">
+      <button class="ai-chat-scroll-btn" id="ai-chat-scroll-btn" onclick="scrollAIChatToBottom()" aria-label="Scroll to latest" title="Scroll to latest"><i class="fas fa-arrow-down"></i></button>
+    </div>
+    <form class="ai-chat-panel__form" id="ai-chat-form" onsubmit="return submitAIChat(event)">
+      <textarea class="ai-chat-panel__input" id="ai-chat-input" rows="1" placeholder="Type a question..." data-en-placeholder="Type a question..." data-th-placeholder="พิมพ์คำถาม..." maxlength="2000" onkeydown="if(event.key==='Enter' &amp;&amp; !event.shiftKey){event.preventDefault();this.form.requestSubmit();}"></textarea>
+      <button type="submit" class="ai-chat-panel__send" id="ai-chat-send" aria-label="Send" title="Send"><i class="fas fa-paper-plane"></i></button>
+    </form>
+  </div>
+
 </body>
 </html>

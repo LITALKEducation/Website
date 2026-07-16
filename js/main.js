@@ -526,3 +526,234 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     });
   });
 })();
+
+/* ============================================================
+   AI CHAT WIDGET (general assistant — home/programs/about)
+   Answers general questions about LITALK Education; not tied to any
+   specific student account. Rate-limited server-side by a random
+   visitorId persisted in localStorage (identity-free, just an
+   abuse-prevention key).
+   ============================================================ */
+(function initGeneralAIChat() {
+  const fab = document.getElementById('ai-chat-fab');
+  if (!fab) return; // page doesn't include the widget markup
+
+  const dataApiUrl = 'https://istudent.litalkeducation.com';
+
+  // Static widget text follows the SITE's language toggle (window.litalkGetLang,
+  // set by initLangToggle above) — not the AI's own reply, which separately
+  // and correctly auto-detects whatever language the user types in.
+  const STRINGS = {
+    en: {
+      newChat: 'Start new conversation',
+      close: 'Close',
+      scrollLatest: 'Scroll to latest',
+      send: 'Send',
+      greeting: "Hi! I'm Nong Lilly. Ask me anything about LITALK Education. (For questions about your own account, please sign in at the student portal.)",
+      newChatMsg: 'Started a new conversation — ask away!',
+      pending: 'Thinking...',
+      genericError: 'Something went wrong. Please try again.',
+      connError: "Couldn't reach the AI assistant. Please try again.",
+    },
+    th: {
+      newChat: 'เริ่มการสนทนาใหม่',
+      close: 'ปิด',
+      scrollLatest: 'เลื่อนไปข้อความล่าสุด',
+      send: 'ส่ง',
+      greeting: 'สวัสดีค่ะ หนูชื่อน้องลิลลี่ ถามเกี่ยวกับ LITALK Education ได้เลยค่ะ (ถ้าถามเรื่องบัญชีของคุณเอง กรุณาเข้าสู่ระบบที่พอร์ทัลนักเรียนนะคะ)',
+      newChatMsg: 'เริ่มการสนทนาใหม่แล้วนะคะ ถามอะไรได้เลย',
+      pending: 'กำลังตอบ...',
+      genericError: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+      connError: 'เชื่อมต่อระบบ AI ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+    },
+  };
+  const t = (key) => (STRINGS[typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en'] || STRINGS.en)[key];
+
+  // data-en/data-th (name, status, placeholder) are already handled by
+  // initLangToggle's own sweep above; aria-label/title aren't part of that
+  // convention, so sync those two here instead.
+  function syncStaticLang() {
+    const newChatBtn = document.getElementById('ai-chat-newchat-btn');
+    const closeBtn = document.getElementById('ai-chat-close-btn');
+    const scrollBtn = document.getElementById('ai-chat-scroll-btn');
+    const sendBtn = document.getElementById('ai-chat-send');
+    if (newChatBtn) { newChatBtn.setAttribute('aria-label', t('newChat')); newChatBtn.setAttribute('title', t('newChat')); }
+    if (closeBtn) { closeBtn.setAttribute('aria-label', t('close')); closeBtn.setAttribute('title', t('close')); }
+    if (scrollBtn) { scrollBtn.setAttribute('aria-label', t('scrollLatest')); scrollBtn.setAttribute('title', t('scrollLatest')); }
+    if (sendBtn) { sendBtn.setAttribute('aria-label', t('send')); sendBtn.setAttribute('title', t('send')); }
+  }
+  syncStaticLang();
+  document.addEventListener('litalk:langchange', syncStaticLang);
+
+  function getVisitorId() {
+    let id = localStorage.getItem('litalk_visitor_id');
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : `v-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      localStorage.setItem('litalk_visitor_id', id);
+    }
+    return id;
+  }
+
+  let conversationId = null;
+  let busy = false;
+
+  function toggleChat(force) {
+    const panel = document.getElementById('ai-chat-panel');
+    if (!panel) return;
+    const open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
+    panel.classList.toggle('open', open);
+    if (window.matchMedia('(max-width: 480px)').matches) {
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
+    if (open) {
+      const input = document.getElementById('ai-chat-input');
+      if (input) input.focus();
+      const messages = document.getElementById('ai-chat-messages');
+      if (messages && !messages.querySelector('.ai-chat-msg, .ai-chat-msg-row')) {
+        appendMessage('assistant', t('greeting'));
+      }
+    }
+  }
+
+  function startNewChat() {
+    conversationId = null;
+    const messages = document.getElementById('ai-chat-messages');
+    if (!messages) return;
+    messages.querySelectorAll('.ai-chat-msg, .ai-chat-msg-row').forEach((el) => el.remove());
+    appendMessage('assistant', t('newChatMsg'));
+  }
+
+  function scrollToBottom() {
+    const messages = document.getElementById('ai-chat-messages');
+    if (messages) messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
+  }
+
+  // Minimal, safe Markdown-to-HTML for AI replies (same subset as the
+  // student portal's assistant — bold, italic, code, links, lists, paragraphs).
+  function renderMarkdown(text) {
+    const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const inline = (s) => escapeHtml(s)
+      .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    const codeBlocks = [];
+    const withPlaceholders = String(text).replace(/```[a-zA-Z0-9]*\n?([\s\S]*?)```/g, (_, code) => {
+      codeBlocks.push(escapeHtml(code.replace(/\n$/, '')));
+      return '\nCODEBLOCK' + (codeBlocks.length - 1) + '\n';
+    });
+
+    const out = [];
+    let para = [];
+    let list = null;
+    const flushPara = () => { if (para.length) { out.push('<p>' + para.join('<br>') + '</p>'); para = []; } };
+    const flushList = () => { if (list) { out.push('<' + list.type + '>' + list.items.map((i) => '<li>' + i + '</li>').join('') + '</' + list.type + '>'); list = null; } };
+    for (const rawLine of withPlaceholders.split('\n')) {
+      const line = rawLine.trim();
+      const codeMatch = line.match(/^CODEBLOCK(\d+)$/);
+      const ul = line.match(/^[-*]\s+(.*)$/);
+      const ol = line.match(/^\d+\.\s+(.*)$/);
+      if (codeMatch) {
+        flushPara();
+        flushList();
+        out.push('<pre><code>' + codeBlocks[Number(codeMatch[1])] + '</code></pre>');
+      } else if (ul) {
+        flushPara();
+        if (!list || list.type !== 'ul') { flushList(); list = { type: 'ul', items: [] }; }
+        list.items.push(inline(ul[1]));
+      } else if (ol) {
+        flushPara();
+        if (!list || list.type !== 'ol') { flushList(); list = { type: 'ol', items: [] }; }
+        list.items.push(inline(ol[1]));
+      } else if (line === '') {
+        flushPara();
+        flushList();
+      } else {
+        flushList();
+        para.push(inline(line));
+      }
+    }
+    flushPara();
+    flushList();
+    return out.join('');
+  }
+
+  function appendMessage(role, text) {
+    const messages = document.getElementById('ai-chat-messages');
+    if (!messages) return null;
+    const el = document.createElement('div');
+    el.className = 'ai-chat-msg ai-chat-msg--' + role;
+    if (role === 'assistant') {
+      el.innerHTML = renderMarkdown(text);
+      const row = document.createElement('div');
+      row.className = 'ai-chat-msg-row';
+      const avatar = document.createElement('span');
+      avatar.className = 'ai-chat-msg-avatar';
+      avatar.textContent = '🌷';
+      row.appendChild(avatar);
+      row.appendChild(el);
+      messages.appendChild(row);
+    } else {
+      el.textContent = text;
+      messages.appendChild(el);
+    }
+    messages.scrollTop = messages.scrollHeight;
+    return el;
+  }
+
+  async function submitChat(event) {
+    event.preventDefault();
+    if (busy) return false;
+    const input = document.getElementById('ai-chat-input');
+    if (!input) return false;
+    const message = input.value.trim();
+    if (!message) return false;
+
+    appendMessage('user', message);
+    input.value = '';
+    busy = true;
+    const sendBtn = document.getElementById('ai-chat-send');
+    if (sendBtn) sendBtn.disabled = true;
+    const pending = appendMessage('pending', t('pending'));
+
+    try {
+      const lang = typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en';
+      const res = await fetch(`${dataApiUrl}/chat/general`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId, message, visitorId: getVisitorId(), lang }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (pending) pending.remove();
+      if (!res.ok || data.status === 'error') {
+        appendMessage('error', data.message || t('genericError'));
+        return false;
+      }
+      conversationId = data.conversationId;
+      appendMessage('assistant', data.reply || '');
+    } catch (err) {
+      if (pending) pending.remove();
+      appendMessage('error', t('connError'));
+    } finally {
+      busy = false;
+      if (sendBtn) sendBtn.disabled = false;
+    }
+    return false;
+  }
+
+  fab.style.display = 'flex';
+  window.toggleAIChat = toggleChat;
+  window.startNewAIChat = startNewChat;
+  window.scrollAIChatToBottom = scrollToBottom;
+  window.submitAIChat = submitChat;
+
+  const messages = document.getElementById('ai-chat-messages');
+  const scrollBtn = document.getElementById('ai-chat-scroll-btn');
+  if (messages && scrollBtn) {
+    messages.addEventListener('scroll', () => {
+      const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 60;
+      scrollBtn.classList.toggle('show', !nearBottom);
+    });
+  }
+})();
