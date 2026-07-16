@@ -258,6 +258,14 @@
             <section class="content-section schedule-section" id="section-schedule">
                 <h2 class="section-title"><i class="fas fa-calendar-days"></i> ตารางเรียนที่จะถึง</h2>
                 <p class="section-sub">วันและเวลาเรียนครั้งต่อไปของคุณ พร้อมปุ่มเข้าห้องเรียนและเพิ่มลงปฏิทิน</p>
+                <!-- Subscribe once and every class lands in the calendar app
+                     automatically — links are filled in by initCalendarSync() -->
+                <div class="calendar-sync-row" id="calendar-sync" style="display: none;">
+                    <span class="calendar-sync-label"><i class="fas fa-rotate"></i> ติดตามตารางเรียนในแอปปฏิทินอัตโนมัติ:</span>
+                    <a id="cal-sync-google" class="btn-table-action" target="_blank" rel="noopener"><i class="fab fa-google"></i> Google Calendar</a>
+                    <a id="cal-sync-webcal" class="btn-table-action"><i class="fab fa-apple"></i> Apple/ปฏิทินอื่น</a>
+                    <button type="button" class="btn-table-action" onclick="copyCalendarLink(this)"><i class="fas fa-link"></i> คัดลอกลิงก์</button>
+                </div>
                 <div id="next-class-container" style="display: none;"></div>
                 <div id="schedule-container">
                     <div class="skeleton-card" aria-hidden="true">
@@ -487,6 +495,9 @@
                         studentId,
                         data.teachers || []
                     );
+
+                    // Calendar-app subscription links for the class schedule
+                    initCalendarSync(studentId);
 
                     // Learning progress ring, weekly streak, and achievements
                     renderLearningProgress(

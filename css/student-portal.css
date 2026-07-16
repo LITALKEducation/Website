@@ -1480,6 +1480,23 @@ body::before {
     text-decoration: underline;
 }
 
+/* ============ Calendar sync row ============ */
+.calendar-sync-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.calendar-sync-label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 /* ============ Learning progress & achievements ============ */
 .progress-layout {
     display: flex;
