@@ -419,10 +419,17 @@
                     const credit = Number(data.info.creditBalance);
                     document.getElementById('display-credit').innerText = `${Number.isFinite(credit) ? credit.toLocaleString('en-US') : '-'} ชม.`;
 
-                    // Membership status, derived from the remaining credit
+                    // Membership status. Credit alone undercounts: a family that
+                    // paid for exactly their scheduled sessions (no extra banked
+                    // hours) has 0 credit but real upcoming classes on the
+                    // calendar — showing "out of hours" for them was the root
+                    // cause of repeated "am I out of hours?" questions. A student
+                    // is only actually out of hours when there's neither leftover
+                    // credit nor anything left on the schedule.
                     const membershipEl = document.getElementById('display-membership');
                     if (Number.isFinite(credit)) {
-                        const active = credit > 0;
+                        const hasUpcoming = Array.isArray(data.schedule) && data.schedule.length > 0;
+                        const active = credit > 0 || hasUpcoming;
                         membershipEl.className = `membership-badge ${active ? 'membership-active' : 'membership-inactive'}`;
                         membershipEl.innerHTML = active
                             ? '<i class="fas fa-circle-check"></i> สมาชิกที่ใช้งานอยู่'
