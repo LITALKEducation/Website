@@ -232,6 +232,14 @@
                 </div>
             </div>
 
+            <!-- Learning progress & achievements (computed client-side from
+                 the same portal payload — no extra API calls) -->
+            <section class="content-section progress-section" id="section-progress" style="display: none;">
+                <h2 class="section-title"><i class="fas fa-seedling"></i> ความก้าวหน้าการเรียน</h2>
+                <p class="section-sub">ชั่วโมงที่เรียนไปแล้ว ความต่อเนื่อง และความสำเร็จที่ปลดล็อกจากการเรียนของคุณ</p>
+                <div id="progress-container"></div>
+            </section>
+
             <!-- Your Teacher (assigned via the admin's visibility/access screen) -->
             <section class="content-section teacher-section" id="section-teacher" style="display: none;">
                 <h2 class="section-title"><i class="fas fa-chalkboard-user"></i> ผู้สอนของคุณ</h2>
@@ -335,6 +343,10 @@
                 <i class="fas fa-receipt"></i>
                 <span>การชำระเงิน</span>
             </a>
+            <button type="button" class="bottom-nav-item" onclick="toggleAIChat()">
+                <i class="fas fa-robot"></i>
+                <span>AI แชท</span>
+            </button>
         </nav>
 
         <!-- Mobile floating action button (upgraded to the Meet link by updateFab) -->
@@ -474,6 +486,17 @@
                         document.getElementById('teacher-container'),
                         studentId,
                         data.teachers || []
+                    );
+
+                    // Learning progress ring, weekly streak, and achievements
+                    renderLearningProgress(
+                        document.getElementById('section-progress'),
+                        document.getElementById('progress-container'),
+                        {
+                            studyLogs: data.studyLogs || [],
+                            upcoming: (data.schedule || []).length,
+                            credit: Number.isFinite(credit) ? credit : 0,
+                        }
                     );
 
                     // Upcoming schedule: spotlight card for the next class,

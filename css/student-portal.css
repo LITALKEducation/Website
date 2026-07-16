@@ -1480,6 +1480,140 @@ body::before {
     text-decoration: underline;
 }
 
+/* ============ Learning progress & achievements ============ */
+.progress-layout {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+
+.progress-ring-wrap {
+    flex-shrink: 0;
+}
+
+.progress-ring {
+    width: 128px;
+    height: 128px;
+    display: block;
+}
+
+.progress-facts {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 220px;
+}
+
+.progress-fact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-fact i {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--brand-soft);
+    color: var(--brand-primary);
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.progress-fact b {
+    display: block;
+    font-size: 17px;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.progress-fact span {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 5px;
+    padding: 14px 10px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+}
+
+.badge-item .badge-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.badge-item.earned .badge-icon {
+    background-color: var(--brand-soft);
+    color: var(--brand-primary);
+}
+
+.badge-item.locked {
+    border-style: dashed;
+    opacity: 0.75;
+}
+
+.badge-item.locked .badge-icon {
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+}
+
+.badge-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.badge-item.locked .badge-label {
+    color: var(--text-secondary);
+}
+
+.badge-state {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.badge-item.earned .badge-state {
+    color: var(--accent-success);
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .progress-layout {
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .progress-facts {
+        width: 100%;
+        justify-content: space-between;
+        gap: 14px;
+    }
+}
+
 /* ============ Content Sections ============ */
 .dashboard-main-grid {
     display: grid;
@@ -2438,6 +2572,12 @@ body::before {
     border-radius: var(--radius-sm);
     padding: 4px 0;
     transition: var(--transition-all);
+    /* The AI chat item is a <button>, not a link — neutralize UA styles so
+       it renders identically to its <a> siblings. */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .bottom-nav-item i {
@@ -2783,9 +2923,10 @@ body::before {
 .ai-chat-panel__send:disabled { opacity: .5; cursor: default; }
 
 @media (max-width: 768px) {
-    /* Stack above the bottom nav bar and the LINE contact FAB (both fixed
-       to the bottom on mobile — see .bottom-nav and .fab above). */
-    .ai-chat-fab { right: 16px; bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 84px); }
+    /* On phones the AI assistant lives in the bottom nav instead of a second
+       floating circle stacked above the LINE FAB. !important because
+       initAIChatWidget() reveals the FAB with an inline display:flex. */
+    .ai-chat-fab { display: none !important; }
 
     /* WebKit: iOS Safari auto-zooms into fields under 16px — keep the chat
        box at 16px so typing in the full-screen popup doesn't zoom the page. */
