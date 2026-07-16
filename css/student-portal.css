@@ -176,6 +176,54 @@ body::before {
     outline: none;
 }
 
+/* Skip link for keyboard/screen-reader users (WCAG 2.4.1): visually hidden
+   until focused, then drops in above the navbar. */
+.skip-link {
+    position: fixed;
+    top: -100px;
+    left: 16px;
+    z-index: 2000;
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: top 0.15s ease;
+}
+
+.skip-link:focus-visible {
+    top: 16px;
+}
+
+/* Fitts's Law: icon-only controls get a >=44px hit area on touch devices
+   without changing desktop density (pointer: coarse only). See
+   Admin-Page/docs/UX-REDESIGN.md §7. */
+@media (pointer: coarse) {
+    .theme-toggle-btn,
+    .btn-edit-profile-header,
+    .ai-chat-panel__icon-btn,
+    .profile-modal-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* min-* so this wins over the base rule's width/height: 24px even though
+       that rule appears later in the file; .navbar scoping outranks the later
+       `.nav-hamburger span { width: 100% }` on specificity. */
+    .navbar .nav-hamburger {
+        min-width: 44px;
+        min-height: 44px;
+        align-items: center;
+    }
+
+    /* Keep the drawn icon at its original 24px while the tap target grows. */
+    .navbar .nav-hamburger span {
+        width: 24px;
+    }
+}
+
 /* Respect users who opt out of motion: kill every transition and
    animation site-wide (covers new nav/FAB/dropdown effects too) */
 @media (prefers-reduced-motion: reduce) {
