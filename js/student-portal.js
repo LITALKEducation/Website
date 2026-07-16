@@ -368,6 +368,38 @@ function renderFiles(studentId, files) {
     }).join('');
 }
 
+// ---------- Calendar sync (docs/UX-REDESIGN.md phase 4) ----------
+// The Worker serves /portal/:id/calendar.ics — a subscribe-able feed of the
+// student's booked classes. webcal:// opens the native "subscribe" flow on
+// Apple/most calendar apps; Google Calendar takes the same URL via ?cid=.
+function initCalendarSync(studentId) {
+    const row = document.getElementById('calendar-sync');
+    if (!row) return;
+    const icsUrl = `${dataApiUrl}/portal/${encodeURIComponent(studentId)}/calendar.ics`;
+    const webcal = icsUrl.replace(/^https:/, 'webcal:');
+    const g = document.getElementById('cal-sync-google');
+    const w = document.getElementById('cal-sync-webcal');
+    if (g) g.href = 'https://calendar.google.com/calendar/render?cid=' + encodeURIComponent(webcal);
+    if (w) w.href = webcal;
+    row.dataset.icsUrl = icsUrl;
+    row.style.display = '';
+}
+
+async function copyCalendarLink(btn) {
+    const row = document.getElementById('calendar-sync');
+    if (!row || !row.dataset.icsUrl) return;
+    try {
+        await navigator.clipboard.writeText(row.dataset.icsUrl);
+        if (btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> คัดลอกแล้ว';
+            setTimeout(() => { btn.innerHTML = orig; }, 1600);
+        }
+    } catch {
+        alert('คัดลอกไม่สำเร็จ ลิงก์คือ: ' + row.dataset.icsUrl);
+    }
+}
+
 // ---------- Learning progress (docs/UX-REDESIGN.md phase 4) ----------
 // Everything here derives from the portal payload the page already fetched
 // (study logs, upcoming schedule, credit balance) — no extra API calls.
