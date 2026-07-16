@@ -165,6 +165,63 @@ html[data-lang="th"] body {
   font-family: var(--font-th);
 }
 
+/* ---------- Accessibility baseline (Admin-Page/docs/UX-REDESIGN.md §7) ---------- */
+/* Keyboard focus ring — :focus-visible only, so mouse/touch users never see
+   it but keyboard users always do (WCAG 2.4.7). Monochrome ink outline works
+   on both light and dark surfaces since the palette flips with the tokens. */
+:focus-visible {
+  outline: 2px solid var(--clr-black);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip link for keyboard/screen-reader users (WCAG 2.4.1): visually hidden
+   until focused, then drops in above the frosted nav. */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 2000;
+  background: var(--clr-black);
+  color: var(--clr-bg);
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: top var(--duration-quick) var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  top: 16px;
+}
+
+/* Fitts's Law: icon-only controls get a >=44px hit area on touch devices
+   without changing desktop density (pointer: coarse only). */
+@media (pointer: coarse) {
+  .nav__hamburger {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Keep the drawn icon at its original 28px while the tap target grows —
+     the spans are width-less blocks, so centering alone would collapse them. */
+  .nav__hamburger span {
+    width: 28px;
+  }
+
+  .ai-chat-panel__icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
 img {
   max-width: 100%;
   height: auto;
