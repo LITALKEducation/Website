@@ -540,6 +540,51 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   const dataApiUrl = 'https://istudent.litalkeducation.com';
 
+  // Static widget text follows the SITE's language toggle (window.litalkGetLang,
+  // set by initLangToggle above) — not the AI's own reply, which separately
+  // and correctly auto-detects whatever language the user types in.
+  const STRINGS = {
+    en: {
+      newChat: 'Start new conversation',
+      close: 'Close',
+      scrollLatest: 'Scroll to latest',
+      send: 'Send',
+      greeting: "Hi! I'm Nong Lilly. Ask me anything about LITALK Education. (For questions about your own account, please sign in at the student portal.)",
+      newChatMsg: 'Started a new conversation — ask away!',
+      pending: 'Thinking...',
+      genericError: 'Something went wrong. Please try again.',
+      connError: "Couldn't reach the AI assistant. Please try again.",
+    },
+    th: {
+      newChat: 'เริ่มการสนทนาใหม่',
+      close: 'ปิด',
+      scrollLatest: 'เลื่อนไปข้อความล่าสุด',
+      send: 'ส่ง',
+      greeting: 'สวัสดีค่ะ หนูชื่อน้องลิลลี่ ถามเกี่ยวกับ LITALK Education ได้เลยค่ะ (ถ้าถามเรื่องบัญชีของคุณเอง กรุณาเข้าสู่ระบบที่พอร์ทัลนักเรียนนะคะ)',
+      newChatMsg: 'เริ่มการสนทนาใหม่แล้วนะคะ ถามอะไรได้เลย',
+      pending: 'กำลังตอบ...',
+      genericError: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+      connError: 'เชื่อมต่อระบบ AI ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+    },
+  };
+  const t = (key) => (STRINGS[typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en'] || STRINGS.en)[key];
+
+  // data-en/data-th (name, status, placeholder) are already handled by
+  // initLangToggle's own sweep above; aria-label/title aren't part of that
+  // convention, so sync those two here instead.
+  function syncStaticLang() {
+    const newChatBtn = document.getElementById('ai-chat-newchat-btn');
+    const closeBtn = document.getElementById('ai-chat-close-btn');
+    const scrollBtn = document.getElementById('ai-chat-scroll-btn');
+    const sendBtn = document.getElementById('ai-chat-send');
+    if (newChatBtn) { newChatBtn.setAttribute('aria-label', t('newChat')); newChatBtn.setAttribute('title', t('newChat')); }
+    if (closeBtn) { closeBtn.setAttribute('aria-label', t('close')); closeBtn.setAttribute('title', t('close')); }
+    if (scrollBtn) { scrollBtn.setAttribute('aria-label', t('scrollLatest')); scrollBtn.setAttribute('title', t('scrollLatest')); }
+    if (sendBtn) { sendBtn.setAttribute('aria-label', t('send')); sendBtn.setAttribute('title', t('send')); }
+  }
+  syncStaticLang();
+  document.addEventListener('litalk:langchange', syncStaticLang);
+
   function getVisitorId() {
     let id = localStorage.getItem('litalk_visitor_id');
     if (!id) {
@@ -565,7 +610,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
       if (input) input.focus();
       const messages = document.getElementById('ai-chat-messages');
       if (messages && !messages.querySelector('.ai-chat-msg, .ai-chat-msg-row')) {
-        appendMessage('assistant', 'สวัสดีค่ะ หนูชื่อน้องลิลลี่ ถามเกี่ยวกับ LITALK Education ได้เลยค่ะ (ถ้าถามเรื่องบัญชีของคุณเอง กรุณาเข้าสู่ระบบที่พอร์ทัลนักเรียนนะคะ)');
+        appendMessage('assistant', t('greeting'));
       }
     }
   }
@@ -575,7 +620,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     const messages = document.getElementById('ai-chat-messages');
     if (!messages) return;
     messages.querySelectorAll('.ai-chat-msg, .ai-chat-msg-row').forEach((el) => el.remove());
-    appendMessage('assistant', 'สวัสดีค่ะ เริ่มการสนทนาใหม่แล้วนะคะ ถามอะไรได้เลย');
+    appendMessage('assistant', t('newChatMsg'));
   }
 
   function scrollToBottom() {
@@ -670,25 +715,26 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     busy = true;
     const sendBtn = document.getElementById('ai-chat-send');
     if (sendBtn) sendBtn.disabled = true;
-    const pending = appendMessage('pending', 'กำลังตอบ...');
+    const pending = appendMessage('pending', t('pending'));
 
     try {
+      const lang = typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en';
       const res = await fetch(`${dataApiUrl}/chat/general`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId, message, visitorId: getVisitorId() }),
+        body: JSON.stringify({ conversationId, message, visitorId: getVisitorId(), lang }),
       });
       const data = await res.json().catch(() => ({}));
       if (pending) pending.remove();
       if (!res.ok || data.status === 'error') {
-        appendMessage('error', data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+        appendMessage('error', data.message || t('genericError'));
         return false;
       }
       conversationId = data.conversationId;
       appendMessage('assistant', data.reply || '');
     } catch (err) {
       if (pending) pending.remove();
-      appendMessage('error', 'เชื่อมต่อระบบ AI ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      appendMessage('error', t('connError'));
     } finally {
       busy = false;
       if (sendBtn) sendBtn.disabled = false;
