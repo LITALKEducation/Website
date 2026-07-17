@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>LITALK Education - เช็คชื่อเข้าเรียน</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
+    <script>
+        // Init theme before first paint to prevent flickering
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', savedTheme || (systemPrefersDark ? 'dark' : 'light'));
+        })();
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/fonts.css?v=20260714h">
+    <link rel="stylesheet" href="css/student-portal.css?v=20260714h">
+    <style>
+        /* Single-purpose page: one centered card, states swapped by JS. */
+        .checkin-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .checkin-card {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            box-shadow: var(--card-shadow);
+            padding: 36px 28px;
+            text-align: center;
+        }
+
+        .checkin-card .logo-img {
+            height: 26px;
+            margin: 0 auto 24px;
+        }
+
+        .checkin-icon {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            margin: 0 auto 18px;
+        }
+
+        .checkin-icon.success {
+            background-color: var(--accent-success-bg, rgba(16, 185, 129, 0.12));
+            color: var(--accent-success);
+        }
+
+        .checkin-icon.error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+        }
+
+        .checkin-icon.loading {
+            background-color: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .checkin-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .checkin-detail {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .checkin-detail b {
+            color: var(--text-primary);
+        }
+
+        .checkin-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="checkin-page">
+        <div class="checkin-card">
+            <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
+            <div id="checkin-state">
+                <div class="checkin-icon loading"><i class="fas fa-spinner fa-spin"></i></div>
+                <div class="checkin-title">กำลังเช็คชื่อ...</div>
+                <div class="checkin-detail">กรุณารอสักครู่</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dataApiUrl = 'https://istudent.litalkeducation.com';
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, (ch) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+            }[ch]));
+        }
+
+        // Class times are stored as Bangkok wall-clock strings; render in the
+        // scanner's own device timezone (same rule as everywhere else).
+        function formatClassMoment(dateYMD, timeHM) {
+            const d = new Date(`${dateYMD}T${timeHM}:00+07:00`);
+            if (isNaN(d.getTime())) return `${dateYMD} ${timeHM}`;
+            return d.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' }) +
+                ' เวลา ' + d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+        }
+
+        function render(state) {
+            document.getElementById('checkin-state').innerHTML = state;
+        }
+
+        function renderError(message) {
+            render(`
+                <div class="checkin-icon error"><i class="fas fa-circle-xmark"></i></div>
+                <div class="checkin-title">เช็คชื่อไม่สำเร็จ</div>
+                <div class="checkin-detail">${escapeHtml(message)}</div>
+                <div class="checkin-actions">
+                    <a class="btn btn-primary" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"><i class="fab fa-line"></i> ติดต่อแอดมินทาง LINE</a>
+                    <a class="btn btn-danger" href="student">ไปที่พอร์ทัลนักเรียน</a>
+                </div>`);
+        }
+
+        window.onload = async () => {
+            const token = new URLSearchParams(window.location.search).get('t');
+            if (!token) {
+                renderError('ลิงก์ไม่ถูกต้อง กรุณาสแกน QR จากผู้สอนอีกครั้ง');
+                return;
+            }
+            try {
+                const res = await fetch(`${dataApiUrl}/checkin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || data.status !== 'success') {
+                    renderError(data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+                    return;
+                }
+                render(`
+                    <div class="checkin-icon success"><i class="fas fa-circle-check"></i></div>
+                    <div class="checkin-title">${data.already ? 'เช็คชื่อไว้แล้ว' : 'เช็คชื่อสำเร็จ!'}</div>
+                    <div class="checkin-detail">
+                        <b>${escapeHtml(data.studentName)}</b><br>
+                        คลาสเรียน${escapeHtml(formatClassMoment(data.date, data.time))}
+                        ${data.already ? '<br><span style="color: var(--text-muted); font-size: 12.5px;">คลาสนี้ถูกบันทึกการเข้าเรียนไว้ก่อนหน้านี้แล้ว</span>' : ''}
+                    </div>
+                    <div class="checkin-actions">
+                        <a class="btn btn-primary" href="student"><i class="fas fa-gauge-high"></i> ไปที่พอร์ทัลนักเรียน</a>
+                    </div>`);
+            } catch (err) {
+                renderError('เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+            }
+        };
+    </script>
+</body>
+
+</html>
