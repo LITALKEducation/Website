@@ -370,21 +370,36 @@
         const STUDY_LOG_PREVIEW_LIMIT = 3;
         const PAYMENT_PREVIEW_LIMIT = 5;
 
+        // Resolve the signed-in student's id and enter the dashboard. The
+        // server (/portal/whoami) is the authority — it also matches by
+        // Auth0 sub, so accounts whose login email doesn't follow the
+        // <id>@domain convention still resolve. Falls back to the old
+        // email-local-part guess only if whoami itself is unreachable.
+        async function enterFromAuth0Session() {
+            portalAuthToken = await getPortalToken();
+            let studentId = await resolveStudentIdFromToken(portalAuthToken);
+            if (!studentId) {
+                const user = await auth0Client.getUser().catch(() => null);
+                if (user && user.email) studentId = user.email.split('@')[0];
+            }
+            if (studentId) {
+                // Overwrite — a stale cookie from an old ?id= link must never
+                // outrank the identity Auth0 just proved.
+                setCookie('student_id', studentId, 30);
+                showDashboard(studentId);
+                return true;
+            }
+            return false;
+        }
+
         window.onload = async () => {
             // Theme setup for icons
             updateThemeIcons(document.documentElement.getAttribute('data-theme'));
 
-            // 1-2. Check for ?id= URL parameter, then the cookie
-            let studentId = resolvePortalStudentId();
+            const search = window.location.search;
+            const urlParams = new URLSearchParams(search);
+            const hasAuthCallback = search.includes('state=') && (search.includes('code=') || search.includes('error='));
 
-            // If we have a student ID from URL param or cookie, login immediately and bypass Auth0 check
-            if (studentId) {
-                showDashboard(studentId);
-                return;
-            }
-
-            // 3. Fallback to standard Auth0 check if no direct ID is present
-            const urlParams = new URLSearchParams(window.location.search);
             const urlError = urlParams.get('error');
             if (urlError) {
                 const urlErrorDesc = urlParams.get('error_description') || 'An authentication error occurred';
@@ -392,7 +407,16 @@
                 return;
             }
 
-            if (location.search.includes("state=") && (location.search.includes("code=") || location.search.includes("error="))) {
+            // 1. Returning from Auth0? Exchange the code FIRST. This used to
+            //    run after the cookie shortcut, so a stale student_id cookie
+            //    (e.g. from an old ?id= link) swallowed the callback entirely:
+            //    the code was never exchanged, the session never established,
+            //    and the "logged-in" student got no data and no Meet links.
+            if (hasAuthCallback) {
+                if (!auth0Client) {
+                    window.location.href = 'error.html?error=sdk_error&error_description=' + encodeURIComponent('โหลดระบบยืนยันตัวตนไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ');
+                    return;
+                }
                 try {
                     await auth0Client.handleRedirectCallback();
                     window.history.replaceState({}, document.title, window.location.pathname);
@@ -401,18 +425,28 @@
                     window.location.href = `error.html?error=callback_error&error_description=${encodeURIComponent(err.message)}`;
                     return;
                 }
+                if (await enterFromAuth0Session()) return;
+                // Valid login but no student account matches this user.
+                document.getElementById('student-dashboard').style.display = 'block';
+                document.getElementById('theme-toggle-container').style.display = 'none';
+                initStudentHamburger();
+                renderPortalDataError('บัญชีที่เข้าสู่ระบบยังไม่ได้ผูกกับข้อมูลนักเรียนในระบบ กรุณาติดต่อเจ้าหน้าที่');
+                return;
             }
 
-            const isAuthenticated = auth0Client ? await auth0Client.isAuthenticated() : false;
-            if (isAuthenticated) {
-                const user = await auth0Client.getUser();
-                const auth0StudentId = user.email ? user.email.split('@')[0] : (user.nickname || user.name);
-                setCookie('student_id', auth0StudentId, 30); // Store student ID in cookie
-                showDashboard(auth0StudentId);
-            } else {
-                document.getElementById('login-section').style.display = 'block';
-                document.getElementById('theme-toggle-container').style.display = 'block';
+            // 2. Fast path: ?id= link or remembered cookie
+            let studentId = resolvePortalStudentId();
+            if (studentId) {
+                showDashboard(studentId);
+                return;
             }
+
+            // 3. Existing Auth0 session without a cookie
+            const isAuthenticated = auth0Client ? await auth0Client.isAuthenticated() : false;
+            if (isAuthenticated && (await enterFromAuth0Session())) return;
+
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('theme-toggle-container').style.display = 'block';
         };
 
         function showDashboard(studentId) {
@@ -550,10 +584,10 @@
                         moreHref: 'student-payments',
                     });
                 } else {
-                    document.getElementById('display-name').innerText = result.message;
+                    renderPortalDataError(result.message);
                 }
             } catch (error) {
-                document.getElementById('display-name').innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล";
+                renderPortalDataError('เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล กรุณาลองใหม่อีกครั้ง');
             }
         }
     </script>

@@ -52,16 +52,64 @@ function withTimeout(promise, ms, message) {
 async function getPortalToken() {
     try {
         if (!auth0Client) return null;
-        const isAuthed = await withTimeout(auth0Client.isAuthenticated(), 4000, 'isAuthenticated timed out');
+        const isAuthed = await withTimeout(auth0Client.isAuthenticated(), 8000, 'isAuthenticated timed out');
         if (!isAuthed) return null;
+        // 12s, not the old 5s: a refresh-token exchange on a slow mobile
+        // connection routinely blew the shorter deadline, which showed up as
+        // "logged in but no Meet link / files" — the token was simply
+        // abandoned mid-flight.
         return await withTimeout(
             auth0Client.getTokenSilently({ authorizationParams: { audience: filesApiAudience } }),
-            5000,
+            12000,
             'getTokenSilently timed out'
         );
     } catch (err) {
         console.warn('Portal token unavailable:', err);
         return null;
+    }
+}
+
+// Asks the Worker which student this Auth0 token belongs to. The old
+// client-side guess (login email's local part) silently broke for accounts
+// whose email doesn't follow the <id>@domain convention — the server
+// resolves by email AND by Auth0 sub against students.auth0_user_id.
+async function resolveStudentIdFromToken(token) {
+    if (!token) return null;
+    try {
+        const res = await fetch(`${dataApiUrl}/portal/whoami`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.studentId) return data.studentId;
+    } catch (err) {
+        console.warn('whoami failed:', err);
+    }
+    return null;
+}
+
+// Clear failure state for "signed in but the id resolves to no student"
+// (or the portal fetch failed) — instead of an error string stuffed into
+// the name slot with everything else stuck as skeletons forever.
+function renderPortalDataError(message) {
+    const name = document.getElementById('display-name');
+    if (name) name.innerText = '—';
+    const main = document.getElementById('main-content');
+    if (!main || document.getElementById('portal-error-card')) return;
+    const card = document.createElement('section');
+    card.id = 'portal-error-card';
+    card.className = 'content-section portal-error-card';
+    card.innerHTML = `
+        <h2 class="section-title"><i class="fas fa-triangle-exclamation"></i> ไม่สามารถแสดงข้อมูลได้</h2>
+        <p class="section-sub">${escapeHtml(message || 'เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล กรุณาลองใหม่อีกครั้ง')}</p>
+        <div class="portal-error-actions">
+            <button type="button" class="btn-table-action" onclick="logout()"><i class="fas fa-arrow-right-from-bracket"></i> ออกจากระบบแล้วเข้าสู่ระบบใหม่</button>
+            <a class="btn-table-action" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"><i class="fab fa-line"></i> ติดต่อแอดมินทาง LINE</a>
+        </div>`;
+    const tabs = main.querySelector('.portal-tabs');
+    if (tabs && tabs.nextSibling) {
+        main.insertBefore(card, tabs.nextSibling);
+    } else {
+        main.insertBefore(card, main.firstChild);
     }
 }
 
