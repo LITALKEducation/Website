@@ -1,7 +1,7 @@
 /* ============================================================
    LITALK — Student Portal shared logic
-   Used by: student.html (overview), student-study-log.html,
-   student-payments.html.
+   Used by: student/index.html (overview), student/study-log.html,
+   student/payments.html.
    Handles auth/session plumbing, theme, mobile drawer and the
    renderers each portal page composes for its own layout.
    ============================================================ */
@@ -714,7 +714,7 @@ function updateFab(schedule) {
         fab.innerHTML = '<i class="fas fa-video"></i>';
         fab.setAttribute('aria-label', 'เข้าเรียนคลาสถัดไป');
     } else if (schedule && schedule.length > 0) {
-        fab.href = 'student#section-schedule';
+        fab.href = '/student#section-schedule';
         fab.removeAttribute('target');
         fab.innerHTML = '<i class="fas fa-calendar-days"></i>';
         fab.setAttribute('aria-label', 'ดูตารางเรียนที่จะถึง');

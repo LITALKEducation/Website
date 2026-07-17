@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>LITALK Education - Student Portal</title>
     <meta name="description" content="LITALK Education Student Portal - ตรวจสอบข้อมูลการเรียนและการชำระเงิน">
-    <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
+    <link rel="icon" href="../img/LITALK-Icon.png" type="image/png">
     <script>
         // Init theme before first paint to prevent flickering
         (function () {
@@ -18,8 +18,8 @@
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-    <link rel="stylesheet" href="css/student-portal.css?v=20260714h">
+    <link rel="stylesheet" href="../css/fonts.css?v=20260714h">
+    <link rel="stylesheet" href="../css/student-portal.css?v=20260714h">
 </head>
 
 <body>
@@ -40,7 +40,7 @@
             <div class="login-brand-side">
                 <div class="brand-content">
                     <div class="brand-logo-container">
-                        <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
+                        <img src="../img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
                     </div>
                     <div class="brand-tagline">
                         <h2>LITALK Education</h2>
@@ -59,7 +59,7 @@
             <div class="login-form-side">
                 <div class="login-form-container">
                     <div class="mobile-logo">
-                        <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
+                        <img src="../img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
                     </div>
                     <h1 class="login-title">เข้าสู่ระบบนักเรียน</h1>
                     <p class="login-subtitle">กรุณาเข้าสู่ระบบเพื่อตรวจสอบข้อมูลการเรียนและการชำระเงินของคุณ</p>
@@ -86,7 +86,7 @@
         <nav class="navbar">
             <div class="nav-container">
                 <a href="/" class="nav-brand">
-                    <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
+                    <img src="../img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
                     <span class="nav-brand-text">Student Portal</span>
                 </a>
                 <div class="nav-actions">
@@ -115,13 +115,13 @@
 
             <!-- Mobile Drawer -->
             <div class="nav-drawer t-panel-slide" id="student-mobile-drawer" data-open="false" role="navigation" aria-label="Mobile navigation">
-                <a href="student" class="drawer-link active"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
-                <a href="student-study-log" class="drawer-link"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
-                <a href="student-payments" class="drawer-link"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                <a href="/student" class="drawer-link active"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
+                <a href="/student/study-log" class="drawer-link"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
+                <a href="/student/payments" class="drawer-link"><i class="fas fa-receipt"></i> การชำระเงิน</a>
                 <div class="drawer-divider"></div>
                 <a href="/" class="drawer-link"><i class="fas fa-home"></i> หน้าหลัก</a>
-                <a href="programs" class="drawer-link"><i class="fas fa-book"></i> หลักสูตรทั้งหมด</a>
-                <a href="about" class="drawer-link"><i class="fas fa-info-circle"></i> เกี่ยวกับเรา</a>
+                <a href="../programs" class="drawer-link"><i class="fas fa-book"></i> หลักสูตรทั้งหมด</a>
+                <a href="../about" class="drawer-link"><i class="fas fa-info-circle"></i> เกี่ยวกับเรา</a>
                 <div class="drawer-divider"></div>
                 <div class="drawer-actions">
                     <button class="drawer-action-btn btn-edit-profile-header" onclick="openProfileModal()" style="display:none;">
@@ -144,9 +144,9 @@
         <main class="dashboard-content" id="main-content">
             <!-- Portal Tabs -->
             <nav class="portal-tabs" aria-label="Portal navigation">
-                <a href="student" class="portal-tab active" aria-current="page"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
-                <a href="student-study-log" class="portal-tab"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
-                <a href="student-payments" class="portal-tab"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                <a href="/student" class="portal-tab active" aria-current="page"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
+                <a href="/student/study-log" class="portal-tab"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
+                <a href="/student/payments" class="portal-tab"><i class="fas fa-receipt"></i> การชำระเงิน</a>
             </nav>
 
             <!-- Welcome Hero -->
@@ -173,7 +173,7 @@
                     <a class="hero-action-btn primary" id="hero-action-join" href="#section-schedule">
                         <i class="fas fa-video"></i> เข้าเรียน
                     </a>
-                    <a class="hero-action-btn" id="hero-action-pay" href="student-payments" hidden>
+                    <a class="hero-action-btn" id="hero-action-pay" href="/student/payments" hidden>
                         <i class="fas fa-credit-card"></i> ชำระเงิน
                     </a>
                     <details class="menu-dropdown">
@@ -181,8 +181,8 @@
                             <i class="fas fa-ellipsis"></i>
                         </summary>
                         <div class="menu-dropdown-panel">
-                            <a class="menu-dropdown-item" href="student-study-log"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
-                            <a class="menu-dropdown-item" href="student-payments"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                            <a class="menu-dropdown-item" href="/student/study-log"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
+                            <a class="menu-dropdown-item" href="/student/payments"><i class="fas fa-receipt"></i> การชำระเงิน</a>
                             <a class="menu-dropdown-item" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"><i class="fab fa-line"></i> ติดต่อแอดมิน</a>
                         </div>
                     </details>
@@ -290,7 +290,7 @@
                         <div class="section-title-group">
                             <h2 class="section-title"><i class="fas fa-graduation-cap"></i> บันทึกการเรียนล่าสุด</h2>
                         </div>
-                        <a href="student-study-log" class="btn-view-all">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a>
+                        <a href="/student/study-log" class="btn-view-all">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <p class="section-sub">สรุปผลการเรียนครั้งล่าสุดของคุณ ดูบันทึกทั้งหมดได้ที่หน้า "บันทึกการเรียน"</p>
                     <div id="study-log-container">
@@ -312,7 +312,7 @@
                         <div class="section-title-group">
                             <h2 class="section-title"><i class="fas fa-receipt"></i> การชำระเงินล่าสุด</h2>
                         </div>
-                        <a href="student-payments" class="btn-view-all">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a>
+                        <a href="/student/payments" class="btn-view-all">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <p class="section-sub">รายการชำระเงินล่าสุดของคุณ ดูประวัติทั้งหมดได้ที่หน้า "การชำระเงิน"</p>
                     <div id="payment-info-container">
@@ -339,15 +339,15 @@
 
         <!-- Mobile bottom navigation -->
         <nav class="bottom-nav" aria-label="เมนูหลัก">
-            <a href="student" class="bottom-nav-item active" aria-current="page">
+            <a href="/student" class="bottom-nav-item active" aria-current="page">
                 <i class="fas fa-gauge-high"></i>
                 <span>ภาพรวม</span>
             </a>
-            <a href="student-study-log" class="bottom-nav-item">
+            <a href="/student/study-log" class="bottom-nav-item">
                 <i class="fas fa-graduation-cap"></i>
                 <span>บันทึกการเรียน</span>
             </a>
-            <a href="student-payments" class="bottom-nav-item">
+            <a href="/student/payments" class="bottom-nav-item">
                 <i class="fas fa-receipt"></i>
                 <span>การชำระเงิน</span>
             </a>
@@ -364,7 +364,7 @@
         </a>
     </div>
 
-    <script src="js/student-portal.js?v=20260714h"></script>
+    <script src="../js/student-portal.js?v=20260714h"></script>
     <script>
         // How many items the overview previews before linking to the full page
         const STUDY_LOG_PREVIEW_LIMIT = 3;
@@ -577,11 +577,11 @@
                     // Preview: latest study logs + latest payments
                     renderStudyLogs(document.getElementById('study-log-container'), data.studyLogs, {
                         limit: STUDY_LOG_PREVIEW_LIMIT,
-                        moreHref: 'student-study-log',
+                        moreHref: '/student/study-log',
                     });
                     renderPayments(document.getElementById('payment-info-container'), data.payments, {
                         limit: PAYMENT_PREVIEW_LIMIT,
-                        moreHref: 'student-payments',
+                        moreHref: '/student/payments',
                     });
                 } else {
                     renderPortalDataError(result.message);
