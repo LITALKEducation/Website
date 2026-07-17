@@ -93,6 +93,41 @@
             flex-direction: column;
             gap: 10px;
         }
+
+        .checkin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .checkin-form label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .checkin-form input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .checkin-form input:focus {
+            outline: 2px solid var(--accent-primary, #2563eb);
+            outline-offset: 1px;
+        }
+
+        .checkin-form .form-error {
+            font-size: 13px;
+            color: var(--accent-danger);
+            min-height: 18px;
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -130,6 +165,12 @@
             document.getElementById('checkin-state').innerHTML = state;
         }
 
+        // Standalone page: no shared JS, so a tiny cookie reader of its own.
+        function getCookie(name) {
+            const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+            return match ? decodeURIComponent(match[1]) : '';
+        }
+
         function renderError(message) {
             render(`
                 <div class="checkin-icon error"><i class="fas fa-circle-xmark"></i></div>
@@ -141,37 +182,99 @@
                 </div>`);
         }
 
-        window.onload = async () => {
-            const token = new URLSearchParams(window.location.search).get('t');
-            if (!token) {
-                renderError('ลิงก์ไม่ถูกต้อง กรุณาสแกน QR จากผู้สอนอีกครั้ง');
-                return;
-            }
+        function renderSuccess(data) {
+            const isEvent = data.mode === 'event';
+            const detail = isEvent
+                ? `กิจกรรม <b>${escapeHtml(data.event)}</b>`
+                : `คลาสเรียน${escapeHtml(formatClassMoment(data.date, data.time))}`;
+            const alreadyNote = isEvent
+                ? 'กิจกรรมนี้ถูกบันทึกการเข้าร่วมไว้ก่อนหน้านี้แล้ว'
+                : 'คลาสนี้ถูกบันทึกการเข้าเรียนไว้ก่อนหน้านี้แล้ว';
+            render(`
+                <div class="checkin-icon success"><i class="fas fa-circle-check"></i></div>
+                <div class="checkin-title">${data.already ? 'เช็คชื่อไว้แล้ว' : 'เช็คชื่อสำเร็จ!'}</div>
+                <div class="checkin-detail">
+                    <b>${escapeHtml(data.studentName)}</b><br>
+                    ${detail}
+                    ${data.already ? `<br><span style="color: var(--text-muted); font-size: 12.5px;">${alreadyNote}</span>` : ''}
+                </div>
+                <div class="checkin-actions">
+                    <a class="btn btn-primary" href="student"><i class="fas fa-gauge-high"></i> ไปที่พอร์ทัลนักเรียน</a>
+                </div>`);
+        }
+
+        // On-site/group events: one QR for everyone, so the server can't know
+        // who scanned — ask for the student id (prefilled from the portal cookie).
+        function renderStudentForm(eventTitle, presetId, errorMsg) {
+            render(`
+                <div class="checkin-icon loading"><i class="fas fa-user-check"></i></div>
+                <div class="checkin-title">เช็คชื่อเข้าร่วมกิจกรรม</div>
+                <div class="checkin-detail">กิจกรรม <b>${escapeHtml(eventTitle)}</b><br>กรุณากรอกรหัสนักเรียนเพื่อยืนยันตัวตน</div>
+                <form class="checkin-form" id="event-checkin-form">
+                    <label for="checkin-student-id">รหัสนักเรียน</label>
+                    <input id="checkin-student-id" type="text" autocomplete="off" autocapitalize="characters"
+                        placeholder="เช่น LT001" value="${escapeHtml(presetId)}" required>
+                    <p class="form-error" id="checkin-form-error">${escapeHtml(errorMsg || '')}</p>
+                    <button type="submit" class="btn btn-primary" id="checkin-submit-btn">
+                        <i class="fas fa-circle-check"></i> เช็คชื่อ
+                    </button>
+                </form>`);
+            const form = document.getElementById('event-checkin-form');
+            const input = document.getElementById('checkin-student-id');
+            if (!presetId) input.focus();
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = input.value.trim();
+                if (!id) {
+                    document.getElementById('checkin-form-error').textContent = 'กรุณากรอกรหัสนักเรียน';
+                    return;
+                }
+                document.getElementById('checkin-submit-btn').disabled = true;
+                submitCheckin(id, eventTitle);
+            });
+        }
+
+        let checkinToken = '';
+
+        async function submitCheckin(studentId, eventTitle) {
             try {
+                const body = { token: checkinToken };
+                if (studentId) body.studentId = studentId;
                 const res = await fetch(`${dataApiUrl}/checkin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token }),
+                    body: JSON.stringify(body),
                 });
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok || data.status !== 'success') {
-                    renderError(data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+                if (data.status === 'need_student') {
+                    // Event QR: server needs to know who is scanning.
+                    renderStudentForm(data.event || '', getCookie('student_id'), '');
                     return;
                 }
-                render(`
-                    <div class="checkin-icon success"><i class="fas fa-circle-check"></i></div>
-                    <div class="checkin-title">${data.already ? 'เช็คชื่อไว้แล้ว' : 'เช็คชื่อสำเร็จ!'}</div>
-                    <div class="checkin-detail">
-                        <b>${escapeHtml(data.studentName)}</b><br>
-                        คลาสเรียน${escapeHtml(formatClassMoment(data.date, data.time))}
-                        ${data.already ? '<br><span style="color: var(--text-muted); font-size: 12.5px;">คลาสนี้ถูกบันทึกการเข้าเรียนไว้ก่อนหน้านี้แล้ว</span>' : ''}
-                    </div>
-                    <div class="checkin-actions">
-                        <a class="btn btn-primary" href="student"><i class="fas fa-gauge-high"></i> ไปที่พอร์ทัลนักเรียน</a>
-                    </div>`);
+                if (!res.ok || data.status !== 'success') {
+                    const message = data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+                    // Wrong id on an event scan: keep the form so they can retry
+                    // (but an expired QR is terminal — fall through to the error card).
+                    if (studentId && eventTitle !== undefined && res.status !== 410) {
+                        renderStudentForm(eventTitle, studentId, message);
+                        return;
+                    }
+                    renderError(message);
+                    return;
+                }
+                renderSuccess(data);
             } catch (err) {
                 renderError('เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
             }
+        }
+
+        window.onload = () => {
+            checkinToken = new URLSearchParams(window.location.search).get('t') || '';
+            if (!checkinToken) {
+                renderError('ลิงก์ไม่ถูกต้อง กรุณาสแกน QR จากผู้สอนอีกครั้ง');
+                return;
+            }
+            submitCheckin('');
         };
     </script>
 </body>
