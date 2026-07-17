@@ -1480,6 +1480,17 @@ body::before {
     text-decoration: underline;
 }
 
+/* ============ Portal data-error card ============ */
+.portal-error-card .section-title i {
+    color: var(--accent-danger);
+}
+
+.portal-error-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 /* ============ Calendar sync row ============ */
 .calendar-sync-row {
     display: flex;
