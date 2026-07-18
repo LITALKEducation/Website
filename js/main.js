@@ -386,18 +386,36 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const submitBtn = $('#contact-submit');
   if (!form || !submitBtn) return;
 
-  form.addEventListener('submit', async (e) => {
+  const CONTACT_EMAIL = 'support@litalkeducation.com';
+
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
 
+    if (!form.reportValidity()) return;
+
     const originalText = submitBtn.textContent;
-    submitBtn.textContent = '...';
-    submitBtn.disabled = true;
-
-    // Simulate submission (replace with real endpoint)
-    await new Promise(resolve => setTimeout(resolve, 1200));
-
     const lang = document.documentElement.getAttribute('data-lang') || 'en';
-    submitBtn.textContent = lang === 'th' ? 'ส่งแล้ว ✓' : 'Sent ✓';
+
+    const name = $('#form-name').value.trim();
+    const email = $('#form-email').value.trim();
+    const program = $('#form-program').value.trim();
+    const message = $('#form-message').value.trim();
+
+    const subject = lang === 'th'
+      ? `สอบถามข้อมูลจาก ${name}`
+      : `Inquiry from ${name}`;
+
+    const bodyLines = lang === 'th'
+      ? [`ชื่อ: ${name}`, `อีเมล: ${email}`, program && `หลักสูตรที่สนใจ: ${program}`]
+      : [`Name: ${name}`, `Email: ${email}`, program && `Program Interest: ${program}`];
+
+    const body = bodyLines.filter(Boolean).concat('', message).join('\n');
+    const mailtoUrl = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailtoUrl;
+
+    submitBtn.textContent = lang === 'th' ? 'เปิดโปรแกรมอีเมล ✓' : 'Opening email ✓';
+    submitBtn.disabled = true;
 
     setTimeout(() => {
       submitBtn.textContent = originalText;
