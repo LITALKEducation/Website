@@ -1127,6 +1127,16 @@ function openIdCardModal() {
     if (idCardQrCountdownTimer) clearInterval(idCardQrCountdownTimer);
     idCardQrCountdownTimer = setInterval(updateIdCardQrCountdown, 1000);
 
+    // The Apple Shortcuts install link only makes sense on iOS/iPadOS —
+    // hide it everywhere else instead of sending Android/desktop users to
+    // an app they don't have.
+    const shortcutLink = document.getElementById('idCardShortcutLink');
+    if (shortcutLink) {
+        const isAppleTouchDevice = /iPad|iPhone|iPod/.test(navigator.userAgent)
+            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        shortcutLink.hidden = !isAppleTouchDevice;
+    }
+
     overlay.classList.add('open');
 }
 
