@@ -19,7 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-    <link rel="stylesheet" href="css/student-portal.css?v=20260718b">
+    <link rel="stylesheet" href="css/student-portal.css?v=20260718c">
 </head>
 
 <body>
@@ -178,7 +178,7 @@
         </a>
     </div>
 
-    <script src="js/student-portal.js?v=20260718d"></script>
+    <script src="js/student-portal.js?v=20260718e"></script>
     <script>
         window.onload = async () => {
             updateThemeIcons(document.documentElement.getAttribute('data-theme'));
@@ -297,8 +297,10 @@
                         <span class="idcard-checkin-hint">ใช้ยืนยันตัวตนตอนเช็คชื่อเข้าร่วมกิจกรรมหน้างาน ไม่ใช่รหัสนักเรียนและไม่เปิดเผยข้อมูลส่วนตัว — ระบบกรอกให้อัตโนมัติถ้าเช็คชื่อจากอุปกรณ์นี้</span>
                     </div>
                     <div class="idcard-qr-wrap">
+                        <div class="idcard-qr-label"><i class="fas fa-qrcode"></i> QR เช็คชื่อเข้า-ออก</div>
                         <div class="idcard-qr" id="idCardQr"></div>
-                        <span class="idcard-qr-hint">ให้เจ้าหน้าที่สแกนเพื่อยืนยันตัวตน</span>
+                        <span class="idcard-qr-countdown" id="idCardQrCountdown">กำลังออก QR...</span>
+                        <span class="idcard-qr-hint">ให้เจ้าหน้าที่สแกนที่จุดเช็คชื่อ — สแกนครั้งแรกเช็คชื่อเข้า ครั้งถัดไปเช็คชื่อออก</span>
                     </div>
                 </div>
             </div>
