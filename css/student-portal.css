@@ -3428,6 +3428,47 @@ button.menu-dropdown-item {
     color: var(--accent-warning);
 }
 
+/* Opaque event self-check-in code — visually separate from the identity
+   fields above (its own bordered box) since it's a different kind of
+   credential: safe to read aloud or leave cached on a device, unlike the
+   student id it sits next to. */
+.idcard-checkin {
+    margin: 0 20px 18px;
+    padding: 14px 16px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+}
+
+.idcard-checkin-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.idcard-checkin-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-primary);
+}
+
+.idcard-checkin-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
 .idcard-qr-wrap {
     display: flex;
     flex-direction: column;

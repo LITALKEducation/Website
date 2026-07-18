@@ -318,6 +318,14 @@ function formatFileSize(bytes) {
     return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// Opaque check-in code cache (see the Worker's students.checkin_code /
+// migrations/0017_checkin_code.sql). Reveals nothing about the student on
+// its own — only a server-side lookup resolves it — so, unlike the real
+// student id, it's safe to leave sitting in localStorage on a shared or
+// lost device. checkin.html (a separate standalone page) reads this same
+// key to auto-fill event self-check-in.
+const CHECKIN_CODE_STORAGE_KEY = 'litalk_checkin_code';
+
 // ---------- Data fetching ----------
 async function fetchPortalData(studentId) {
     // A token (when the student signed in via Auth0) unlocks private
@@ -342,10 +350,14 @@ async function fetchPortalData(studentId) {
                 course: info.course && info.course !== '-' ? info.course : '',
                 email: info.email || '',
                 hasAvatar: !!info.hasAvatar,
+                checkinCode: info.checkinCode || '',
                 // Mirrors the hero membership-badge logic: out of hours only
                 // when there's neither leftover credit nor anything upcoming.
                 membershipActive: Number.isFinite(credit) ? (credit > 0 || hasUpcoming) : null,
             };
+            if (info.checkinCode) {
+                try { localStorage.setItem(CHECKIN_CODE_STORAGE_KEY, info.checkinCode); } catch { /* private mode etc. — auto-fill just won't work */ }
+            }
         }
         updateProfileNavButton();
         updateIdCardButton();
@@ -1061,6 +1073,13 @@ function openIdCardModal() {
     } else {
         statusEl.className = 'idcard-status';
         statusEl.innerHTML = '-';
+    }
+
+    const checkinCodeEl = document.getElementById('idCardCheckinCode');
+    if (checkinCodeEl) {
+        checkinCodeEl.textContent = currentPortalInfo.checkinCode
+            ? currentPortalInfo.checkinCode.replace(/(.{4})(.{4})/, '$1 $2')
+            : '-';
     }
 
     const qrHolder = document.getElementById('idCardQr');
