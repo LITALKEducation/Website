@@ -1064,6 +1064,62 @@ let idCardQrTimer = null;
 let idCardQrCountdownTimer = null;
 let idCardQrExpiresAt = 0;
 
+// ---------- "You've been scanned" feedback on the card holder's own device ----------
+// The scanning device at the front desk already gets its own vibrate/beep;
+// this is the same feedback but on the *card's* screen, so the student
+// knows their scan landed without needing to check the QR box or ask
+// staff. Polls GET /portal/:id/checkin-status while the card is open —
+// deliberately not a websocket/push channel, since a couple of requests a
+// second for the ~seconds a card stays open in front of a scanner is
+// simpler and cheap enough not to need one.
+const ID_CARD_CHECKIN_POLL_MS = 1500;
+let idCardCheckinPollTimer = null;
+let idCardCheckinSince = null;
+let idCardAudioCtx = null;
+
+function idCardFeedbackTone() {
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtor) return;
+    if (!idCardAudioCtx) idCardAudioCtx = new AudioCtor();
+    if (idCardAudioCtx.state === 'suspended') idCardAudioCtx.resume().catch(() => {});
+    let t = idCardAudioCtx.currentTime;
+    [880, 1320].forEach((freq) => {
+        const osc = idCardAudioCtx.createOscillator();
+        const gain = idCardAudioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.28, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+        osc.connect(gain);
+        gain.connect(idCardAudioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.14);
+        t += 0.15;
+    });
+}
+
+function idCardScannedFeedback() {
+    if (navigator.vibrate) navigator.vibrate(80); // no-op on iOS/Safari — no Vibration API there
+    idCardFeedbackTone();
+}
+
+async function pollIdCardCheckinStatus(studentId) {
+    if (!portalAuthToken) return;
+    try {
+        const res = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(studentId)}/checkin-status?since=${encodeURIComponent(idCardCheckinSince)}`, {
+            headers: { Authorization: `Bearer ${portalAuthToken}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data.status === 'success' && data.event) {
+            idCardCheckinSince = data.event.at;
+            idCardScannedFeedback();
+        }
+    } catch (err) {
+        // Transient network hiccups just mean the next poll tries again.
+    }
+}
+
 function openIdCardModal() {
     if (!currentPortalInfo) return;
     const overlay = document.getElementById('idCardModalOverlay');
@@ -1126,6 +1182,10 @@ function openIdCardModal() {
     idCardQrTimer = setInterval(refreshIdCardQr, ID_CARD_QR_REFRESH_MS);
     if (idCardQrCountdownTimer) clearInterval(idCardQrCountdownTimer);
     idCardQrCountdownTimer = setInterval(updateIdCardQrCountdown, 1000);
+
+    idCardCheckinSince = new Date().toISOString();
+    if (idCardCheckinPollTimer) clearInterval(idCardCheckinPollTimer);
+    idCardCheckinPollTimer = setInterval(() => pollIdCardCheckinStatus(currentPortalInfo.studentId), ID_CARD_CHECKIN_POLL_MS);
 
     // The Apple Shortcuts install link only makes sense on iOS/iPadOS —
     // hide it everywhere else instead of sending Android/desktop users to
@@ -1197,6 +1257,7 @@ function closeIdCardModal() {
     if (overlay) overlay.classList.remove('open');
     if (idCardQrTimer) { clearInterval(idCardQrTimer); idCardQrTimer = null; }
     if (idCardQrCountdownTimer) { clearInterval(idCardQrCountdownTimer); idCardQrCountdownTimer = null; }
+    if (idCardCheckinPollTimer) { clearInterval(idCardCheckinPollTimer); idCardCheckinPollTimer = null; }
 }
 
 function previewProfileImage(event) {
