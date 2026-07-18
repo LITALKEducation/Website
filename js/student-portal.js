@@ -91,7 +91,11 @@ async function resolveStudentIdFromToken(token) {
 // Clear failure state for "signed in but the id resolves to no student"
 // (or the portal fetch failed) — instead of an error string stuffed into
 // the name slot with everything else stuck as skeletons forever.
-function renderPortalDataError(message) {
+// debug is the TEMPORARY diagnostic field from GET /portal/:studentId's 401
+// response (see debugPortalAuth in the Worker) — shown inline so reporting
+// the live "logged in but no data" incident doesn't need devtools. Remove
+// this param along with debugPortalAuth once that's fixed for good.
+function renderPortalDataError(message, debug) {
     const name = document.getElementById('display-name');
     if (name) name.innerText = '—';
     const main = document.getElementById('main-content');
@@ -99,13 +103,17 @@ function renderPortalDataError(message) {
     const card = document.createElement('section');
     card.id = 'portal-error-card';
     card.className = 'content-section portal-error-card';
+    const debugBlock = debug
+        ? `<pre style="margin-top:12px;padding:10px;background:var(--bg-tertiary);border-radius:8px;font-size:11px;overflow-x:auto;user-select:all;">${escapeHtml(JSON.stringify(debug, null, 2))}</pre>`
+        : '';
     card.innerHTML = `
         <h2 class="section-title"><i class="fas fa-triangle-exclamation"></i> ไม่สามารถแสดงข้อมูลได้</h2>
         <p class="section-sub">${escapeHtml(message || 'เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล กรุณาลองใหม่อีกครั้ง')}</p>
         <div class="portal-error-actions">
             <button type="button" class="btn-table-action" onclick="logout()"><i class="fas fa-arrow-right-from-bracket"></i> ออกจากระบบแล้วเข้าสู่ระบบใหม่</button>
             <a class="btn-table-action" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"><i class="fab fa-line"></i> ติดต่อแอดมินทาง LINE</a>
-        </div>`;
+        </div>
+        ${debugBlock}`;
     const tabs = main.querySelector('.portal-tabs');
     if (tabs && tabs.nextSibling) {
         main.insertBefore(card, tabs.nextSibling);

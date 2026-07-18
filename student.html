@@ -374,7 +374,7 @@
         </a>
     </div>
 
-    <script src="js/student-portal.js?v=20260718b"></script>
+    <script src="js/student-portal.js?v=20260718c"></script>
     <script>
         // How many items the overview previews before linking to the full page
         const STUDY_LOG_PREVIEW_LIMIT = 3;
@@ -573,7 +573,7 @@
                         moreHref: 'student-payments',
                     });
                 } else {
-                    renderPortalDataError(result.message);
+                    renderPortalDataError(result.message, result.debug);
                 }
             } catch (error) {
                 renderPortalDataError('เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล กรุณาลองใหม่อีกครั้ง');
