@@ -17,7 +17,7 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-    <link rel="stylesheet" href="css/student-portal.css?v=20260714h">
+    <link rel="stylesheet" href="css/student-portal.css?v=20260718a">
     <style>
         /* Single-purpose page: one centered card, states swapped by JS. */
         .checkin-page {
@@ -165,12 +165,6 @@
             document.getElementById('checkin-state').innerHTML = state;
         }
 
-        // Standalone page: no shared JS, so a tiny cookie reader of its own.
-        function getCookie(name) {
-            const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-            return match ? decodeURIComponent(match[1]) : '';
-        }
-
         function renderError(message) {
             render(`
                 <div class="checkin-icon error"><i class="fas fa-circle-xmark"></i></div>
@@ -204,7 +198,9 @@
         }
 
         // On-site/group events: one QR for everyone, so the server can't know
-        // who scanned — ask for the student id (prefilled from the portal cookie).
+        // who scanned — ask for the student id. presetId re-fills the value
+        // typed on a failed retry (see the need_student branch below); it's
+        // always empty on the first render.
         function renderStudentForm(eventTitle, presetId, errorMsg) {
             render(`
                 <div class="checkin-icon loading"><i class="fas fa-user-check"></i></div>
@@ -248,7 +244,7 @@
                 const data = await res.json().catch(() => ({}));
                 if (data.status === 'need_student') {
                     // Event QR: server needs to know who is scanning.
-                    renderStudentForm(data.event || '', getCookie('student_id'), '');
+                    renderStudentForm(data.event || '', '', '');
                     return;
                 }
                 if (!res.ok || data.status !== 'success') {

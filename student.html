@@ -92,8 +92,7 @@
                 </a>
                 <div class="nav-actions">
                     <!-- Self-service profile edit — hidden until updateProfileNavButton()
-                         confirms this is a real Auth0 session (?id=/cookie sessions can't
-                         prove ownership of the account) -->
+                         confirms portal data has actually loaded -->
                     <button class="btn-edit-profile-header" onclick="openProfileModal()" aria-label="แก้ไขข้อมูลส่วนตัว" title="แก้ไขข้อมูลส่วนตัว" style="display:none;">
                         <i class="fas fa-user-pen"></i>
                     </button>
@@ -381,22 +380,12 @@
         const STUDY_LOG_PREVIEW_LIMIT = 3;
         const PAYMENT_PREVIEW_LIMIT = 5;
 
-        // Resolve the signed-in student's id and enter the dashboard. The
-        // server (/portal/whoami) is the authority — it also matches by
-        // Auth0 sub, so accounts whose login email doesn't follow the
-        // <id>@domain convention still resolve. Falls back to the old
-        // email-local-part guess only if whoami itself is unreachable.
+        // Resolve the signed-in student's id and enter the dashboard.
+        // resolveAuthedStudentId() (student-portal.js) is the only way in now
+        // — the ?id=/cookie shortcut has been retired.
         async function enterFromAuth0Session() {
-            portalAuthToken = await getPortalToken();
-            let studentId = await resolveStudentIdFromToken(portalAuthToken);
-            if (!studentId) {
-                const user = await auth0Client.getUser().catch(() => null);
-                if (user && user.email) studentId = user.email.split('@')[0];
-            }
+            const studentId = await resolveAuthedStudentId();
             if (studentId) {
-                // Overwrite — a stale cookie from an old ?id= link must never
-                // outrank the identity Auth0 just proved.
-                setCookie('student_id', studentId, 30);
                 showDashboard(studentId);
                 return true;
             }
@@ -418,11 +407,7 @@
                 return;
             }
 
-            // 1. Returning from Auth0? Exchange the code FIRST. This used to
-            //    run after the cookie shortcut, so a stale student_id cookie
-            //    (e.g. from an old ?id= link) swallowed the callback entirely:
-            //    the code was never exchanged, the session never established,
-            //    and the "logged-in" student got no data and no Meet links.
+            // 1. Returning from Auth0? Exchange the code first.
             if (hasAuthCallback) {
                 if (!auth0Client) {
                     window.location.href = 'error.html?error=sdk_error&error_description=' + encodeURIComponent('โหลดระบบยืนยันตัวตนไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ');
@@ -445,14 +430,7 @@
                 return;
             }
 
-            // 2. Fast path: ?id= link or remembered cookie
-            let studentId = resolvePortalStudentId();
-            if (studentId) {
-                showDashboard(studentId);
-                return;
-            }
-
-            // 3. Existing Auth0 session without a cookie
+            // 2. Existing Auth0 session (returning visitor)
             const isAuthenticated = auth0Client ? await auth0Client.isAuthenticated() : false;
             if (isAuthenticated && (await enterFromAuth0Session())) return;
 

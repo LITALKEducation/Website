@@ -178,7 +178,7 @@
         window.onload = async () => {
             updateThemeIcons(document.documentElement.getAttribute('data-theme'));
 
-            const studentId = resolvePortalStudentId();
+            const studentId = await resolveAuthedStudentId();
             if (!studentId) {
                 // Not signed in — send back to the portal entry page for login
                 window.location.replace('student');
