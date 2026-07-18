@@ -46,9 +46,10 @@ function withTimeout(promise, ms, message) {
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
-// Best-effort access token for the portal. Present only when the student
-// signed in through Auth0 (not the ?id= / cookie shortcut); the API uses
-// it to release private data (files, Meet links). Returns null otherwise.
+// Best-effort access token for the portal — present only when the student
+// has a live Auth0 session (the only way into the portal now). Every
+// GET /portal/:studentId call needs this to prove ownership. Returns null
+// otherwise.
 async function getPortalToken() {
     try {
         if (!auth0Client) return null;
@@ -121,27 +122,8 @@ let portalAuthToken = null;
 let currentPortalInfo = null;
 
 // ---------- Cookie helpers ----------
-function setCookie(name, value, days) {
-    let expires = "";
-    if (days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Lax; Secure";
-}
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
-    }
-    return null;
-}
-
+// Only used to clean up the old ?id=-shortcut cookie on logout (see below) —
+// nothing writes student_id anymore.
 function deleteCookie(name) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax; Secure";
 }
@@ -150,7 +132,7 @@ function deleteCookie(name) {
 const login = async () => { await auth0Client.loginWithRedirect(); };
 
 const logout = async () => {
-    deleteCookie('student_id');
+    deleteCookie('student_id'); // clears any leftover cookie from the retired ?id= shortcut
     const returnTo = window.location.origin + '/student';
     const isAuthenticated = auth0Client ? await auth0Client.isAuthenticated() : false;
     if (isAuthenticated) {
@@ -160,18 +142,21 @@ const logout = async () => {
     }
 };
 
-// Resolve the student ID from ?id= (and persist it) or the cookie.
-// Returns null when neither is present.
-function resolvePortalStudentId() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlStudentId = urlParams.get('id');
-    if (urlStudentId) {
-        setCookie('student_id', urlStudentId, 30);
-        // Clean the address bar by removing the query parameters
-        window.history.replaceState({}, document.title, window.location.pathname);
-        return urlStudentId;
+// Resolves the signed-in student's id purely from the live Auth0 session.
+// The old ?id=-in-the-URL / cookie shortcut let anyone who knew (or
+// guessed) a student id read their portal data — payments, study logs —
+// without ever logging in; the server now rejects those requests outright
+// (GET /portal/:studentId requires a matching token), so every portal page
+// must resolve identity this way. Returns null when there's no session.
+async function resolveAuthedStudentId() {
+    portalAuthToken = await getPortalToken();
+    if (!portalAuthToken) return null;
+    let studentId = await resolveStudentIdFromToken(portalAuthToken);
+    if (!studentId) {
+        const user = await auth0Client.getUser().catch(() => null);
+        if (user && user.email) studentId = user.email.split('@')[0];
     }
-    return getCookie('student_id');
+    return studentId;
 }
 
 // ---------- Theme ----------
@@ -333,6 +318,14 @@ function formatFileSize(bytes) {
     return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// Opaque check-in code cache (see the Worker's students.checkin_code /
+// migrations/0017_checkin_code.sql). Reveals nothing about the student on
+// its own — only a server-side lookup resolves it — so, unlike the real
+// student id, it's safe to leave sitting in localStorage on a shared or
+// lost device. checkin.html (a separate standalone page) reads this same
+// key to auto-fill event self-check-in.
+const CHECKIN_CODE_STORAGE_KEY = 'litalk_checkin_code';
+
 // ---------- Data fetching ----------
 async function fetchPortalData(studentId) {
     // A token (when the student signed in via Auth0) unlocks private
@@ -347,20 +340,46 @@ async function fetchPortalData(studentId) {
         });
         const result = await response.json();
         if (result.status === 'success') {
-            currentPortalInfo = { studentId, nickname: result.data.info.nickname || '', hasAvatar: !!result.data.info.hasAvatar };
+            const info = result.data.info;
+            const credit = Number(info.creditBalance);
+            const hasUpcoming = Array.isArray(result.data.schedule) && result.data.schedule.length > 0;
+            currentPortalInfo = {
+                studentId,
+                name: info.name || '',
+                nickname: info.nickname || '',
+                course: info.course && info.course !== '-' ? info.course : '',
+                email: info.email || '',
+                hasAvatar: !!info.hasAvatar,
+                checkinCode: info.checkinCode || '',
+                // Mirrors the hero membership-badge logic: out of hours only
+                // when there's neither leftover credit nor anything upcoming.
+                membershipActive: Number.isFinite(credit) ? (credit > 0 || hasUpcoming) : null,
+            };
+            if (info.checkinCode) {
+                try { localStorage.setItem(CHECKIN_CODE_STORAGE_KEY, info.checkinCode); } catch { /* private mode etc. — auto-fill just won't work */ }
+            }
         }
         updateProfileNavButton();
+        updateIdCardButton();
         return result;
     } finally {
         clearTimeout(timer);
     }
 }
 
-// Shows the nav "edit profile" entry point only for students who actually
-// signed in through Auth0 — the ?id=/cookie shortcut can't prove ownership,
-// so those sessions stay read-only (matches the files/Meet-link gating).
+// Shows the nav "edit profile" entry point only once a real Auth0 session
+// (and its data) has loaded.
 function updateProfileNavButton() {
     document.querySelectorAll('.btn-edit-profile-header').forEach((btn) => {
+        btn.style.display = (portalAuthToken && currentPortalInfo) ? '' : 'none';
+    });
+}
+
+// Same gating as the profile-edit button — the digital ID card's QR links
+// to the admin's student-verification screen and (when authed) shows the
+// student's email, so it only makes sense for a proven Auth0 session.
+function updateIdCardButton() {
+    document.querySelectorAll('.btn-id-card-header').forEach((btn) => {
         btn.style.display = (portalAuthToken && currentPortalInfo) ? '' : 'none';
     });
 }
@@ -677,8 +696,7 @@ function renderNextClass(container, schedule) {
     const start = getScheduleStart(next);
     const relative = start ? getRelativeDayLabel(start) : '';
     const calendarUrl = buildGoogleCalendarUrl(next);
-    // The Meet link is only present for Auth0-authenticated students;
-    // cookie/?id= sessions get a hint instead of a dead button.
+    // meet can still be unset if the class doesn't have a Meet link yet.
     const joinAction = next.meet
         ? `<a href="${escapeHtml(next.meet)}" target="_blank" rel="noopener" class="btn-join-class"><i class="fas fa-video"></i> เข้าห้องเรียน</a>`
         : `<span class="next-class-join-hint"><i class="fas fa-lock"></i> เข้าสู่ระบบด้วยบัญชี LITALK เพื่อรับลิงก์เข้าเรียน</span>`;
@@ -968,8 +986,7 @@ function renderPayments(container, payments, options = {}) {
 // ---------- Profile self-edit (nickname + photo) ----------
 // Auth0-signed-in students only (see updateProfileNavButton) — the
 // PATCH/POST/DELETE endpoints are gated server-side by the same ownership
-// check, but the button is hidden for ?id=/cookie sessions since they'd
-// just get a 401.
+// check (portalTokenMatchesStudent).
 let profileAvatarRemoved = false;
 let profileAvatarFile = null;
 
@@ -999,6 +1016,87 @@ function openProfileModal() {
 
 function closeProfileModal() {
     const overlay = document.getElementById('profileModalOverlay');
+    if (overlay) overlay.classList.remove('open');
+}
+
+// ---------- Digital student ID card ----------
+// Renders a wallet-style card from the same info the dashboard already
+// has (no extra fetch) plus a QR code that deep-links into the admin
+// panel's student check screen (?screen=check&student=<id>, already
+// supported by applyDeepLink() there) so staff can scan it on-site to
+// pull up and verify the student's profile.
+function openIdCardModal() {
+    if (!currentPortalInfo) return;
+    const overlay = document.getElementById('idCardModalOverlay');
+    if (!overlay) return;
+
+    const avatar = document.getElementById('idCardAvatar');
+    const avatarFallback = document.getElementById('idCardAvatarFallback');
+    if (currentPortalInfo.hasAvatar) {
+        avatar.src = `${dataApiUrl}/portal/${encodeURIComponent(currentPortalInfo.studentId)}/avatar?v=${Date.now()}`;
+        avatar.style.display = '';
+        avatarFallback.hidden = true;
+    } else {
+        avatar.style.display = 'none';
+        const initial = String(currentPortalInfo.nickname || currentPortalInfo.name || currentPortalInfo.studentId).trim().charAt(0);
+        avatarFallback.innerText = initial ? initial.toUpperCase() : '';
+        avatarFallback.hidden = false;
+    }
+
+    document.getElementById('idCardName').textContent = currentPortalInfo.name || currentPortalInfo.studentId;
+    document.getElementById('idCardNickname').textContent = currentPortalInfo.nickname ? `(${currentPortalInfo.nickname})` : '';
+    document.getElementById('idCardId').textContent = currentPortalInfo.studentId;
+
+    const courseRow = document.getElementById('idCardCourseRow');
+    if (currentPortalInfo.course) {
+        document.getElementById('idCardCourse').textContent = currentPortalInfo.course;
+        courseRow.hidden = false;
+    } else {
+        courseRow.hidden = true;
+    }
+
+    const emailRow = document.getElementById('idCardEmailRow');
+    if (currentPortalInfo.email) {
+        document.getElementById('idCardEmail').textContent = currentPortalInfo.email;
+        emailRow.hidden = false;
+    } else {
+        emailRow.hidden = true;
+    }
+
+    const statusEl = document.getElementById('idCardStatus');
+    if (currentPortalInfo.membershipActive === true) {
+        statusEl.className = 'idcard-status idcard-status-active';
+        statusEl.innerHTML = '<i class="fas fa-circle-check"></i> สมาชิกที่ใช้งานอยู่';
+    } else if (currentPortalInfo.membershipActive === false) {
+        statusEl.className = 'idcard-status idcard-status-inactive';
+        statusEl.innerHTML = '<i class="fas fa-hourglass-end"></i> หมดชั่วโมงเรียน';
+    } else {
+        statusEl.className = 'idcard-status';
+        statusEl.innerHTML = '-';
+    }
+
+    const checkinCodeEl = document.getElementById('idCardCheckinCode');
+    if (checkinCodeEl) {
+        checkinCodeEl.textContent = currentPortalInfo.checkinCode
+            ? currentPortalInfo.checkinCode.replace(/(.{4})(.{4})/, '$1 $2')
+            : '-';
+    }
+
+    const qrHolder = document.getElementById('idCardQr');
+    qrHolder.innerHTML = '';
+    const verifyUrl = `https://admin.litalkeducation.com/?screen=check&student=${encodeURIComponent(currentPortalInfo.studentId)}`;
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(qrHolder, { text: verifyUrl, width: 168, height: 168, correctLevel: QRCode.CorrectLevel.M });
+    } else {
+        // QR library blocked/unloaded — the student id is still readable.
+        qrHolder.innerHTML = `<div class="idcard-qr-fallback">${escapeHtml(currentPortalInfo.studentId)}</div>`;
+    }
+
+    overlay.classList.add('open');
+}
+
+function closeIdCardModal() {
+    const overlay = document.getElementById('idCardModalOverlay');
     if (overlay) overlay.classList.remove('open');
 }
 
@@ -1110,8 +1208,8 @@ async function saveProfileData() {
 
 // ---------- AI chat assistant ----------
 // Shared by students and parents alike — the portal has no separate parent
-// login, so anyone with the student's portal link reaches this the same way
-// they reach the rest of the dashboard (see resolvePortalStudentId).
+// login, so whoever holds the student's Auth0 credentials reaches this the
+// same way they reach the rest of the dashboard.
 let aiChatConversationId = null;
 let aiChatStudentId = null;
 let aiChatBusy = false;

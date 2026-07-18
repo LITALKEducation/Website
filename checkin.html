@@ -17,7 +17,7 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-    <link rel="stylesheet" href="css/student-portal.css?v=20260714h">
+    <link rel="stylesheet" href="css/student-portal.css?v=20260718b">
     <style>
         /* Single-purpose page: one centered card, states swapped by JS. */
         .checkin-page {
@@ -165,12 +165,6 @@
             document.getElementById('checkin-state').innerHTML = state;
         }
 
-        // Standalone page: no shared JS, so a tiny cookie reader of its own.
-        function getCookie(name) {
-            const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-            return match ? decodeURIComponent(match[1]) : '';
-        }
-
         function renderError(message) {
             render(`
                 <div class="checkin-icon error"><i class="fas fa-circle-xmark"></i></div>
@@ -203,43 +197,57 @@
                 </div>`);
         }
 
+        // Cross-referenced with CHECKIN_CODE_STORAGE_KEY in js/student-portal.js
+        // (this page is standalone and doesn't load that file) — the portal
+        // and the digital ID card cache the student's opaque check-in code
+        // here on last load, so a same-device scan can auto-fill it. The
+        // code carries no information about the student on its own, unlike
+        // the real student id this used to prefill, so it's safe to leave
+        // sitting in localStorage on a shared or lost device.
+        const CHECKIN_CODE_STORAGE_KEY = 'litalk_checkin_code';
+        function getCachedCheckinCode() {
+            try { return localStorage.getItem(CHECKIN_CODE_STORAGE_KEY) || ''; } catch { return ''; }
+        }
+
         // On-site/group events: one QR for everyone, so the server can't know
-        // who scanned — ask for the student id (prefilled from the portal cookie).
-        function renderStudentForm(eventTitle, presetId, errorMsg) {
+        // who scanned — ask for their check-in code. presetCode re-fills the
+        // value typed on a failed retry (see the need_student branch below),
+        // or auto-fills the cached code on the first render.
+        function renderStudentForm(eventTitle, presetCode, errorMsg) {
             render(`
                 <div class="checkin-icon loading"><i class="fas fa-user-check"></i></div>
                 <div class="checkin-title">เช็คชื่อเข้าร่วมกิจกรรม</div>
-                <div class="checkin-detail">กิจกรรม <b>${escapeHtml(eventTitle)}</b><br>กรุณากรอกรหัสนักเรียนเพื่อยืนยันตัวตน</div>
+                <div class="checkin-detail">กิจกรรม <b>${escapeHtml(eventTitle)}</b><br>กรุณากรอกรหัสเช็คชื่อเพื่อยืนยันตัวตน (ดูได้จากบัตรนักเรียนดิจิทัลในพอร์ทัล)</div>
                 <form class="checkin-form" id="event-checkin-form">
-                    <label for="checkin-student-id">รหัสนักเรียน</label>
-                    <input id="checkin-student-id" type="text" autocomplete="off" autocapitalize="characters"
-                        placeholder="เช่น LT001" value="${escapeHtml(presetId)}" required>
+                    <label for="checkin-code-input">รหัสเช็คชื่อ</label>
+                    <input id="checkin-code-input" type="text" autocomplete="off" autocapitalize="characters"
+                        placeholder="เช่น 3F9A2E7B" value="${escapeHtml(presetCode)}" required>
                     <p class="form-error" id="checkin-form-error">${escapeHtml(errorMsg || '')}</p>
                     <button type="submit" class="btn btn-primary" id="checkin-submit-btn">
                         <i class="fas fa-circle-check"></i> เช็คชื่อ
                     </button>
                 </form>`);
             const form = document.getElementById('event-checkin-form');
-            const input = document.getElementById('checkin-student-id');
-            if (!presetId) input.focus();
+            const input = document.getElementById('checkin-code-input');
+            if (!presetCode) input.focus();
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const id = input.value.trim();
-                if (!id) {
-                    document.getElementById('checkin-form-error').textContent = 'กรุณากรอกรหัสนักเรียน';
+                const code = input.value.trim().toUpperCase();
+                if (!code) {
+                    document.getElementById('checkin-form-error').textContent = 'กรุณากรอกรหัสเช็คชื่อ';
                     return;
                 }
                 document.getElementById('checkin-submit-btn').disabled = true;
-                submitCheckin(id, eventTitle);
+                submitCheckin(code, eventTitle);
             });
         }
 
         let checkinToken = '';
 
-        async function submitCheckin(studentId, eventTitle) {
+        async function submitCheckin(checkinCode, eventTitle) {
             try {
                 const body = { token: checkinToken };
-                if (studentId) body.studentId = studentId;
+                if (checkinCode) body.checkinCode = checkinCode;
                 const res = await fetch(`${dataApiUrl}/checkin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -248,15 +256,15 @@
                 const data = await res.json().catch(() => ({}));
                 if (data.status === 'need_student') {
                     // Event QR: server needs to know who is scanning.
-                    renderStudentForm(data.event || '', getCookie('student_id'), '');
+                    renderStudentForm(data.event || '', getCachedCheckinCode(), '');
                     return;
                 }
                 if (!res.ok || data.status !== 'success') {
                     const message = data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
-                    // Wrong id on an event scan: keep the form so they can retry
+                    // Wrong code on an event scan: keep the form so they can retry
                     // (but an expired QR is terminal — fall through to the error card).
-                    if (studentId && eventTitle !== undefined && res.status !== 410) {
-                        renderStudentForm(eventTitle, studentId, message);
+                    if (checkinCode && eventTitle !== undefined && res.status !== 410) {
+                        renderStudentForm(eventTitle, checkinCode, message);
                         return;
                     }
                     renderError(message);

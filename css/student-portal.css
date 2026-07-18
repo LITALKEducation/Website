@@ -1136,6 +1136,17 @@ body::before {
     color: var(--brand-primary);
 }
 
+/* <button> variant (e.g. the digital ID card entry) — same look as the
+   <a> items, reset to remove native button chrome. */
+button.menu-dropdown-item {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+}
+
 /* Sub-page header (Study Log / Payments pages) */
 .page-head {
     background: var(--hero-bg);
@@ -3189,4 +3200,307 @@ body::before {
 
 .profile-btn-cancel:hover {
     background-color: var(--bg-tertiary);
+}
+
+/* ---------- Digital student ID card ---------- */
+/* Reuses the profile-modal overlay/frame chrome (see .profile-modal-*
+   above) — only the class names differ so both modals can be open-state
+   toggled independently. */
+.idcard-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 16px;
+}
+
+.idcard-modal-overlay.open { display: flex; }
+
+.idcard-modal {
+    background-color: var(--bg-secondary);
+    border-radius: 18px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 400px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.idcard-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.idcard-modal-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.idcard-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.idcard-modal-close:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.idcard-modal-body {
+    padding: 20px;
+}
+
+.idcard-modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.idcard-modal-footer .btn {
+    width: auto;
+    flex: 1;
+    padding: 11px 20px;
+    font-size: 14px;
+}
+
+/* The card itself — kept monochrome (brand tokens) rather than the
+   colorful per-org look of typical wallet-app mockups, to stay inside
+   the site's existing "color reserved for semantics" design system. */
+.idcard {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.idcard-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: var(--brand-gradient);
+    color: var(--brand-btn-text);
+}
+
+.idcard-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 3px;
+}
+
+.idcard-brand {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+}
+
+.idcard-main {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+}
+
+.idcard-photo {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.idcard-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.idcard-photo-fallback {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.idcard-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.idcard-role {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--brand-primary);
+    background: var(--brand-soft);
+    padding: 2px 8px;
+    border-radius: 999px;
+    width: fit-content;
+}
+
+.idcard-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 3px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.idcard-nickname {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.idcard-field {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 5px;
+}
+
+.idcard-field[hidden] { display: none; }
+
+.idcard-field-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.idcard-field-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.idcard-status {
+    margin: 0 20px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+}
+
+.idcard-status-active {
+    background: var(--accent-success-bg);
+    color: var(--accent-success);
+}
+
+.idcard-status-inactive {
+    background: var(--accent-warning-bg);
+    color: var(--accent-warning);
+}
+
+/* Opaque event self-check-in code — visually separate from the identity
+   fields above (its own bordered box) since it's a different kind of
+   credential: safe to read aloud or leave cached on a device, unlike the
+   student id it sits next to. */
+.idcard-checkin {
+    margin: 0 20px 18px;
+    padding: 14px 16px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+}
+
+.idcard-checkin-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.idcard-checkin-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-primary);
+}
+
+.idcard-checkin-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.idcard-qr-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 20px 22px;
+    border-top: 1px dashed var(--border-color);
+}
+
+/* Fixed white background regardless of theme — QR scanners need light
+   background/dark modules contrast, which a dark-mode card would break. */
+.idcard-qr {
+    width: 168px;
+    height: 168px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: var(--radius-sm);
+    padding: 8px;
+}
+
+.idcard-qr-fallback {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1d1d1f;
+    text-align: center;
+    word-break: break-all;
+}
+
+.idcard-qr-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
 }
