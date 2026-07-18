@@ -46,15 +46,30 @@ function withTimeout(promise, ms, message) {
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
+// TEMPORARY — captures why the last getPortalToken() call failed, since the
+// server-side debug (debugPortalAuth) can only ever see "hasToken: false"
+// when this happens: no Authorization header ever gets sent, so the actual
+// Auth0 SDK error (timeout, invalid_grant, missing_refresh_token, …) never
+// reaches the Worker at all. Surfaced on the portal error card. Remove
+// alongside debugPortalAuth once the live incident is resolved.
+let lastPortalTokenError = null;
+
 // Best-effort access token for the portal — present only when the student
 // has a live Auth0 session (the only way into the portal now). Every
 // GET /portal/:studentId call needs this to prove ownership. Returns null
 // otherwise.
 async function getPortalToken() {
+    lastPortalTokenError = null;
     try {
-        if (!auth0Client) return null;
+        if (!auth0Client) {
+            lastPortalTokenError = 'auth0Client not initialized (SDK failed to load?)';
+            return null;
+        }
         const isAuthed = await withTimeout(auth0Client.isAuthenticated(), 8000, 'isAuthenticated timed out');
-        if (!isAuthed) return null;
+        if (!isAuthed) {
+            lastPortalTokenError = 'isAuthenticated() returned false';
+            return null;
+        }
         // 12s, not the old 5s: a refresh-token exchange on a slow mobile
         // connection routinely blew the shorter deadline, which showed up as
         // "logged in but no Meet link / files" — the token was simply
@@ -65,6 +80,9 @@ async function getPortalToken() {
             'getTokenSilently timed out'
         );
     } catch (err) {
+        lastPortalTokenError = (err && (err.error || err.message))
+            ? `${err.error || ''} ${err.error_description || err.message || ''}`.trim()
+            : String(err);
         console.warn('Portal token unavailable:', err);
         return null;
     }
@@ -366,6 +384,11 @@ async function fetchPortalData(studentId) {
             if (info.checkinCode) {
                 try { localStorage.setItem(CHECKIN_CODE_STORAGE_KEY, info.checkinCode); } catch { /* private mode etc. — auto-fill just won't work */ }
             }
+        } else if (lastPortalTokenError) {
+            // TEMPORARY — see lastPortalTokenError above. The server's debug
+            // only ever sees "hasToken: false" here; this is the actual
+            // client-side reason no token was sent in the first place.
+            result.debug = Object.assign({ clientTokenError: lastPortalTokenError }, result.debug);
         }
         updateProfileNavButton();
         updateIdCardButton();
