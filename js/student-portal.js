@@ -1147,7 +1147,23 @@ async function refreshIdCardQr() {
         idCardQrExpiresAt = Date.parse(data.expiresAt) || (Date.now() + 120000);
         qrHolder.innerHTML = '';
         if (typeof QRCode !== 'undefined') {
-            new QRCode(qrHolder, { text: data.token, width: 168, height: 168, correctLevel: QRCode.CorrectLevel.M });
+            // Render well above the on-screen 168px size and scale down via
+            // CSS. qrcodejs draws each module as a canvas fillRect; at a
+            // low pixel size the module edges land on fractional pixels and
+            // get anti-aliased into a soft gray band, which is a big enough
+            // fraction of a small module that camera QR decoders can't
+            // threshold it reliably. Rendering large keeps that blur a
+            // negligible fraction of each module once downscaled.
+            new QRCode(qrHolder, { text: data.token, width: 400, height: 400, correctLevel: QRCode.CorrectLevel.M });
+            // qrcodejs draws to an off-screen <canvas> and displays a
+            // separate <img> (canvas.toDataURL()) with the canvas hidden —
+            // the <img> is what's actually visible, so that's what needs
+            // the CSS scale-down. querySelector('img, canvas') is a
+            // selector LIST — it returns whichever matches first in
+            // document order, not list order, and the canvas is always
+            // appended first, so img must be selected explicitly.
+            const rendered = qrHolder.querySelector('img') || qrHolder.querySelector('canvas');
+            if (rendered) { rendered.style.width = '100%'; rendered.style.height = '100%'; }
         } else {
             // QR library blocked/unloaded — the token is still readable/typeable.
             qrHolder.innerHTML = `<div class="idcard-qr-fallback">${escapeHtml(data.token)}</div>`;

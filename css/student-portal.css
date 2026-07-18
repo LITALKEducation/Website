@@ -3508,16 +3508,23 @@ button.menu-dropdown-item {
 }
 
 /* Fixed white background regardless of theme — QR scanners need light
-   background/dark modules contrast, which a dark-mode card would break. */
+   background/dark modules contrast, which a dark-mode card would break.
+   padding is a real quiet zone, not just visual breathing room: our token
+   QR is a 29x29-module (version 3) code displayed at ~152px, so each
+   module is ~5.2px — the ISO spec's 4-module quiet zone needs ~21px of
+   contiguous white margin around the code. In light mode that margin was
+   accidentally satisfied by the surrounding white card; in dark mode the
+   8px padding was the *only* white pixels near the code, well short of
+   what a camera needs to find its edges. */
 .idcard-qr {
-    width: 168px;
-    height: 168px;
+    width: 200px;
+    height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #ffffff;
     border-radius: var(--radius-sm);
-    padding: 8px;
+    padding: 24px;
     box-shadow: 0 0 0 1px var(--border-color);
 }
 
