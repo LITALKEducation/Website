@@ -347,9 +347,23 @@ async function fetchPortalData(studentId) {
         });
         const result = await response.json();
         if (result.status === 'success') {
-            currentPortalInfo = { studentId, nickname: result.data.info.nickname || '', hasAvatar: !!result.data.info.hasAvatar };
+            const info = result.data.info;
+            const credit = Number(info.creditBalance);
+            const hasUpcoming = Array.isArray(result.data.schedule) && result.data.schedule.length > 0;
+            currentPortalInfo = {
+                studentId,
+                name: info.name || '',
+                nickname: info.nickname || '',
+                course: info.course && info.course !== '-' ? info.course : '',
+                email: info.email || '',
+                hasAvatar: !!info.hasAvatar,
+                // Mirrors the hero membership-badge logic: out of hours only
+                // when there's neither leftover credit nor anything upcoming.
+                membershipActive: Number.isFinite(credit) ? (credit > 0 || hasUpcoming) : null,
+            };
         }
         updateProfileNavButton();
+        updateIdCardButton();
         return result;
     } finally {
         clearTimeout(timer);
@@ -361,6 +375,15 @@ async function fetchPortalData(studentId) {
 // so those sessions stay read-only (matches the files/Meet-link gating).
 function updateProfileNavButton() {
     document.querySelectorAll('.btn-edit-profile-header').forEach((btn) => {
+        btn.style.display = (portalAuthToken && currentPortalInfo) ? '' : 'none';
+    });
+}
+
+// Same gating as the profile-edit button — the digital ID card's QR links
+// to the admin's student-verification screen and (when authed) shows the
+// student's email, so it only makes sense for a proven Auth0 session.
+function updateIdCardButton() {
+    document.querySelectorAll('.btn-id-card-header').forEach((btn) => {
         btn.style.display = (portalAuthToken && currentPortalInfo) ? '' : 'none';
     });
 }
@@ -999,6 +1022,80 @@ function openProfileModal() {
 
 function closeProfileModal() {
     const overlay = document.getElementById('profileModalOverlay');
+    if (overlay) overlay.classList.remove('open');
+}
+
+// ---------- Digital student ID card ----------
+// Renders a wallet-style card from the same info the dashboard already
+// has (no extra fetch) plus a QR code that deep-links into the admin
+// panel's student check screen (?screen=check&student=<id>, already
+// supported by applyDeepLink() there) so staff can scan it on-site to
+// pull up and verify the student's profile.
+function openIdCardModal() {
+    if (!currentPortalInfo) return;
+    const overlay = document.getElementById('idCardModalOverlay');
+    if (!overlay) return;
+
+    const avatar = document.getElementById('idCardAvatar');
+    const avatarFallback = document.getElementById('idCardAvatarFallback');
+    if (currentPortalInfo.hasAvatar) {
+        avatar.src = `${dataApiUrl}/portal/${encodeURIComponent(currentPortalInfo.studentId)}/avatar?v=${Date.now()}`;
+        avatar.style.display = '';
+        avatarFallback.hidden = true;
+    } else {
+        avatar.style.display = 'none';
+        const initial = String(currentPortalInfo.nickname || currentPortalInfo.name || currentPortalInfo.studentId).trim().charAt(0);
+        avatarFallback.innerText = initial ? initial.toUpperCase() : '';
+        avatarFallback.hidden = false;
+    }
+
+    document.getElementById('idCardName').textContent = currentPortalInfo.name || currentPortalInfo.studentId;
+    document.getElementById('idCardNickname').textContent = currentPortalInfo.nickname ? `(${currentPortalInfo.nickname})` : '';
+    document.getElementById('idCardId').textContent = currentPortalInfo.studentId;
+
+    const courseRow = document.getElementById('idCardCourseRow');
+    if (currentPortalInfo.course) {
+        document.getElementById('idCardCourse').textContent = currentPortalInfo.course;
+        courseRow.hidden = false;
+    } else {
+        courseRow.hidden = true;
+    }
+
+    const emailRow = document.getElementById('idCardEmailRow');
+    if (currentPortalInfo.email) {
+        document.getElementById('idCardEmail').textContent = currentPortalInfo.email;
+        emailRow.hidden = false;
+    } else {
+        emailRow.hidden = true;
+    }
+
+    const statusEl = document.getElementById('idCardStatus');
+    if (currentPortalInfo.membershipActive === true) {
+        statusEl.className = 'idcard-status idcard-status-active';
+        statusEl.innerHTML = '<i class="fas fa-circle-check"></i> สมาชิกที่ใช้งานอยู่';
+    } else if (currentPortalInfo.membershipActive === false) {
+        statusEl.className = 'idcard-status idcard-status-inactive';
+        statusEl.innerHTML = '<i class="fas fa-hourglass-end"></i> หมดชั่วโมงเรียน';
+    } else {
+        statusEl.className = 'idcard-status';
+        statusEl.innerHTML = '-';
+    }
+
+    const qrHolder = document.getElementById('idCardQr');
+    qrHolder.innerHTML = '';
+    const verifyUrl = `https://admin.litalkeducation.com/?screen=check&student=${encodeURIComponent(currentPortalInfo.studentId)}`;
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(qrHolder, { text: verifyUrl, width: 168, height: 168, correctLevel: QRCode.CorrectLevel.M });
+    } else {
+        // QR library blocked/unloaded — the student id is still readable.
+        qrHolder.innerHTML = `<div class="idcard-qr-fallback">${escapeHtml(currentPortalInfo.studentId)}</div>`;
+    }
+
+    overlay.classList.add('open');
+}
+
+function closeIdCardModal() {
+    const overlay = document.getElementById('idCardModalOverlay');
     if (overlay) overlay.classList.remove('open');
 }
 

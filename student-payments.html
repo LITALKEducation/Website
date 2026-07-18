@@ -16,9 +16,10 @@
         })();
     </script>
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-    <link rel="stylesheet" href="css/student-portal.css?v=20260714h">
+    <link rel="stylesheet" href="css/student-portal.css?v=20260718a">
 </head>
 
 <body>
@@ -37,6 +38,9 @@
                 <div class="nav-actions">
                     <button class="btn-edit-profile-header" onclick="openProfileModal()" aria-label="แก้ไขข้อมูลส่วนตัว" title="แก้ไขข้อมูลส่วนตัว" style="display:none;">
                         <i class="fas fa-user-pen"></i>
+                    </button>
+                    <button class="btn-edit-profile-header btn-id-card-header" onclick="openIdCardModal()" aria-label="บัตรประจำตัวนักเรียนดิจิทัล" title="บัตรประจำตัวนักเรียนดิจิทัล" style="display:none;">
+                        <i class="fas fa-id-card"></i>
                     </button>
                     <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-toggle-icon-dash" class="fas fa-moon"></i>
@@ -68,6 +72,10 @@
                     <button class="drawer-action-btn btn-edit-profile-header" onclick="openProfileModal()" style="display:none;">
                         <i class="fas fa-user-pen"></i>
                         <span>แก้ไขข้อมูลส่วนตัว</span>
+                    </button>
+                    <button class="drawer-action-btn btn-edit-profile-header btn-id-card-header" onclick="openIdCardModal()" style="display:none;">
+                        <i class="fas fa-id-card"></i>
+                        <span>บัตรประจำตัวนักเรียนดิจิทัล</span>
                     </button>
                     <button class="drawer-action-btn theme-toggle-btn-mobile" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-toggle-icon-mobile" class="fas fa-moon"></i>
@@ -170,7 +178,7 @@
         </a>
     </div>
 
-    <script src="js/student-portal.js?v=20260714h"></script>
+    <script src="js/student-portal.js?v=20260718a"></script>
     <script>
         window.onload = async () => {
             updateThemeIcons(document.documentElement.getAttribute('data-theme'));
@@ -242,6 +250,55 @@
             <div class="profile-modal-footer">
                 <button type="button" class="btn profile-btn-cancel" onclick="closeProfileModal()">ยกเลิก</button>
                 <button type="button" class="btn btn-primary profile-btn-save" onclick="saveProfileData()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Digital student ID card (Auth0 sessions only — see updateIdCardButton) -->
+    <div class="idcard-modal-overlay" id="idCardModalOverlay" onclick="if(event.target===this) closeIdCardModal()">
+        <div class="idcard-modal" role="dialog" aria-modal="true" aria-labelledby="idCardModalTitle">
+            <div class="idcard-modal-header">
+                <h3 id="idCardModalTitle"><i class="fas fa-id-card"></i> บัตรประจำตัวนักเรียนดิจิทัล</h3>
+                <button type="button" class="idcard-modal-close" onclick="closeIdCardModal()" aria-label="ปิด"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="idcard-modal-body">
+                <div class="idcard">
+                    <div class="idcard-top">
+                        <img src="img/LITALK-Icon.png" class="idcard-logo" alt="">
+                        <span class="idcard-brand">LITALK Education</span>
+                    </div>
+                    <div class="idcard-main">
+                        <div class="idcard-photo">
+                            <img id="idCardAvatar" alt="รูปนักเรียน" style="display:none;">
+                            <div id="idCardAvatarFallback" class="idcard-photo-fallback" aria-hidden="true"></div>
+                        </div>
+                        <div class="idcard-info">
+                            <span class="idcard-role">STUDENT</span>
+                            <h4 class="idcard-name" id="idCardName">-</h4>
+                            <span class="idcard-nickname" id="idCardNickname"></span>
+                            <div class="idcard-field">
+                                <span class="idcard-field-label">รหัสนักเรียน</span>
+                                <span class="idcard-field-value" id="idCardId">-</span>
+                            </div>
+                            <div class="idcard-field" id="idCardCourseRow" hidden>
+                                <span class="idcard-field-label">หลักสูตร</span>
+                                <span class="idcard-field-value" id="idCardCourse">-</span>
+                            </div>
+                            <div class="idcard-field" id="idCardEmailRow" hidden>
+                                <span class="idcard-field-label">อีเมล</span>
+                                <span class="idcard-field-value" id="idCardEmail">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="idcard-status" id="idCardStatus">-</div>
+                    <div class="idcard-qr-wrap">
+                        <div class="idcard-qr" id="idCardQr"></div>
+                        <span class="idcard-qr-hint">ให้เจ้าหน้าที่สแกนเพื่อยืนยันตัวตน</span>
+                    </div>
+                </div>
+            </div>
+            <div class="idcard-modal-footer">
+                <button type="button" class="btn profile-btn-cancel" onclick="closeIdCardModal()">ปิด</button>
             </div>
         </div>
     </div>
