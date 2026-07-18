@@ -1051,11 +1051,19 @@ function closeProfileModal() {
 }
 
 // ---------- Digital student ID card ----------
-// Renders a wallet-style card from the same info the dashboard already
-// has (no extra fetch) plus a QR code that deep-links into the admin
-// panel's student check screen (?screen=check&student=<id>, already
-// supported by applyDeepLink() there) so staff can scan it on-site to
-// pull up and verify the student's profile.
+// Renders a wallet-style card from the same info the dashboard already has
+// (no extra fetch) plus a rotating QR (POST /portal/:id/id-card-token,
+// 2-minute TTL) that front-desk staff scan at scan.html — camera, a
+// keyboard-emulating barcode scanner, or a registered NFC card all resolve
+// to the same token server-side — to toggle campus check-in/out. The QR
+// mints fresh every ~100s while the card stays open, so a photo of the
+// screen is only useful for a couple of minutes, not a permanent stand-in
+// for the card.
+const ID_CARD_QR_REFRESH_MS = 100_000; // refresh before the server's 2-min TTL
+let idCardQrTimer = null;
+let idCardQrCountdownTimer = null;
+let idCardQrExpiresAt = 0;
+
 function openIdCardModal() {
     if (!currentPortalInfo) return;
     const overlay = document.getElementById('idCardModalOverlay');
@@ -1113,22 +1121,56 @@ function openIdCardModal() {
             : '-';
     }
 
-    const qrHolder = document.getElementById('idCardQr');
-    qrHolder.innerHTML = '';
-    const verifyUrl = `https://admin.litalkeducation.com/?screen=check&student=${encodeURIComponent(currentPortalInfo.studentId)}`;
-    if (typeof QRCode !== 'undefined') {
-        new QRCode(qrHolder, { text: verifyUrl, width: 168, height: 168, correctLevel: QRCode.CorrectLevel.M });
-    } else {
-        // QR library blocked/unloaded — the student id is still readable.
-        qrHolder.innerHTML = `<div class="idcard-qr-fallback">${escapeHtml(currentPortalInfo.studentId)}</div>`;
-    }
+    refreshIdCardQr();
+    if (idCardQrTimer) clearInterval(idCardQrTimer);
+    idCardQrTimer = setInterval(refreshIdCardQr, ID_CARD_QR_REFRESH_MS);
+    if (idCardQrCountdownTimer) clearInterval(idCardQrCountdownTimer);
+    idCardQrCountdownTimer = setInterval(updateIdCardQrCountdown, 1000);
 
     overlay.classList.add('open');
+}
+
+// Mints a fresh check-in token and redraws the QR. Called on open and then
+// on a timer while the card stays open.
+async function refreshIdCardQr() {
+    const qrHolder = document.getElementById('idCardQr');
+    if (!qrHolder || !currentPortalInfo || !portalAuthToken) return;
+
+    try {
+        const res = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(currentPortalInfo.studentId)}/id-card-token`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${portalAuthToken}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data.status !== 'success' || !data.token) throw new Error(data.message || 'mint failed');
+
+        idCardQrExpiresAt = Date.parse(data.expiresAt) || (Date.now() + 120000);
+        qrHolder.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+            new QRCode(qrHolder, { text: data.token, width: 168, height: 168, correctLevel: QRCode.CorrectLevel.M });
+        } else {
+            // QR library blocked/unloaded — the token is still readable/typeable.
+            qrHolder.innerHTML = `<div class="idcard-qr-fallback">${escapeHtml(data.token)}</div>`;
+        }
+        updateIdCardQrCountdown();
+    } catch (err) {
+        console.warn('refreshIdCardQr failed:', err);
+        qrHolder.innerHTML = `<div class="idcard-qr-fallback idcard-qr-error"><i class="fas fa-triangle-exclamation"></i> ออก QR ไม่สำเร็จ<br>ลองปิดแล้วเปิดบัตรใหม่</div>`;
+    }
+}
+
+function updateIdCardQrCountdown() {
+    const el = document.getElementById('idCardQrCountdown');
+    if (!el) return;
+    const secondsLeft = Math.max(0, Math.round((idCardQrExpiresAt - Date.now()) / 1000));
+    el.textContent = `รีเฟรชอัตโนมัติใน ${secondsLeft} วิ`;
 }
 
 function closeIdCardModal() {
     const overlay = document.getElementById('idCardModalOverlay');
     if (overlay) overlay.classList.remove('open');
+    if (idCardQrTimer) { clearInterval(idCardQrTimer); idCardQrTimer = null; }
+    if (idCardQrCountdownTimer) { clearInterval(idCardQrCountdownTimer); idCardQrCountdownTimer = null; }
 }
 
 function previewProfileImage(event) {
