@@ -572,6 +572,15 @@
                         limit: PAYMENT_PREVIEW_LIMIT,
                         moreHref: 'student-payments',
                     });
+
+                    // ?card=1 — jumps straight to the digital ID card, e.g.
+                    // for a Shortcuts "Open URL" action pinned to the Home
+                    // Screen/Action Button instead of navigating the portal
+                    // by hand.
+                    if (new URLSearchParams(window.location.search).get('card') === '1') {
+                        openIdCardModal();
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
                 } else {
                     renderPortalDataError(result.message, result.debug);
                 }
