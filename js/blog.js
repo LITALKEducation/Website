@@ -228,9 +228,129 @@
     return out.join('\n');
   }
 
+  /* ---------- Footnotes ----------
+     marked (even with GFM) does not implement the [^ref] / [^ref]: syntax,
+     so footnotes are handled here around the core renderer:
+
+       Some claim.[^1]              →  Some claim.<sup><a>[1]</a></sup>
+       [^1]: The supporting source.  →  collected into a list at the end
+
+     Definitions are pulled out of the source first (so marked never sees
+     them as link-reference definitions), each in-text reference is swapped
+     for an inert placeholder that survives both marked and the HTML
+     sanitizer, and the trusted <sup>/<section> markup is stitched in only
+     afterwards. Footnote *content* still flows through the same renderer,
+     so it is sanitized like the rest of the article; numbering follows the
+     order references first appear, and unreferenced definitions are dropped
+     (matching GitHub/CommonMark footnote behaviour). */
+
+  // Private-use sentinels — ordinary text to marked, DOMParser and the
+  // sanitizer, so a reference placeholder rides through untouched and is
+  // only expanded into real markup once the surrounding HTML is safe.
+  const FN_REF_OPEN = '';
+  const FN_REF_CLOSE = '';
+  const FN_MASK_OPEN = '';
+  const FN_MASK_CLOSE = '';
+
+  function parseFootnotes(md) {
+    const lines = String(md || '').split('\n');
+    const defs = new Map();      // key -> raw Markdown of the definition
+    const bodyLines = [];
+
+    // Pull definitions ([^key]: text, plus indented continuation lines).
+    for (let i = 0; i < lines.length; i++) {
+      const m = lines[i].match(/^ {0,3}\[\^([^\]]+)\]:[ \t]*(.*)$/);
+      if (!m) { bodyLines.push(lines[i]); continue; }
+      const key = m[1].trim();
+      const content = [m[2]];
+      while (i + 1 < lines.length) {
+        const next = lines[i + 1];
+        if (next.trim() === '') {
+          // A blank line continues the definition only if what follows is
+          // still indented (a lazy continuation paragraph).
+          if (i + 2 < lines.length && /^( {2,}|\t)/.test(lines[i + 2])) {
+            content.push('');
+            i++;
+            continue;
+          }
+          break;
+        }
+        if (/^( {2,}|\t)/.test(next)) {
+          content.push(next.replace(/^(\t| {2,4})/, ''));
+          i++;
+          continue;
+        }
+        break;
+      }
+      if (key) defs.set(key, content.join('\n').trim());
+    }
+
+    if (defs.size === 0) return { body: bodyLines.join('\n'), order: [], defs, occByKey: new Map() };
+
+    // Mask fenced/inline code so a [^x] typed inside a code sample is left
+    // as literal text rather than turned into a footnote reference.
+    const masks = [];
+    const mask = (m) => { masks.push(m); return FN_MASK_OPEN + (masks.length - 1) + FN_MASK_CLOSE; };
+    let body = bodyLines.join('\n')
+      .replace(/```[\s\S]*?```/g, mask)
+      .replace(/`[^`\n]*`/g, mask);
+
+    const order = [];
+    const numByKey = new Map();
+    const occByKey = new Map();
+    body = body.replace(/\[\^([^\]]+)\]/g, (full, rawKey) => {
+      const key = rawKey.trim();
+      if (!defs.has(key)) return full; // reference with no definition — leave as-is
+      if (!numByKey.has(key)) { order.push(key); numByKey.set(key, order.length); occByKey.set(key, 0); }
+      const num = numByKey.get(key);
+      const occ = occByKey.get(key) + 1;
+      occByKey.set(key, occ);
+      return FN_REF_OPEN + num + ':' + occ + FN_REF_CLOSE;
+    });
+
+    body = body.replace(new RegExp(FN_MASK_OPEN + '(\\d+)' + FN_MASK_CLOSE, 'g'), (_m, idx) => masks[+idx]);
+    return { body, order, defs, occByKey };
+  }
+
+  function buildFootnotes(order, defs, occByKey, render) {
+    const isTh = lang() === 'th';
+    const heading = isTh ? 'เชิงอรรถ' : 'Footnotes';
+    const backLabel = isTh ? 'กลับไปยังเนื้อหา' : 'Back to content';
+    const items = order.map((key, i) => {
+      const num = i + 1;
+      const content = render(defs.get(key) || '');
+      const occ = occByKey.get(key) || 1;
+      let backrefs = '';
+      for (let j = 1; j <= occ; j++) {
+        const sup = occ > 1 ? `<sup>${j}</sup>` : '';
+        backrefs += `<a href="#fnref-${num}-${j}" class="footnote-backref" aria-label="${escapeHtml(backLabel)}">↩${sup}</a>`;
+      }
+      return `<li id="fn-${num}" class="footnotes__item">` +
+        `<div class="footnotes__content">${content}</div>` +
+        `<span class="footnotes__backrefs">${backrefs}</span></li>`;
+    }).join('');
+    return `<section class="footnotes" aria-label="${escapeHtml(heading)}">` +
+      `<h2 class="footnotes__title">${escapeHtml(heading)}</h2>` +
+      `<ol class="footnotes__list">${items}</ol></section>`;
+  }
+
   function mdToHtml(md) {
-    if (typeof marked === 'undefined') return mdToHtmlFallback(md || '');
-    return sanitizeHtml(marked.parse(md || '', { gfm: true, breaks: false }));
+    const useMarked = typeof marked !== 'undefined';
+    const render = useMarked
+      ? (m) => sanitizeHtml(marked.parse(m || '', { gfm: true, breaks: false }))
+      : (m) => mdToHtmlFallback(m || '');
+
+    const { body, order, defs, occByKey } = parseFootnotes(md);
+    let html = render(body);
+
+    // Expand the inert reference placeholders into superscript links now
+    // that the article HTML has already been sanitized.
+    html = html.replace(new RegExp(FN_REF_OPEN + '(\\d+):(\\d+)' + FN_REF_CLOSE, 'g'),
+      (_m, num, occ) => `<sup class="footnote-ref" id="fnref-${num}-${occ}">` +
+        `<a href="#fn-${num}" aria-label="Footnote ${num}">[${num}]</a></sup>`);
+
+    if (order.length) html += buildFootnotes(order, defs, occByKey, render);
+    return html;
   }
 
   /* ---------- Card rendering ---------- */
