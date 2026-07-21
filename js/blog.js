@@ -312,25 +312,18 @@
     return { body, order, defs, occByKey };
   }
 
-  function buildFootnotes(order, defs, occByKey, render) {
-    const isTh = lang() === 'th';
-    const heading = isTh ? 'เชิงอรรถ' : 'Footnotes';
-    const backLabel = isTh ? 'กลับไปยังเนื้อหา' : 'Back to content';
+  function buildFootnotes(order, defs, render) {
+    // Minimal, Apple-style notes: no visible heading, no back-arrows —
+    // just a light, small numbered list. The label stays as an accessible
+    // name on the section for screen readers only.
+    const heading = lang() === 'th' ? 'เชิงอรรถ' : 'Footnotes';
     const items = order.map((key, i) => {
       const num = i + 1;
       const content = render(defs.get(key) || '');
-      const occ = occByKey.get(key) || 1;
-      let backrefs = '';
-      for (let j = 1; j <= occ; j++) {
-        const sup = occ > 1 ? `<sup>${j}</sup>` : '';
-        backrefs += `<a href="#fnref-${num}-${j}" class="footnote-backref" aria-label="${escapeHtml(backLabel)}">↩${sup}</a>`;
-      }
       return `<li id="fn-${num}" class="footnotes__item">` +
-        `<div class="footnotes__content">${content}</div>` +
-        `<span class="footnotes__backrefs">${backrefs}</span></li>`;
+        `<div class="footnotes__content">${content}</div></li>`;
     }).join('');
     return `<section class="footnotes" aria-label="${escapeHtml(heading)}">` +
-      `<h2 class="footnotes__title">${escapeHtml(heading)}</h2>` +
       `<ol class="footnotes__list">${items}</ol></section>`;
   }
 
@@ -347,9 +340,9 @@
     // that the article HTML has already been sanitized.
     html = html.replace(new RegExp(FN_REF_OPEN + '(\\d+):(\\d+)' + FN_REF_CLOSE, 'g'),
       (_m, num, occ) => `<sup class="footnote-ref" id="fnref-${num}-${occ}">` +
-        `<a href="#fn-${num}" aria-label="Footnote ${num}">[${num}]</a></sup>`);
+        `<a href="#fn-${num}" aria-label="Footnote ${num}">${num}</a></sup>`);
 
-    if (order.length) html += buildFootnotes(order, defs, occByKey, render);
+    if (order.length) html += buildFootnotes(order, defs, render);
     return html;
   }
 

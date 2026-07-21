@@ -3060,25 +3060,23 @@ textarea {
    FOOTNOTES (blog-post.html) — [^ref] links in the body and the
    collected notes list appended after the article by blog.js
    ============================================================ */
-/* In-text reference: a small superscript "[n]" that jumps to the note */
+/* In-text reference: a small, faded superscript number that jumps to the
+   note — Apple-style, no brackets */
 .post-content .footnote-ref {
-  font-size: 0.72em;
+  font-size: 0.6em;
   line-height: 0;
-  font-weight: 700;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .post-content .footnote-ref a {
-  color: var(--clr-black);
+  color: var(--clr-muted);
   text-decoration: none;
   padding: 0 1px;
 }
 
 .post-content .footnote-ref a:hover,
-.post-content .footnote-ref a:focus {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
+.post-content .footnote-ref a:focus { color: var(--clr-black); }
 
 /* Briefly highlight the note (or the reference) jumped to via the anchor */
 .post-content .footnotes__item:target,
@@ -3088,63 +3086,36 @@ textarea {
   box-shadow: 0 0 0 4px var(--clr-light-bg);
 }
 
-/* The collected notes, rendered at the end of the article */
+/* The collected notes, rendered at the end of the article — small and
+   light, no heading, no back-links (Apple-style) */
 .post-content .footnotes {
   max-width: 720px;
-  margin: 48px auto 0;
-  padding-top: 24px;
+  margin: 44px auto 0;
+  padding-top: 20px;
   border-top: 1px solid var(--clr-border);
-}
-
-.post-content .footnotes__title {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--clr-muted);
-  margin: 0 0 16px;
 }
 
 .post-content .footnotes__list {
   margin: 0;
-  padding-left: 24px;
-  font-size: 15px;
-  line-height: 1.7;
+  padding-left: 20px;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--clr-muted);
   list-style: decimal;
 }
 
 .post-content .footnotes__item {
-  margin-bottom: 12px;
-  padding-left: 4px;
+  margin-bottom: 8px;
+  padding-left: 3px;
 }
 
 .post-content .footnotes__item:last-child { margin-bottom: 0; }
 
-/* Keep the note's text and its back-link on the same flow so the arrow
-   trails the final line rather than dropping onto its own row */
-.post-content .footnotes__content { display: inline; }
-.post-content .footnotes__content > :first-child { display: inline; }
-.post-content .footnotes__content > :last-child { display: inline; }
 .post-content .footnotes__content p { margin: 0; }
-
-.post-content .footnotes__backrefs {
-  white-space: nowrap;
-  margin-left: 6px;
-}
-
-.post-content .footnote-backref {
-  color: var(--clr-muted);
-  text-decoration: none;
-  font-size: 0.95em;
-}
-
-.post-content .footnote-backref:hover,
-.post-content .footnote-backref:focus { color: var(--clr-black); }
-
-.post-content .footnote-backref sup {
-  font-size: 0.7em;
-  margin-left: 1px;
+.post-content .footnotes__content p + p { margin-top: 6px; }
+.post-content .footnotes__content a {
+  color: inherit;
+  text-underline-offset: 2px;
 }
 
 /* ============================================================
@@ -3346,8 +3317,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   }
 
   .nav, .footer, .post-share, .post-tools, .post-back,
-  .blog-filter, .login-menu, .post-end-mark, .post-recommend,
-  .footnotes__backrefs {
+  .blog-filter, .login-menu, .post-end-mark, .post-recommend {
     display: none !important;
   }
 
