@@ -2569,6 +2569,18 @@ textarea {
   border-bottom: 1px solid var(--clr-border);
 }
 
+/* Pointer from the general Terms / Privacy Policy to the AI-specific
+   documents that supplement them. Set apart from body copy so a reader
+   scanning the AI section doesn't miss that a fuller document exists. */
+.legal-content__note {
+  padding: 14px 16px;
+  border-left: 3px solid var(--clr-black);
+  border-radius: 0 10px 10px 0;
+  background-color: var(--clr-light-bg);
+}
+
+.legal-content__note a { color: var(--clr-black); text-decoration: underline; }
+
 .legal-content h2 {
   font-size: 24px;
   font-weight: 800;

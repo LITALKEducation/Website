@@ -623,9 +623,9 @@ window.litalkChat = (function initChatConsentState() {
         'Nong Lilly is an AI assistant. Replies are generated automatically and can be wrong, so please confirm anything important with our staff. Your messages are stored so we can improve the service and handle enquiries.',
       consentNote: 'Please don’t send passwords, ID numbers, or payment details in this chat.',
       consentLinks: 'By continuing you agree to our',
-      consentTerms: 'Terms of Service',
+      consentTerms: 'AI Chat Terms of Use',
       consentAnd: 'and',
-      consentPrivacy: 'Privacy Policy',
+      consentPrivacy: 'AI Chat Privacy Notice',
       consentAccept: 'Accept and start chatting',
       consentDecline: 'Not now',
     },
@@ -644,9 +644,9 @@ window.litalkChat = (function initChatConsentState() {
         'น้องลิลลี่เป็นผู้ช่วย AI คำตอบสร้างขึ้นโดยอัตโนมัติและอาจคลาดเคลื่อนได้ กรุณาตรวจสอบเรื่องสำคัญกับเจ้าหน้าที่อีกครั้ง ข้อความที่คุณพิมพ์จะถูกจัดเก็บไว้เพื่อพัฒนาบริการและติดตามคำถาม',
       consentNote: 'กรุณาอย่าส่งรหัสผ่าน เลขบัตรประชาชน หรือข้อมูลการชำระเงินในแชทนี้',
       consentLinks: 'การใช้งานต่อถือว่าคุณยอมรับ',
-      consentTerms: 'เงื่อนไขการใช้บริการ',
+      consentTerms: 'ข้อกำหนดการใช้แชท AI',
       consentAnd: 'และ',
-      consentPrivacy: 'นโยบายความเป็นส่วนตัว',
+      consentPrivacy: 'ประกาศความเป็นส่วนตัวสำหรับแชท AI',
       consentAccept: 'ยอมรับและเริ่มแชท',
       consentDecline: 'ไว้ก่อน',
     },
@@ -688,9 +688,9 @@ window.litalkChat = (function initChatConsentState() {
         <p class="ai-chat-consent__note"><i class="fas fa-circle-info"></i> <span></span></p>
         <p class="ai-chat-consent__links">
           <span class="ai-chat-consent__links-lead"></span>
-          <a class="ai-chat-consent__terms" href="/terms-of-service.html" target="_blank" rel="noopener"></a>
+          <a class="ai-chat-consent__terms" href="/ai-terms" target="_blank" rel="noopener"></a>
           <span class="ai-chat-consent__and"></span>
-          <a class="ai-chat-consent__privacy" href="/privacy-policy.html" target="_blank" rel="noopener"></a>
+          <a class="ai-chat-consent__privacy" href="/ai-privacy" target="_blank" rel="noopener"></a>
         </p>
         <button type="button" class="ai-chat-consent__accept"></button>
         <button type="button" class="ai-chat-consent__decline"></button>
