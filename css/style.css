@@ -3882,3 +3882,25 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
    sibling list would need is wrong here. */
 .ask-msg__body li > ul, .ask-msg__body li > ol,
 .ai-chat-msg li > ul, .ai-chat-msg li > ol { margin: 4px 0 0; }
+
+/* Typewriter reveal (js/markdown.js). A block waiting its turn is hidden
+   rather than left empty, so a table or code block doesn't sit there as an
+   empty skeleton while the text ahead of it types out. */
+.md-pending { display: none !important; }
+
+.md-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background-color: currentColor;
+  opacity: .7;
+  animation: md-caret-blink 1s steps(1, end) infinite;
+}
+
+@keyframes md-caret-blink { 0%, 50% { opacity: .7; } 50.01%, 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .md-caret { animation: none; }
+}

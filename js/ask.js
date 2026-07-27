@@ -41,6 +41,9 @@
 
   let conversationId = null;
   let busy = false;
+  // The in-progress typewriter, so a new question can cut the previous
+  // answer short instead of leaving two replies animating at once.
+  let typing = null;
 
   /* ---- Composer shape -------------------------------------------------- *
    * Same trigger as the block: expand once the text can no longer sit
@@ -146,11 +149,21 @@
 
     const body = document.createElement('div');
     body.className = 'ask-msg__body';
-    if (role === 'assistant') body.innerHTML = renderMarkdown(text);
-    else body.textContent = text;
     row.appendChild(body);
-
     thread.appendChild(row);
+
+    if (role === 'assistant') {
+      // Typed out rather than dropped in whole — see litalkTypewriter.
+      typing = window.litalkTypewriter(body, renderMarkdown(text), {
+        onTick: () => row.scrollIntoView({ block: 'nearest' }),
+        onDone: () => {
+          typing = null;
+        },
+      });
+    } else {
+      body.textContent = text;
+    }
+
     row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return row;
   }
@@ -158,6 +171,7 @@
   /* ---- Send ------------------------------------------------------------ */
   async function ask(message) {
     if (busy || !message) return;
+    if (typing) typing.finish();
     appendMessage('user', message);
     input.value = '';
     busy = true;
