@@ -127,43 +127,9 @@
     });
   });
 
-  /* ---- Markdown -------------------------------------------------------- *
-   * Same safe subset the other assistants render. Everything is escaped
-   * first, so a reply can never inject markup. */
-  function renderMarkdown(text) {
-    const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const inline = (s) =>
-      escapeHtml(s)
-        .replace(/`([^`\n]+)`/g, '<code>$1</code>')
-        .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
-    const out = [];
-    let list = null;
-    for (const rawLine of String(text).split('\n')) {
-      const line = rawLine.trimEnd();
-      const bullet = line.match(/^\s*[-*+]\s+(.*)$/);
-      const numbered = line.match(/^\s*\d+[.)]\s+(.*)$/);
-      if (bullet || numbered) {
-        const tag = bullet ? 'ul' : 'ol';
-        if (list !== tag) {
-          if (list) out.push(`</${list}>`);
-          out.push(`<${tag}>`);
-          list = tag;
-        }
-        out.push(`<li>${inline((bullet || numbered)[1])}</li>`);
-        continue;
-      }
-      if (list) {
-        out.push(`</${list}>`);
-        list = null;
-      }
-      if (line.trim()) out.push(`<p>${inline(line)}</p>`);
-    }
-    if (list) out.push(`</${list}>`);
-    return out.join('');
-  }
+  // Markdown rendering lives in js/markdown.js, shared with the /ask page
+  // and the student portal so all three render the same subset.
+  const renderMarkdown = (text) => window.litalkMarkdown(text);
 
   /* ---- Thread ---------------------------------------------------------- */
   function appendMessage(role, text) {

@@ -3824,3 +3824,61 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   .ask-send,
   .ask-menu__item { transition: none; }
 }
+
+/* ============================================================
+   AI reply Markdown
+   Shared by the /ask thread and the floating assistant's bubbles.
+   js/markdown.js now renders headings, blockquotes, fenced code,
+   tables, rules and strikethrough, which previously arrived as
+   literal text and so had never needed styling.
+   ============================================================ */
+.ask-msg__body h3, .ai-chat-msg h3 { margin: 12px 0 6px; font-size: 15px; font-weight: 700; }
+.ask-msg__body h4, .ai-chat-msg h4 { margin: 10px 0 5px; font-size: 14px; font-weight: 700; }
+.ask-msg__body h5, .ai-chat-msg h5 { margin: 10px 0 5px; font-size: 13px; font-weight: 700; }
+.ask-msg__body h3:first-child, .ask-msg__body h4:first-child, .ask-msg__body h5:first-child,
+.ai-chat-msg h3:first-child, .ai-chat-msg h4:first-child, .ai-chat-msg h5:first-child { margin-top: 0; }
+
+.ask-msg__body blockquote, .ai-chat-msg blockquote {
+  margin: 8px 0;
+  padding: 4px 0 4px 12px;
+  border-left: 3px solid var(--clr-border);
+  color: var(--clr-muted);
+}
+
+.ask-msg__body pre, .ai-chat-msg pre {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--clr-border);
+  border-radius: 10px;
+  background-color: var(--clr-bg);
+  overflow-x: auto;
+}
+.ask-msg__body pre code, .ai-chat-msg pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12.5px;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.ask-msg__body hr, .ai-chat-msg hr { margin: 12px 0; border: 0; border-top: 1px solid var(--clr-border); }
+.ask-msg__body del, .ai-chat-msg del { opacity: .7; }
+
+/* A comparison table is the one thing a vocabulary reply reliably produces
+   that can outgrow the bubble, so it scrolls inside its own box rather than
+   stretching the message past the layout. */
+.md-table-wrap { margin: 8px 0; overflow-x: auto; }
+.md-table-wrap table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.md-table-wrap th, .md-table-wrap td {
+  padding: 7px 10px;
+  border: 1px solid var(--clr-border);
+  text-align: left;
+  vertical-align: top;
+}
+.md-table-wrap th { background-color: var(--clr-bg); font-weight: 700; }
+
+/* Nested lists sit inside their parent <li>, so the extra top margin a
+   sibling list would need is wrong here. */
+.ask-msg__body li > ul, .ask-msg__body li > ol,
+.ai-chat-msg li > ul, .ai-chat-msg li > ol { margin: 4px 0 0; }
