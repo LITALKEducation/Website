@@ -3576,3 +3576,86 @@ button.menu-dropdown-item {
 @media (prefers-reduced-motion: reduce) {
     .idcard-qr-countdown::before { animation: none; }
 }
+
+/* ============================================================
+   Service notices (js/service-notice.js)
+   The portal loads the same script as the marketing site but not
+   the same stylesheet, so these rules have to exist here too —
+   without them the script appends a bare <div> to the end of
+   <body> and nothing appears to happen.
+   Kept visually in step with .svc-* in css/style.css, on the
+   portal's own theme variables so it follows light/dark.
+   ============================================================ */
+.svc-layer {
+    position: fixed;
+    z-index: 4000;
+    inset: auto 20px 20px auto;
+    max-width: min(380px, calc(100vw - 40px));
+}
+
+.svc-layer--blocking {
+    inset: 0;
+    max-width: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-color: color-mix(in srgb, var(--bg-primary) 92%, transparent);
+    backdrop-filter: blur(6px);
+}
+
+/* Only the blocking layer takes the page over. */
+body.svc-locked { overflow: hidden; }
+
+.svc-card {
+    padding: 22px;
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background-color: var(--bg-secondary);
+    box-shadow: var(--shadow-lg);
+}
+
+.svc-card--blocking { max-width: 440px; text-align: center; padding: 32px 28px; }
+
+.svc-card__icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 17px;
+}
+.svc-card--blocking .svc-card__icon { margin-left: auto; margin-right: auto; }
+
+.svc-card__title { margin: 0 0 8px; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+.svc-card--blocking .svc-card__title { font-size: 21px; }
+.svc-card__body { margin: 0 0 12px; font-size: 14px; line-height: 1.65; color: var(--text-secondary); }
+.svc-card__meta { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+
+.svc-card__btn {
+    margin-top: 16px;
+    width: 100%;
+    min-height: 44px;
+    border: none;
+    border-radius: 10px;
+    background: var(--brand-gradient);
+    color: var(--brand-btn-text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s ease-out;
+}
+.svc-card__btn:hover { opacity: .85; }
+
+@media (max-width: 640px) {
+    .svc-layer { inset: auto 12px 12px 12px; max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svc-card__btn { transition: none; }
+}
