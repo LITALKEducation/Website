@@ -17,8 +17,9 @@
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-  <link rel="stylesheet" href="css/style.css?v=20260727c">
+  <link rel="stylesheet" href="css/style.css?v=20260727f">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 </head>
 
 <body class="page-enter">
@@ -132,6 +133,27 @@
       <div class="container">
         <div class="ask-stage" id="ask-stage">
 
+          <div class="ask-account" id="ask-account" hidden>
+            <span class="ask-account__text" id="ask-account-text"></span>
+            <button type="button" class="ask-account__btn" id="ask-signin-btn" hidden
+              data-en="Sign in to save" data-th="เข้าสู่ระบบเพื่อบันทึก">Sign in to save</button>
+            <button type="button" class="ask-account__btn" id="ask-history-btn" hidden
+              data-en="My questions" data-th="คำถามของฉัน">My questions</button>
+          </div>
+
+          <div class="ask-history" id="ask-history" hidden>
+            <div class="ask-history__head">
+              <span data-en="Your saved questions" data-th="คำถามที่บันทึกไว้">Your saved questions</span>
+              <button type="button" class="ask-icon-btn" id="ask-history-close" aria-label="Close" title="Close">
+                <i class="fas fa-xmark"></i>
+              </button>
+            </div>
+            <div class="ask-history__list" id="ask-history-list"></div>
+            <p class="ask-history__note" data-en="Questions are kept for six months, then deleted automatically." data-th="คำถามจะถูกเก็บไว้ 6 เดือน จากนั้นระบบจะลบให้อัตโนมัติ">
+              Questions are kept for six months, then deleted automatically.
+            </p>
+          </div>
+
           <div class="ask-thread" id="ask-thread" aria-live="polite" aria-label="Conversation"></div>
 
           <form class="ask-composer" id="ask-form" autocomplete="off">
@@ -198,6 +220,10 @@
                 <a href="ai-privacy" target="_blank" rel="noopener" data-en="AI Chat Privacy Notice" data-th="ประกาศความเป็นส่วนตัวสำหรับแชท AI">AI Chat Privacy Notice</a>
               </p>
               <button type="button" class="btn btn--primary" id="ask-consent-accept" data-en="Accept and start" data-th="ยอมรับและเริ่มใช้งาน">Accept and start</button>
+              <p class="ask-consent__signin" id="ask-consent-signin-row" hidden>
+                <span data-en="Already a LITALK student?" data-th="เป็นนักเรียน LITALK อยู่แล้ว?">Already a LITALK student?</span>
+                <button type="button" id="ask-consent-signin" data-en="Sign in to save your questions" data-th="เข้าสู่ระบบเพื่อบันทึกคำถาม">Sign in to save your questions</button>
+              </p>
             </div>
           </div>
 
@@ -281,9 +307,9 @@
       </div>
     </div>
   </footer>
-  <script src="js/markdown.js?v=20260727c" defer></script>
-  <script src="js/main.js?v=20260727c" defer></script>
-  <script src="js/ask.js?v=20260727c" defer></script>
+  <script src="js/markdown.js?v=20260727e" defer></script>
+  <script src="js/main.js?v=20260727e" defer></script>
+  <script src="js/ask.js?v=20260727f" defer></script>
 </body>
 
 </html>

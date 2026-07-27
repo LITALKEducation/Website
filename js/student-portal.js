@@ -1411,6 +1411,7 @@ function toggleAIChat(force) {
 }
 
 function startNewAIChat() {
+    if (aiChatTyping) aiChatTyping.finish();
     aiChatConversationId = null;
     const messages = document.getElementById('ai-chat-messages');
     if (!messages) return;
@@ -1429,12 +1430,15 @@ function renderChatMarkdown(text) {
     return window.litalkMarkdown(text);
 }
 
+// The in-progress typewriter, so a new question can cut the previous answer
+// short instead of leaving two replies animating at once.
+let aiChatTyping = null;
+
 function appendAIChatMessage(role, text) {
     const messages = document.getElementById('ai-chat-messages');
     const el = document.createElement('div');
     el.className = 'ai-chat-msg ai-chat-msg--' + role;
     if (role === 'assistant') {
-        el.innerHTML = renderChatMarkdown(text);
         const row = document.createElement('div');
         row.className = 'ai-chat-msg-row';
         const avatar = document.createElement('span');
@@ -1443,6 +1447,11 @@ function appendAIChatMessage(role, text) {
         row.appendChild(avatar);
         row.appendChild(el);
         messages.appendChild(row);
+        // Typed out rather than dropped in whole — see litalkTypewriter.
+        aiChatTyping = window.litalkTypewriter(el, renderChatMarkdown(text), {
+            onTick: () => { messages.scrollTop = messages.scrollHeight; },
+            onDone: () => { aiChatTyping = null; },
+        });
     } else {
         el.textContent = text;
         messages.appendChild(el);
@@ -1458,6 +1467,7 @@ async function submitAIChat(event) {
     const message = input.value.trim();
     if (!message) return false;
 
+    if (aiChatTyping) aiChatTyping.finish();
     appendAIChatMessage('user', message);
     input.value = '';
     aiChatBusy = true;
@@ -1465,9 +1475,14 @@ async function submitAIChat(event) {
     const pending = appendAIChatMessage('pending', 'กำลังตอบ...');
 
     try {
+        // The server now proves ownership on this route like every other
+        // /portal one, so the token has to go with it.
         const res = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(aiChatStudentId)}/chat`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(portalAuthToken ? { Authorization: `Bearer ${portalAuthToken}` } : {}),
+            },
             body: JSON.stringify({ conversationId: aiChatConversationId, message }),
         });
         const data = await res.json().catch(() => ({}));

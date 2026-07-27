@@ -673,6 +673,9 @@ window.litalkChat = (function initChatConsentState() {
 
   let conversationId = null;
   let busy = false;
+  // The in-progress typewriter, so a new question can cut the previous
+  // answer short instead of leaving two replies animating at once.
+  let typing = null;
 
   function buildConsentGate() {
     const panel = document.getElementById('ai-chat-panel');
@@ -768,6 +771,7 @@ window.litalkChat = (function initChatConsentState() {
   }
 
   function startNewChat() {
+    if (typing) typing.finish();
     conversationId = null;
     const messages = document.getElementById('ai-chat-messages');
     if (!messages) return;
@@ -790,7 +794,6 @@ window.litalkChat = (function initChatConsentState() {
     const el = document.createElement('div');
     el.className = 'ai-chat-msg ai-chat-msg--' + role;
     if (role === 'assistant') {
-      el.innerHTML = renderMarkdown(text);
       const row = document.createElement('div');
       row.className = 'ai-chat-msg-row';
       const avatar = document.createElement('span');
@@ -799,6 +802,15 @@ window.litalkChat = (function initChatConsentState() {
       row.appendChild(avatar);
       row.appendChild(el);
       messages.appendChild(row);
+      // Typed out rather than dropped in whole — see litalkTypewriter.
+      typing = window.litalkTypewriter(el, renderMarkdown(text), {
+        onTick: () => {
+          messages.scrollTop = messages.scrollHeight;
+        },
+        onDone: () => {
+          typing = null;
+        },
+      });
     } else {
       el.textContent = text;
       messages.appendChild(el);
@@ -815,6 +827,7 @@ window.litalkChat = (function initChatConsentState() {
     const message = input.value.trim();
     if (!message) return false;
 
+    if (typing) typing.finish();
     appendMessage('user', message);
     input.value = '';
     busy = true;
