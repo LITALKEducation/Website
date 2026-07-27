@@ -546,6 +546,52 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 })();
 
 /* ============================================================
+   AI CHAT: SHARED VISITOR + CONSENT STATE
+   Used by the floating site assistant below and by the /ask
+   vocabulary page (js/ask.js), which load in that order. One
+   definition so the two can't disagree about whether someone has
+   accepted, and so the terms version lives in a single place.
+   ============================================================ */
+window.litalkChat = (function initChatConsentState() {
+  const API = 'https://istudent.litalkeducation.com';
+
+  // Bump when the chat terms change and everyone is asked again. Must match
+  // CHAT_TERMS_VERSION in the worker, which enforces the same gate
+  // server-side — clearing localStorage is not a way around it.
+  const TERMS_VERSION = '2026-07-27';
+  const CONSENT_KEY = 'litalk_chat_terms_accepted';
+
+  // Random, identity-free key: it exists only so the server can rate-limit
+  // per browser. It is not tied to any person or account.
+  function getVisitorId() {
+    let id = localStorage.getItem('litalk_visitor_id');
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID() : `v-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem('litalk_visitor_id', id);
+    }
+    return id;
+  }
+
+  const hasConsent = () => localStorage.getItem(CONSENT_KEY) === TERMS_VERSION;
+
+  function rememberConsent() {
+    localStorage.setItem(CONSENT_KEY, TERMS_VERSION);
+    // Recorded server-side too, so the acceptance survives the visitor
+    // clearing their browser and exists as a record the school holds.
+    // Fire-and-forget: the chat endpoints re-record it on the next message
+    // if this call never lands, so a failure here costs nothing.
+    const lang = typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en';
+    fetch(`${API}/chat/consent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visitorId: getVisitorId(), lang }),
+    }).catch(() => {});
+  }
+
+  return { API, TERMS_VERSION, CONSENT_KEY, getVisitorId, hasConsent, rememberConsent };
+})();
+
+/* ============================================================
    AI CHAT WIDGET (general assistant — home/programs/about)
    Answers general questions about LITALK Education; not tied to any
    specific student account. Rate-limited server-side by a random
@@ -577,9 +623,9 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
         'Nong Lilly is an AI assistant. Replies are generated automatically and can be wrong, so please confirm anything important with our staff. Your messages are stored so we can improve the service and handle enquiries.',
       consentNote: 'Please don’t send passwords, ID numbers, or payment details in this chat.',
       consentLinks: 'By continuing you agree to our',
-      consentTerms: 'Terms of Service',
+      consentTerms: 'AI Chat Terms of Use',
       consentAnd: 'and',
-      consentPrivacy: 'Privacy Policy',
+      consentPrivacy: 'AI Chat Privacy Notice',
       consentAccept: 'Accept and start chatting',
       consentDecline: 'Not now',
     },
@@ -598,9 +644,9 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
         'น้องลิลลี่เป็นผู้ช่วย AI คำตอบสร้างขึ้นโดยอัตโนมัติและอาจคลาดเคลื่อนได้ กรุณาตรวจสอบเรื่องสำคัญกับเจ้าหน้าที่อีกครั้ง ข้อความที่คุณพิมพ์จะถูกจัดเก็บไว้เพื่อพัฒนาบริการและติดตามคำถาม',
       consentNote: 'กรุณาอย่าส่งรหัสผ่าน เลขบัตรประชาชน หรือข้อมูลการชำระเงินในแชทนี้',
       consentLinks: 'การใช้งานต่อถือว่าคุณยอมรับ',
-      consentTerms: 'เงื่อนไขการใช้บริการ',
+      consentTerms: 'ข้อกำหนดการใช้แชท AI',
       consentAnd: 'และ',
-      consentPrivacy: 'นโยบายความเป็นส่วนตัว',
+      consentPrivacy: 'ประกาศความเป็นส่วนตัวสำหรับแชท AI',
       consentAccept: 'ยอมรับและเริ่มแชท',
       consentDecline: 'ไว้ก่อน',
     },
@@ -623,45 +669,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   syncStaticLang();
   document.addEventListener('litalk:langchange', syncStaticLang);
 
-  function getVisitorId() {
-    let id = localStorage.getItem('litalk_visitor_id');
-    if (!id) {
-      id = (crypto.randomUUID ? crypto.randomUUID() : `v-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-      localStorage.setItem('litalk_visitor_id', id);
-    }
-    return id;
-  }
+  const { getVisitorId, hasConsent, rememberConsent, TERMS_VERSION: CHAT_TERMS_VERSION, CONSENT_KEY } = window.litalkChat;
 
   let conversationId = null;
   let busy = false;
-
-  /* ---- Terms of use gate -------------------------------------------------
-     The first time someone opens the chat they have to accept the terms.
-     Bump CHAT_TERMS_VERSION (and the copy above) when the terms change and
-     everyone is asked again; it must match CHAT_TERMS_VERSION in the
-     worker, which enforces the same gate server-side so clearing
-     localStorage isn't a way around it.
-     The gate is built here rather than written into each page's markup
-     because the widget appears on several pages and this script is the only
-     thing they share. */
-  const CHAT_TERMS_VERSION = '2026-07-27';
-  const CONSENT_KEY = 'litalk_chat_terms_accepted';
-
-  const hasConsent = () => localStorage.getItem(CONSENT_KEY) === CHAT_TERMS_VERSION;
-
-  function rememberConsent() {
-    localStorage.setItem(CONSENT_KEY, CHAT_TERMS_VERSION);
-    // Recorded server-side too, so the acceptance survives the visitor
-    // clearing their browser and exists as a record the school holds.
-    // Fire-and-forget: /chat/general re-records it on the next message if
-    // this call never lands, so a failure here costs nothing.
-    const lang = typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en';
-    fetch(`${dataApiUrl}/chat/consent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ visitorId: getVisitorId(), lang }),
-    }).catch(() => {});
-  }
 
   function buildConsentGate() {
     const panel = document.getElementById('ai-chat-panel');
@@ -677,9 +688,9 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
         <p class="ai-chat-consent__note"><i class="fas fa-circle-info"></i> <span></span></p>
         <p class="ai-chat-consent__links">
           <span class="ai-chat-consent__links-lead"></span>
-          <a class="ai-chat-consent__terms" href="/terms-of-service.html" target="_blank" rel="noopener"></a>
+          <a class="ai-chat-consent__terms" href="/ai-terms" target="_blank" rel="noopener"></a>
           <span class="ai-chat-consent__and"></span>
-          <a class="ai-chat-consent__privacy" href="/privacy-policy.html" target="_blank" rel="noopener"></a>
+          <a class="ai-chat-consent__privacy" href="/ai-privacy" target="_blank" rel="noopener"></a>
         </p>
         <button type="button" class="ai-chat-consent__accept"></button>
         <button type="button" class="ai-chat-consent__decline"></button>

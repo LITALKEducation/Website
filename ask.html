@@ -4,19 +4,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Page Not Found — LITALK Education</title>
-  <meta name="description" content="ไม่พบหน้าที่คุณต้องการ - LITALK Education">
+  <title>Ask a Word — LITALK English Vocabulary Helper</title>
+  <meta name="description" content="Ask about any English word or phrase and get its meaning in English and Thai, example sentences, and usage notes. A free study aid from LITALK Education.">
+  <meta property="og:title" content="Ask a Word — LITALK English Vocabulary Helper">
+  <meta property="og:description" content="Ask about any English word or phrase and get its meaning in English and Thai, example sentences, and usage notes.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://litalkeducation.com/ask">
+  <meta property="og:image" content="https://litalkeducation.com/img/hero-visual.png">
+  <meta property="og:site_name" content="LITALK Education">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
-
-  <!-- Fonts -->
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-
-  <!-- Styles -->
   <link rel="stylesheet" href="css/style.css?v=20260714h">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body class="page-enter">
+  <a href="#main-content" class="skip-link" data-en="Skip to main content" data-th="ข้ามไปยังเนื้อหาหลัก">Skip to main content</a>
+
 
   <!-- ============================================================
        NAVIGATION
@@ -26,21 +33,18 @@
       <div class="container">
         <div class="nav__inner">
 
-          <!-- Logo -->
           <a href="/" class="nav__logo" aria-label="LITALK Home">
             <img src="img/LITALK-Black.png" alt="LITALK Education" class="theme-invertable" width="120" height="28">
           </a>
 
-          <!-- Links -->
           <ul class="nav__links" role="list">
             <li><a href="programs" class="nav__link" data-en="Programs" data-th="หลักสูตร">Programs</a></li>
             <li><a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a></li>
-            <li><a href="ask" class="nav__link" data-en="Ask" data-th="ถามคำศัพท์">Ask</a></li>
+            <li><a href="ask" class="nav__link nav__link--active" data-en="Ask" data-th="ถามคำศัพท์">Ask</a></li>
             <li><a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a></li>
             <li><a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
           </ul>
 
-          <!-- Actions -->
           <div class="nav__actions">
             <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
               <span class="lang-toggle__thumb" aria-hidden="true"></span>
@@ -73,21 +77,17 @@
             <a href="/#contact" class="btn btn--primary btn--sm" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
           </div>
 
-          <!-- Hamburger -->
           <button class="nav__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-drawer">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
           </button>
 
         </div>
       </div>
 
-      <!-- Mobile Drawer -->
       <div class="nav__drawer" id="mobile-drawer" role="navigation" aria-label="Mobile navigation">
         <a href="programs" class="nav__link" data-en="Programs" data-th="หลักสูตร">Programs</a>
         <a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a>
-        <a href="ask" class="nav__link" data-en="Ask" data-th="ถามคำศัพท์">Ask</a>
+        <a href="ask" class="nav__link nav__link--active" data-en="Ask" data-th="ถามคำศัพท์">Ask</a>
         <a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a>
         <a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a>
         <div class="nav__actions">
@@ -115,52 +115,86 @@
       </div>
     </nav>
   </header>
-
   <main id="main-content">
-
-    <!-- ============================================================
-         404 PAGE HERO
-         ============================================================ -->
-    <section class="page-hero" aria-labelledby="error-heading">
+    <section class="ask-hero">
       <div class="container">
-        <nav class="page-hero__breadcrumb" aria-label="Breadcrumb">
-          <a href="/" data-en="Home" data-th="หน้าหลัก">Home</a>
-          <span class="sep" aria-hidden="true">/</span>
-          <span data-en="404 Not Found" data-th="ไม่พบหน้า">404 Not Found</span>
-        </nav>
-        <span class="page-hero__label">404 Error</span>
-        <h1 class="page-hero__title" id="error-heading">
-          <span data-en="Page Not Found" data-th="ไม่พบหน้าที่คุณต้องการ">Page Not Found</span>
-        </h1>
-        <p class="page-hero__sub" data-en="The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Please check the URL again." data-th="ลิงก์ที่คุณเข้าถึงอาจจะไม่ถูกต้อง หรือหน้าเว็บดังกล่าวถูกย้ายหรือลบไปเรียบร้อยแล้ว กรุณาตรวจสอบลิงก์อีกครั้ง">
-          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Please check the URL again.
+        <p class="ask-hero__eyebrow" data-en="English vocabulary helper" data-th="ผู้ช่วยเรื่องคำศัพท์">English vocabulary helper</p>
+        <h1 class="ask-hero__title" data-en="Ask a word." data-th="ถามคำศัพท์ได้เลย">Ask a word.</h1>
+        <p class="ask-hero__sub" data-en="Type any English word, phrase, or sentence. Nong Lilly explains what it means in English and Thai, how it is used, and gives you examples you can copy into your own writing." data-th="พิมพ์คำศัพท์ วลี หรือประโยคภาษาอังกฤษที่สงสัย น้องลิลลี่จะอธิบายความหมายทั้งภาษาอังกฤษและภาษาไทย วิธีใช้ พร้อมตัวอย่างประโยคที่นำไปใช้ต่อได้">
+          Type any English word, phrase, or sentence. Nong Lilly explains what it means in English and Thai, how it is used, and gives you examples you can copy into your own writing.
         </p>
-        <div class="page-hero__cta">
-          <a href="/" class="btn btn--primary btn--lg" data-en="Back to Home" data-th="กลับสู่หน้าหลัก">Back to Home</a>
-          <a href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener noreferrer" class="btn btn--outline btn--lg">
-            <i class="fab fa-line" style="margin-right: 8px;"></i>
-            <span data-en="Contact Support on Line" data-th="ติดต่อฝ่ายสนับสนุนทาง Line">Contact Support on Line</span>
-          </a>
-        </div>
       </div>
     </section>
 
+    <section class="ask-section">
+      <div class="container">
+        <div class="ask-panel">
+
+          <!-- Terms gate, shown by js/ask.js on first visit. Same consent
+               record as the site-wide assistant, so accepting in one place
+               covers both. -->
+          <div class="ask-consent" id="ask-consent" hidden>
+            <div class="ask-consent__inner">
+              <div class="ask-consent__icon"><i class="fas fa-message"></i></div>
+              <h2 class="ask-consent__title" data-en="Before you start" data-th="ก่อนเริ่มใช้งาน">Before you start</h2>
+              <p class="ask-consent__body" data-en="Nong Lilly is an AI assistant. Explanations are generated automatically and can be wrong, so check anything important with your teacher. Your questions are stored so we can improve the service." data-th="น้องลิลลี่เป็นผู้ช่วย AI คำอธิบายสร้างขึ้นโดยอัตโนมัติและอาจคลาดเคลื่อนได้ เรื่องสำคัญควรตรวจสอบกับคุณครูอีกครั้ง คำถามของคุณจะถูกจัดเก็บไว้เพื่อพัฒนาบริการ">
+                Nong Lilly is an AI assistant. Explanations are generated automatically and can be wrong, so check anything important with your teacher. Your questions are stored so we can improve the service.
+              </p>
+              <p class="ask-consent__note">
+                <i class="fas fa-circle-info"></i>
+                <span data-en="Please don’t send passwords, ID numbers, or payment details here." data-th="กรุณาอย่าส่งรหัสผ่าน เลขบัตรประชาชน หรือข้อมูลการชำระเงินที่นี่">Please don’t send passwords, ID numbers, or payment details here.</span>
+              </p>
+              <p class="ask-consent__links">
+                <span data-en="By continuing you agree to our" data-th="การใช้งานต่อถือว่าคุณยอมรับ">By continuing you agree to our</span>
+                <a href="ai-terms" target="_blank" rel="noopener" data-en="AI Chat Terms of Use" data-th="ข้อกำหนดการใช้แชท AI">AI Chat Terms of Use</a>
+                <span data-en="and" data-th="และ">and</span>
+                <a href="ai-privacy" target="_blank" rel="noopener" data-en="AI Chat Privacy Notice" data-th="ประกาศความเป็นส่วนตัวสำหรับแชท AI">AI Chat Privacy Notice</a>
+              </p>
+              <button type="button" class="btn btn--primary" id="ask-consent-accept" data-en="Accept and start" data-th="ยอมรับและเริ่มใช้งาน">Accept and start</button>
+            </div>
+          </div>
+
+          <div class="ask-thread" id="ask-thread" aria-live="polite" aria-label="Conversation">
+            <div class="ask-empty" id="ask-empty">
+              <div class="ask-empty__icon"><i class="fas fa-message"></i></div>
+              <p class="ask-empty__title" data-en="What word are you stuck on?" data-th="ติดคำไหนอยู่ ลองถามได้เลย">What word are you stuck on?</p>
+              <div class="ask-suggestions" id="ask-suggestions">
+                <button type="button" class="ask-chip" data-q="What does &quot;commute&quot; mean?">“commute”</button>
+                <button type="button" class="ask-chip" data-q="What is the difference between &quot;bring&quot; and &quot;take&quot;?">bring vs take</button>
+                <button type="button" class="ask-chip" data-q="How do I use the phrase &quot;look forward to&quot; in a sentence?">“look forward to”</button>
+                <button type="button" class="ask-chip" data-q="Is this sentence correct: I have been to Japan last year?">Check my sentence</button>
+              </div>
+            </div>
+          </div>
+
+          <form class="ask-form" id="ask-form" autocomplete="off">
+            <textarea class="ask-form__input" id="ask-input" rows="1" maxlength="2000"
+              placeholder="Ask about a word, phrase, or sentence..."
+              data-en-placeholder="Ask about a word, phrase, or sentence..."
+              data-th-placeholder="ถามคำศัพท์ วลี หรือประโยคที่สงสัย..."
+              aria-label="Your question"></textarea>
+            <button type="submit" class="ask-form__send" id="ask-send" aria-label="Send" title="Send">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
+          <p class="ask-disclaimer" data-en="Nong Lilly is an AI and can make mistakes. For anything about your own classes, schedule or payments, use the student portal." data-th="น้องลิลลี่เป็น AI จึงอาจตอบผิดพลาดได้ เรื่องคลาสเรียน ตารางเรียน หรือการชำระเงินของคุณเอง กรุณาใช้พอร์ทัลนักเรียน">
+            Nong Lilly is an AI and can make mistakes. For anything about your own classes, schedule or payments, use the student portal.
+          </p>
+
+        </div>
+      </div>
+    </section>
   </main>
 
-  <!-- ============================================================
-       FOOTER
-       ============================================================ -->
   <footer class="footer" role="contentinfo" aria-label="Site footer">
     <div class="container">
       <div class="footer__top">
 
-        <!-- Brand -->
         <div class="footer__brand">
           <img src="img/LITALK-Black.png" alt="LITALK Education" class="theme-invertable" width="120" height="28">
           <p class="footer__tagline" data-en="Building confident English communicators, one lesson at a time." data-th="สร้างนักสื่อสารภาษาอังกฤษที่มั่นใจ ทีละบทเรียน">
             Building confident English communicators, one lesson at a time.
           </p>
-          <!-- Social Icons -->
           <div class="footer__socials" aria-label="Social media">
             <a href="https://www.facebook.com/LITALKOfficial" class="footer__social-icon" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
               <i class="fab fa-facebook-f"></i>
@@ -177,7 +211,6 @@
           </div>
         </div>
 
-        <!-- Programs -->
         <div>
           <h3 class="footer__col-title" data-en="Programs" data-th="หลักสูตร">Programs</h3>
           <ul class="footer__links" role="list">
@@ -188,7 +221,6 @@
           </ul>
         </div>
 
-        <!-- Company -->
         <div>
           <h3 class="footer__col-title" data-en="Company" data-th="บริษัท">Company</h3>
           <ul class="footer__links" role="list">
@@ -198,7 +230,6 @@
           </ul>
         </div>
 
-        <!-- Resources -->
         <div>
           <h3 class="footer__col-title" data-en="Resources" data-th="ทรัพยากร">Resources</h3>
           <ul class="footer__links" role="list">
@@ -207,8 +238,6 @@
             <li><a href="/#faq" class="footer__link" data-en="FAQ" data-th="คำถามที่พบบ่อย">FAQ</a></li>
             <li><a href="privacy-policy" class="footer__link" data-en="Privacy Policy" data-th="นโยบายความเป็นส่วนตัว">Privacy Policy</a></li>
             <li><a href="terms-of-service" class="footer__link" data-en="Terms of Service" data-th="ข้อกำหนดการใช้งาน">Terms of Service</a></li>
-            <li><a href="ai-terms" class="footer__link" data-en="AI Chat Terms" data-th="ข้อกำหนดการใช้แชท AI">AI Chat Terms</a></li>
-            <li><a href="ai-privacy" class="footer__link" data-en="AI Chat Privacy" data-th="ความเป็นส่วนตัวแชท AI">AI Chat Privacy</a></li>
           </ul>
         </div>
 
@@ -232,10 +261,8 @@
       </div>
     </div>
   </footer>
-
-  <!-- JavaScript -->
   <script src="js/main.js?v=20260714h" defer></script>
-
+  <script src="js/ask.js?v=20260714h" defer></script>
 </body>
 
 </html>
