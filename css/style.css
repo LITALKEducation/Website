@@ -1746,6 +1746,10 @@ textarea {
 
 .footer__brand img {
   height: 26px;
+  /* Without this the width="170" attribute wins and the wordmark is
+     stretched to fit — the nav copy escaped it only because .nav__logo img
+     already sets width:auto. */
+  width: auto;
   filter: invert(1);
   margin-bottom: 16px;
 }
