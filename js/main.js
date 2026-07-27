@@ -874,6 +874,17 @@ window.litalkChat = (function initChatConsentState() {
     return false;
   }
 
+  // A notice can close the assistant without closing the page it sits on,
+  // so the fab follows the chat_site surface rather than the page's own.
+  // Hidden rather than left to fail on send: a button that only reveals it
+  // is unavailable after you have typed a question is worse than no button.
+  function syncServiceState() {
+    const blocked = window.litalkService && window.litalkService.blocked('chat_site');
+    fab.style.display = blocked ? 'none' : 'flex';
+    if (blocked) toggleChat(false);
+  }
+  document.addEventListener('litalk:serviceready', syncServiceState);
+
   fab.style.display = 'flex';
   window.toggleAIChat = toggleChat;
   window.startNewAIChat = startNewChat;

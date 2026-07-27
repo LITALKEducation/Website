@@ -393,5 +393,11 @@
     });
   });
 
+  // The overlay covers the page, but the composer must also stop accepting
+  // input behind it — otherwise a keyboard user can still type and send.
+  document.addEventListener('litalk:serviceblocked', () => {
+    form.setAttribute('inert', '');
+  });
+
   syncComposer();
 })();

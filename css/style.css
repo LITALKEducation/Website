@@ -4007,3 +4007,83 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* ============================================================
+   Service notices (js/service-notice.js)
+   The scheduled popup that announces, and then enforces, planned
+   downtime. Two looks: a dismissible card for the heads-up, and a
+   full overlay for the block.
+   ============================================================ */
+.svc-layer {
+  position: fixed;
+  z-index: 2000;
+  inset: auto 20px 20px auto;
+  max-width: min(380px, calc(100vw - 40px));
+}
+
+.svc-layer--blocking {
+  inset: 0;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: color-mix(in srgb, var(--clr-bg) 92%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+/* Only the blocking layer takes the page over. */
+body.svc-locked { overflow: hidden; }
+
+.svc-card {
+  padding: 22px;
+  border: 1px solid var(--clr-border);
+  border-radius: 18px;
+  background-color: var(--clr-bg);
+  box-shadow: 0 18px 40px -12px rgba(16, 24, 40, .22);
+}
+
+.svc-card--blocking { max-width: 440px; text-align: center; padding: 32px 28px; }
+
+.svc-card__icon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--clr-light-bg);
+  color: var(--clr-black);
+  font-size: 17px;
+}
+.svc-card--blocking .svc-card__icon { margin-left: auto; margin-right: auto; }
+
+.svc-card__title { margin: 0 0 8px; font-size: 17px; font-weight: 700; color: var(--clr-black); }
+.svc-card--blocking .svc-card__title { font-size: 21px; }
+.svc-card__body { margin: 0 0 12px; font-size: 14px; line-height: 1.65; color: var(--clr-muted); }
+.svc-card__meta { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--clr-black); }
+
+.svc-card__btn {
+  margin-top: 16px;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--clr-black);
+  border-radius: 10px;
+  background-color: var(--clr-black);
+  color: var(--clr-bg);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s ease-out;
+}
+.svc-card__btn:hover { opacity: .85; }
+
+@media (max-width: 640px) {
+  .svc-layer { inset: auto 12px 12px 12px; max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svc-card__btn { transition: none; }
+}
