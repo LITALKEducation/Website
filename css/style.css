@@ -3561,103 +3561,59 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
 
 /* ============================================================
    /ask — English vocabulary tutor page
-   The chat is the page here, not a floating panel, so the thread
-   carries the layout instead of a fixed-size widget.
+   Composer modelled on the shadcn @blocks-so/ai-01 block: a single
+   centred pill that holds the input and its controls in one grid,
+   and restructures from [leading | input | trailing] into stacked
+   [input / footer] once the text outgrows a single line.
+   Reimplemented in plain CSS because this site has no React or
+   Tailwind — pulling in a build pipeline for one page would cost
+   far more than the block is worth.
    ============================================================ */
-.ask-hero { padding: 120px 0 32px; }
+.ask-hero { padding: 120px 0 0; }
+.ask-hero__inner { max-width: 720px; margin: 0 auto; text-align: center; }
 .ask-hero__eyebrow {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--clr-muted);
 }
-.ask-hero__title { margin: 0 0 12px; font-size: clamp(32px, 5vw, 52px); line-height: 1.1; color: var(--clr-black); }
-.ask-hero__sub { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.7; color: var(--clr-muted); }
-
-.ask-section { padding: 0 0 96px; }
-
-.ask-panel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 460px;
-  border: 1px solid var(--clr-border);
-  border-radius: 20px;
-  background-color: var(--clr-bg);
-  overflow: hidden;
-}
-
-.ask-thread {
-  flex: 1;
-  overflow-y: auto;
-  max-height: 60vh;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-/* Empty state doubles as the on-ramp: the chips below it show what a
-   useful question looks like so a first-time visitor doesn't have to
-   invent one. */
-.ask-empty { margin: auto; text-align: center; padding: 24px 0; }
-.ask-empty[hidden] { display: none; }
-.ask-empty__icon {
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 14px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--clr-light-bg);
+.ask-hero__title {
+  margin: 0 0 14px;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.2;
   color: var(--clr-black);
-  font-size: 19px;
 }
-.ask-empty__title { margin: 0 0 18px; font-size: 16px; font-weight: 600; color: var(--clr-black); }
+.ask-hero__sub { margin: 0; font-size: 15px; line-height: 1.7; color: var(--clr-muted); }
 
-.ask-suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.ask-chip {
-  min-height: 40px;
-  padding: 9px 15px;
-  border: 1px solid var(--clr-border);
-  border-radius: 999px;
-  background-color: var(--clr-bg);
-  color: var(--clr-black);
-  font: inherit;
-  font-size: 13.5px;
-  cursor: pointer;
-  transition: border-color .15s ease-out, background-color .15s ease-out;
-}
-.ask-chip:hover { border-color: var(--clr-black); background-color: var(--clr-light-bg); }
+.ask-section { padding: 32px 0 96px; }
+.ask-stage { position: relative; max-width: 672px; margin: 0 auto; }
+
+/* --- thread ------------------------------------------------------------ */
+/* Hidden until the first message so the page opens on the composer alone,
+   the way the block presents it. */
+.ask-thread { display: none; margin-bottom: 20px; }
+.ask-stage.has-thread .ask-thread { display: flex; flex-direction: column; gap: 18px; }
 
 .ask-msg { display: flex; flex-direction: column; gap: 5px; max-width: 88%; }
 .ask-msg--user { align-self: flex-end; align-items: flex-end; }
 .ask-msg__who { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--clr-muted); }
-
-.ask-msg__body {
-  padding: 12px 15px;
-  border-radius: 14px;
-  font-size: 14.5px;
-  line-height: 1.65;
-  word-break: break-word;
-}
-.ask-msg--user .ask-msg__body { background-color: var(--clr-black); color: var(--clr-bg); border-bottom-right-radius: 4px; }
-.ask-msg--assistant .ask-msg__body { background-color: var(--clr-light-bg); color: var(--clr-black); border-bottom-left-radius: 4px; }
+.ask-msg__body { padding: 12px 15px; border-radius: 16px; font-size: 15px; line-height: 1.65; word-break: break-word; }
+.ask-msg--user .ask-msg__body { background-color: var(--clr-black); color: var(--clr-bg); border-bottom-right-radius: 5px; }
+.ask-msg--assistant .ask-msg__body { background-color: var(--clr-light-bg); color: var(--clr-black); border-bottom-left-radius: 5px; }
 .ask-msg--pending .ask-msg__body { background-color: var(--clr-light-bg); color: var(--clr-muted); font-style: italic; }
 .ask-msg--error .ask-msg__body { background-color: rgba(239, 68, 68, .1); color: #dc2626; }
 
 .ask-msg__body p { margin: 0 0 8px; }
 .ask-msg__body p:last-child { margin-bottom: 0; }
+.ask-msg__body ul, .ask-msg__body ol { margin: 0 0 8px; padding-left: 20px; }
+.ask-msg__body ul:last-child, .ask-msg__body ol:last-child { margin-bottom: 0; }
 /* The global reset strips list markers (line ~237), and blog post bodies
    restore them the same way — an AI reply listing word senses needs them
    back or the items read as loose indented lines. */
-.ask-msg__body ul, .ask-msg__body ol { margin: 0 0 8px; padding-left: 20px; }
 .ask-msg__body ul { list-style: disc; }
 .ask-msg__body ol { list-style: decimal; }
-.ask-msg__body ul:last-child, .ask-msg__body ol:last-child { margin-bottom: 0; }
 .ask-msg__body li { margin-bottom: 4px; }
 .ask-msg__body code {
   padding: 1px 5px;
@@ -3667,104 +3623,204 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   font-size: .9em;
 }
 
-.ask-form {
-  display: flex;
-  gap: 10px;
-  padding: 14px;
-  border-top: 1px solid var(--clr-border);
-  background-color: var(--clr-bg);
-}
-.ask-form__input {
-  flex: 1;
-  resize: none;
-  min-height: 44px;
-  max-height: 160px;
-  padding: 11px 14px;
+/* --- composer (ai-01) --------------------------------------------------- */
+.ask-composer__box {
+  display: grid;
+  grid-template-areas:
+    'header  header   header'
+    'leading primary  trailing'
+    '.       footer   .';
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  padding: 10px;
   border: 1px solid var(--clr-border);
-  border-radius: 12px;
+  border-radius: 26px;
   background-color: var(--clr-bg);
+  box-shadow: 0 10px 15px -3px rgba(16, 24, 40, .08), 0 4px 6px -4px rgba(16, 24, 40, .06);
+  cursor: text;
+  transition: border-color .15s ease-out;
+}
+
+/* Once the text needs more than one line the controls drop below it, so a
+   long question gets the full width instead of a narrow middle column. */
+.ask-composer__box.is-expanded {
+  grid-template-areas: 'header' 'primary' 'footer';
+  grid-template-columns: 1fr;
+}
+
+.ask-composer__box:focus-within { border-color: var(--clr-black); }
+
+.ask-composer__primary {
+  grid-area: primary;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 6px;
+  overflow-x: hidden;
+}
+.ask-composer__box.is-expanded .ask-composer__primary { padding: 4px 8px 8px; }
+
+.ask-composer__input {
+  flex: 1;
+  max-height: 208px;
+  overflow-y: auto;
+  resize: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
   color: var(--clr-black);
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
 }
-.ask-form__input:focus { outline: none; border-color: var(--clr-black); }
-.ask-form__send {
+.ask-composer__input:focus { outline: none; }
+.ask-composer__input::placeholder { color: var(--clr-muted); }
+
+.ask-composer__leading { grid-area: leading; display: flex; position: relative; }
+.ask-composer__box.is-expanded .ask-composer__leading { display: none; }
+
+.ask-composer__trailing { grid-area: trailing; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.ask-composer__box.is-expanded .ask-composer__trailing { grid-area: footer; padding-top: 6px; }
+
+/* 40px keeps the round controls close to the block's proportions while
+   staying a comfortable touch target inside the pill. */
+.ask-icon-btn,
+.ask-send {
   flex-shrink: 0;
-  width: 44px;
-  min-height: 44px;
-  border: none;
-  border-radius: 12px;
-  background-color: var(--clr-black);
-  color: var(--clr-bg);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 15px;
   cursor: pointer;
-  transition: opacity .15s ease-out;
+  transition: background-color .15s ease-out, opacity .15s ease-out;
 }
-.ask-form__send:hover { opacity: .85; }
-.ask-form__send:disabled { opacity: .5; cursor: default; }
+
+.ask-icon-btn { border: 0; background: transparent; color: var(--clr-muted); }
+.ask-icon-btn:hover, .ask-icon-btn[aria-expanded="true"] { background-color: var(--clr-light-bg); color: var(--clr-black); }
+
+.ask-send { border: 0; background-color: var(--clr-black); color: var(--clr-bg); }
+.ask-send:hover { opacity: .85; }
+.ask-send:disabled { opacity: .45; cursor: default; }
+/* Mirrors the block: the send button only exists once there is something
+   to send. */
+.ask-send[hidden] { display: none; }
+
+/* --- suggestion menu ---------------------------------------------------- */
+/* Stands in for the block's attachment dropdown. This page has nothing to
+   attach, and a menu of buttons that do nothing would be worse than no
+   menu — so the slot holds starter questions instead, which is the one
+   thing a first-time visitor actually needs. */
+.ask-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 5;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 48px));
+  padding: 6px;
+  border: 1px solid var(--clr-border);
+  border-radius: 16px;
+  background-color: var(--clr-bg);
+  box-shadow: 0 12px 24px -8px rgba(16, 24, 40, .18);
+}
+.ask-menu[hidden] { display: none; }
+
+.ask-menu__label {
+  padding: 6px 10px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--clr-muted);
+}
+
+.ask-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--clr-black);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .15s ease-out;
+}
+.ask-menu__item:hover { background-color: var(--clr-light-bg); }
+.ask-menu__item i { color: var(--clr-muted); font-size: 13px; flex-shrink: 0; }
 
 .ask-disclaimer {
-  margin: 12px 2px 0;
+  max-width: 672px;
+  margin: 14px auto 0;
+  text-align: center;
   font-size: 12px;
   line-height: 1.6;
   color: var(--clr-muted);
 }
 
-/* Terms gate, same acceptance as the floating assistant's. Covers the whole
-   panel so the composer can't be reached around it. */
+/* --- terms gate --------------------------------------------------------- */
+/* Covers the composer only — the heading above stays readable, so someone
+   who declines still knows what the page is for. */
 .ask-consent {
   position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 20px;
+  inset: auto 0 0;
+  z-index: 6;
+  padding: 24px 20px;
+  border: 1px solid var(--clr-border);
+  border-radius: 26px;
   background-color: var(--clr-bg);
-  overflow-y: auto;
+  box-shadow: 0 10px 15px -3px rgba(16, 24, 40, .08);
 }
 .ask-consent[hidden] { display: none; }
-.ask-consent__inner { max-width: 400px; text-align: center; }
+.ask-consent__inner { max-width: 420px; margin: 0 auto; text-align: center; }
 .ask-consent__icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 16px;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 14px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--clr-light-bg);
   color: var(--clr-black);
-  font-size: 18px;
+  font-size: 17px;
 }
-.ask-consent__title { margin: 0 0 10px; font-size: 19px; font-weight: 700; color: var(--clr-black); }
+.ask-consent__title { margin: 0 0 10px; font-size: 18px; font-weight: 700; color: var(--clr-black); }
 .ask-consent__body { margin: 0 0 14px; font-size: 14px; line-height: 1.65; color: var(--clr-muted); }
 .ask-consent__note {
   display: flex;
   gap: 8px;
   text-align: left;
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   background-color: var(--clr-light-bg);
   font-size: 12.5px;
   line-height: 1.55;
   color: var(--clr-muted);
 }
 .ask-consent__note i { margin-top: 3px; flex-shrink: 0; }
-.ask-consent__links { margin: 0 0 18px; font-size: 12.5px; line-height: 1.6; color: var(--clr-muted); }
+.ask-consent__links { margin: 0 0 16px; font-size: 12.5px; line-height: 1.6; color: var(--clr-muted); }
 .ask-consent__links a { color: var(--clr-black); text-decoration: underline; }
 
 @media (max-width: 640px) {
-  .ask-hero { padding: 100px 0 24px; }
-  .ask-panel { min-height: 420px; border-radius: 16px; }
-  .ask-thread { padding: 18px; max-height: none; }
+  .ask-hero { padding: 100px 0 0; }
+  .ask-section { padding: 24px 0 72px; }
   .ask-msg { max-width: 94%; }
-  /* 16px stops iOS Safari zooming the page when the field takes focus. */
-  .ask-form__input { font-size: 16px; }
+  .ask-consent { position: static; margin-bottom: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ask-chip,
-  .ask-form__send { transition: none; }
+  .ask-composer__box,
+  .ask-icon-btn,
+  .ask-send,
+  .ask-menu__item { transition: none; }
 }
