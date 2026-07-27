@@ -1,8 +1,14 @@
 /**
  * LITALK Education — ask.js
- * The /ask page: an English vocabulary tutor. Unlike the floating assistant
- * in main.js, the chat IS the page, so there's no panel to open and the
- * thread fills the layout.
+ * The /ask page: an English vocabulary tutor.
+ *
+ * The composer follows the shadcn @blocks-so/ai-01 block — one centred pill
+ * holding the input and its controls in a single grid, restructuring from
+ * [leading | input | trailing] to stacked [input / footer] once the text
+ * outgrows a line, with the send button appearing only when there is
+ * something to send. Reimplemented in plain JS/CSS: this site has no React
+ * or Tailwind, and a build pipeline for one page would cost more than the
+ * block is worth.
  *
  * Shares the visitor id and terms consent with the floating assistant via
  * window.litalkChat (defined in main.js, which loads first) — accepting the
@@ -16,28 +22,19 @@
   if (!form) return; // not the /ask page
 
   const chat = window.litalkChat;
+  const stage = document.getElementById('ask-stage');
+  const box = document.getElementById('ask-composer-box');
   const thread = document.getElementById('ask-thread');
   const input = document.getElementById('ask-input');
   const sendBtn = document.getElementById('ask-send');
-  const empty = document.getElementById('ask-empty');
+  const suggestBtn = document.getElementById('ask-suggest-btn');
+  const menu = document.getElementById('ask-menu');
   const consent = document.getElementById('ask-consent');
   const consentAccept = document.getElementById('ask-consent-accept');
 
   const STRINGS = {
-    en: {
-      pending: 'Looking it up...',
-      genericError: 'Something went wrong. Please try again.',
-      connError: "Couldn't reach the assistant. Please try again.",
-      you: 'You',
-      lilly: 'Nong Lilly',
-    },
-    th: {
-      pending: 'กำลังค้นหา...',
-      genericError: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
-      connError: 'เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
-      you: 'คุณ',
-      lilly: 'น้องลิลลี่',
-    },
+    en: { pending: 'Looking it up...', genericError: 'Something went wrong. Please try again.', connError: "Couldn't reach the assistant. Please try again.", lilly: 'Nong Lilly' },
+    th: { pending: 'กำลังค้นหา...', genericError: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง', connError: 'เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', lilly: 'น้องลิลลี่' },
   };
   const lang = () => (typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en');
   const t = (key) => (STRINGS[lang()] || STRINGS.en)[key];
@@ -45,19 +42,42 @@
   let conversationId = null;
   let busy = false;
 
+  /* ---- Composer shape -------------------------------------------------- *
+   * Same trigger as the block: expand once the text can no longer sit
+   * comfortably on one line, measured by length or an explicit newline. */
+  const EXPAND_AT = 100;
+
+  function syncComposer() {
+    const value = input.value;
+    box.classList.toggle('is-expanded', value.length > EXPAND_AT || value.includes('\n'));
+    sendBtn.hidden = !value.trim() || busy;
+
+    input.style.height = 'auto';
+    input.style.height = `${input.scrollHeight}px`;
+  }
+
+  // Clicking anywhere in the pill focuses the input, which is what the
+  // block's `cursor: text` on the container implies.
+  box.addEventListener('mousedown', (event) => {
+    if (event.target.closest('button, a')) return;
+    event.preventDefault();
+    input.focus();
+  });
+
   /* ---- Terms gate ------------------------------------------------------ */
   function showConsent() {
     if (!consent) return;
     consent.hidden = false;
-    // Not just visually disabled: inert keeps the composer out of the tab
-    // order too, so the gate can't be skipped with a keyboard.
+    // inert, not just disabled: the composer must also drop out of the tab
+    // order so the gate can't be skipped with a keyboard.
     form.setAttribute('inert', '');
+    closeMenu();
   }
 
   function hideConsent() {
     if (consent) consent.hidden = true;
     form.removeAttribute('inert');
-    if (input) input.focus();
+    input.focus();
   }
 
   if (!chat.hasConsent()) showConsent();
@@ -68,56 +88,59 @@
     });
   }
 
-  /* ---- Markdown -------------------------------------------------------- *
-   * Same safe subset the other two assistants render (bold, italic, code,
-   * links, lists, paragraphs). Everything is escaped first, so replies can
-   * never inject markup. */
-  function renderMarkdown(text) {
-    const escapeHtml = (s) =>
-      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const inline = (s) =>
-      escapeHtml(s)
-        .replace(/`([^`\n]+)`/g, '<code>$1</code>')
-        .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
-    const out = [];
-    let list = null;
-    for (const rawLine of String(text).split('\n')) {
-      const line = rawLine.trimEnd();
-      const bullet = line.match(/^\s*[-*+]\s+(.*)$/);
-      const numbered = line.match(/^\s*\d+[.)]\s+(.*)$/);
-      if (bullet || numbered) {
-        const tag = bullet ? 'ul' : 'ol';
-        if (list !== tag) {
-          if (list) out.push(`</${list}>`);
-          out.push(`<${tag}>`);
-          list = tag;
-        }
-        out.push(`<li>${inline((bullet || numbered)[1])}</li>`);
-        continue;
-      }
-      if (list) {
-        out.push(`</${list}>`);
-        list = null;
-      }
-      if (line.trim()) out.push(`<p>${inline(line)}</p>`);
-    }
-    if (list) out.push(`</${list}>`);
-    return out.join('');
+  /* ---- Suggestion menu -------------------------------------------------- */
+  function openMenu() {
+    menu.hidden = false;
+    suggestBtn.setAttribute('aria-expanded', 'true');
   }
+
+  function closeMenu() {
+    menu.hidden = true;
+    suggestBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  suggestBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (menu.hidden) openMenu();
+    else closeMenu();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!menu.hidden && !menu.contains(event.target) && event.target !== suggestBtn) closeMenu();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !menu.hidden) {
+      closeMenu();
+      suggestBtn.focus();
+    }
+  });
+
+  menu.querySelectorAll('.ask-menu__item').forEach((item) => {
+    item.addEventListener('click', () => {
+      closeMenu();
+      // Fills the composer rather than sending straight away, so the visitor
+      // can see the shape of a good question and edit it before asking.
+      input.value = item.getAttribute('data-q') || '';
+      input.focus();
+      syncComposer();
+    });
+  });
+
+  // Markdown rendering lives in js/markdown.js, shared with the /ask page
+  // and the student portal so all three render the same subset.
+  const renderMarkdown = (text) => window.litalkMarkdown(text);
 
   /* ---- Thread ---------------------------------------------------------- */
   function appendMessage(role, text) {
-    if (empty) empty.hidden = true;
+    stage.classList.add('has-thread');
     const row = document.createElement('div');
     row.className = `ask-msg ask-msg--${role}`;
 
     if (role !== 'user') {
       const who = document.createElement('div');
       who.className = 'ask-msg__who';
-      who.textContent = role === 'pending' ? t('lilly') : t('lilly');
+      who.textContent = t('lilly');
       row.appendChild(who);
     }
 
@@ -137,9 +160,8 @@
     if (busy || !message) return;
     appendMessage('user', message);
     input.value = '';
-    autoGrow();
     busy = true;
-    sendBtn.disabled = true;
+    syncComposer();
     const pending = appendMessage('pending', t('pending'));
 
     try {
@@ -174,7 +196,7 @@
       appendMessage('error', t('connError'));
     } finally {
       busy = false;
-      sendBtn.disabled = false;
+      syncComposer();
       input.focus();
     }
   }
@@ -183,6 +205,8 @@
     event.preventDefault();
     ask(input.value.trim());
   });
+
+  input.addEventListener('input', syncComposer);
 
   // Enter sends, Shift+Enter makes a new line — the convention every chat
   // input on this site already follows.
@@ -193,21 +217,13 @@
     }
   });
 
-  function autoGrow() {
-    input.style.height = 'auto';
-    input.style.height = `${Math.min(input.scrollHeight, 160)}px`;
-  }
-  input.addEventListener('input', autoGrow);
-
-  // Starter chips: prefill and send, so a first-time visitor can see what a
-  // useful question looks like without having to think of one.
-  document.querySelectorAll('.ask-chip').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      if (!chat.hasConsent()) {
-        showConsent();
-        return;
-      }
-      ask(chip.getAttribute('data-q') || chip.textContent.trim());
+  // The "Nong Lilly" byline is rendered text, so it has to be re-rendered
+  // when the site language changes rather than swapped by the data-en sweep.
+  document.addEventListener('litalk:langchange', () => {
+    thread.querySelectorAll('.ask-msg__who').forEach((el) => {
+      el.textContent = t('lilly');
     });
   });
+
+  syncComposer();
 })();

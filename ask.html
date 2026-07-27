@@ -17,7 +17,7 @@
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-  <link rel="stylesheet" href="css/style.css?v=20260727a">
+  <link rel="stylesheet" href="css/style.css?v=20260727c">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -118,21 +118,68 @@
   <main id="main-content">
     <section class="ask-hero">
       <div class="container">
-        <p class="ask-hero__eyebrow" data-en="English vocabulary helper" data-th="ผู้ช่วยเรื่องคำศัพท์">English vocabulary helper</p>
-        <h1 class="ask-hero__title" data-en="Ask a word." data-th="ถามคำศัพท์ได้เลย">Ask a word.</h1>
-        <p class="ask-hero__sub" data-en="Type any English word, phrase, or sentence. Nong Lilly explains what it means in English and Thai, how it is used, and gives you examples you can copy into your own writing." data-th="พิมพ์คำศัพท์ วลี หรือประโยคภาษาอังกฤษที่สงสัย น้องลิลลี่จะอธิบายความหมายทั้งภาษาอังกฤษและภาษาไทย วิธีใช้ พร้อมตัวอย่างประโยคที่นำไปใช้ต่อได้">
-          Type any English word, phrase, or sentence. Nong Lilly explains what it means in English and Thai, how it is used, and gives you examples you can copy into your own writing.
-        </p>
+        <div class="ask-hero__inner">
+          <p class="ask-hero__eyebrow" data-en="English vocabulary helper" data-th="ผู้ช่วยเรื่องคำศัพท์">English vocabulary helper</p>
+          <h1 class="ask-hero__title" data-en="What word are you stuck on?" data-th="ติดคำไหนอยู่ ถามได้เลย">What word are you stuck on?</h1>
+          <p class="ask-hero__sub" data-en="Type any English word, phrase, or sentence. Nong Lilly explains what it means in English and Thai, how it is used, and gives you examples you can copy into your own writing." data-th="พิมพ์คำศัพท์ วลี หรือประโยคภาษาอังกฤษที่สงสัย น้องลิลลี่จะอธิบายความหมายทั้งภาษาอังกฤษและภาษาไทย วิธีใช้ พร้อมตัวอย่างประโยคที่นำไปใช้ต่อได้">
+            Type any English word, phrase, or sentence. Nong Lilly explains what it means in English and Thai, how it is used, and gives you examples you can copy into your own writing.
+          </p>
+        </div>
       </div>
     </section>
 
     <section class="ask-section">
       <div class="container">
-        <div class="ask-panel">
+        <div class="ask-stage" id="ask-stage">
 
-          <!-- Terms gate, shown by js/ask.js on first visit. Same consent
-               record as the site-wide assistant, so accepting in one place
-               covers both. -->
+          <div class="ask-thread" id="ask-thread" aria-live="polite" aria-label="Conversation"></div>
+
+          <form class="ask-composer" id="ask-form" autocomplete="off">
+            <div class="ask-composer__box" id="ask-composer-box">
+
+              <div class="ask-composer__primary">
+                <textarea class="ask-composer__input" id="ask-input" rows="1" maxlength="2000"
+                  placeholder="Ask about a word, phrase, or sentence..."
+                  data-en-placeholder="Ask about a word, phrase, or sentence..."
+                  data-th-placeholder="ถามคำศัพท์ วลี หรือประโยคที่สงสัย..."
+                  aria-label="Your question"></textarea>
+              </div>
+
+              <div class="ask-composer__leading">
+                <button type="button" class="ask-icon-btn" id="ask-suggest-btn" aria-haspopup="menu" aria-expanded="false"
+                  aria-label="Example questions" title="Example questions" data-en-title="Example questions" data-th-title="ตัวอย่างคำถาม">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <div class="ask-menu" id="ask-menu" role="menu" hidden>
+                  <div class="ask-menu__label" data-en="Try one of these" data-th="ลองถามแบบนี้">Try one of these</div>
+                  <button type="button" role="menuitem" class="ask-menu__item" data-q="What does &quot;commute&quot; mean?">
+                    <i class="fas fa-book"></i><span data-en="Meaning of a word" data-th="ความหมายของคำ">Meaning of a word</span>
+                  </button>
+                  <button type="button" role="menuitem" class="ask-menu__item" data-q="What is the difference between &quot;bring&quot; and &quot;take&quot;?">
+                    <i class="fas fa-code-compare"></i><span data-en="Compare two words" data-th="เทียบคำที่คล้ายกัน">Compare two words</span>
+                  </button>
+                  <button type="button" role="menuitem" class="ask-menu__item" data-q="How do I use the phrase &quot;look forward to&quot; in a sentence?">
+                    <i class="fas fa-quote-left"></i><span data-en="How to use a phrase" data-th="วิธีใช้วลี">How to use a phrase</span>
+                  </button>
+                  <button type="button" role="menuitem" class="ask-menu__item" data-q="Is this sentence correct: I have been to Japan last year?">
+                    <i class="fas fa-spell-check"></i><span data-en="Check my sentence" data-th="ตรวจประโยคให้หน่อย">Check my sentence</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="ask-composer__trailing">
+                <button type="submit" class="ask-send" id="ask-send" hidden aria-label="Send" title="Send">
+                  <i class="fas fa-arrow-up"></i>
+                </button>
+              </div>
+
+            </div>
+          </form>
+
+          <p class="ask-disclaimer" data-en="Nong Lilly is an AI and can make mistakes. For anything about your own classes, schedule or payments, use the student portal." data-th="น้องลิลลี่เป็น AI จึงอาจตอบผิดพลาดได้ เรื่องคลาสเรียน ตารางเรียน หรือการชำระเงินของคุณเอง กรุณาใช้พอร์ทัลนักเรียน">
+            Nong Lilly is an AI and can make mistakes. For anything about your own classes, schedule or payments, use the student portal.
+          </p>
+
           <div class="ask-consent" id="ask-consent" hidden>
             <div class="ask-consent__inner">
               <div class="ask-consent__icon"><i class="fas fa-message"></i></div>
@@ -153,33 +200,6 @@
               <button type="button" class="btn btn--primary" id="ask-consent-accept" data-en="Accept and start" data-th="ยอมรับและเริ่มใช้งาน">Accept and start</button>
             </div>
           </div>
-
-          <div class="ask-thread" id="ask-thread" aria-live="polite" aria-label="Conversation">
-            <div class="ask-empty" id="ask-empty">
-              <div class="ask-empty__icon"><i class="fas fa-message"></i></div>
-              <p class="ask-empty__title" data-en="What word are you stuck on?" data-th="ติดคำไหนอยู่ ลองถามได้เลย">What word are you stuck on?</p>
-              <div class="ask-suggestions" id="ask-suggestions">
-                <button type="button" class="ask-chip" data-q="What does &quot;commute&quot; mean?">“commute”</button>
-                <button type="button" class="ask-chip" data-q="What is the difference between &quot;bring&quot; and &quot;take&quot;?">bring vs take</button>
-                <button type="button" class="ask-chip" data-q="How do I use the phrase &quot;look forward to&quot; in a sentence?">“look forward to”</button>
-                <button type="button" class="ask-chip" data-q="Is this sentence correct: I have been to Japan last year?">Check my sentence</button>
-              </div>
-            </div>
-          </div>
-
-          <form class="ask-form" id="ask-form" autocomplete="off">
-            <textarea class="ask-form__input" id="ask-input" rows="1" maxlength="2000"
-              placeholder="Ask about a word, phrase, or sentence..."
-              data-en-placeholder="Ask about a word, phrase, or sentence..."
-              data-th-placeholder="ถามคำศัพท์ วลี หรือประโยคที่สงสัย..."
-              aria-label="Your question"></textarea>
-            <button type="submit" class="ask-form__send" id="ask-send" aria-label="Send" title="Send">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </form>
-          <p class="ask-disclaimer" data-en="Nong Lilly is an AI and can make mistakes. For anything about your own classes, schedule or payments, use the student portal." data-th="น้องลิลลี่เป็น AI จึงอาจตอบผิดพลาดได้ เรื่องคลาสเรียน ตารางเรียน หรือการชำระเงินของคุณเอง กรุณาใช้พอร์ทัลนักเรียน">
-            Nong Lilly is an AI and can make mistakes. For anything about your own classes, schedule or payments, use the student portal.
-          </p>
 
         </div>
       </div>
@@ -261,8 +281,9 @@
       </div>
     </div>
   </footer>
-  <script src="js/main.js?v=20260727a" defer></script>
-  <script src="js/ask.js?v=20260727a" defer></script>
+  <script src="js/markdown.js?v=20260727c" defer></script>
+  <script src="js/main.js?v=20260727c" defer></script>
+  <script src="js/ask.js?v=20260727c" defer></script>
 </body>
 
 </html>

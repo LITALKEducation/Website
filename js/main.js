@@ -780,56 +780,9 @@ window.litalkChat = (function initChatConsentState() {
     if (messages) messages.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' });
   }
 
-  // Minimal, safe Markdown-to-HTML for AI replies (same subset as the
-  // student portal's assistant — bold, italic, code, links, lists, paragraphs).
-  function renderMarkdown(text) {
-    const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const inline = (s) => escapeHtml(s)
-      .replace(/`([^`\n]+)`/g, '<code>$1</code>')
-      .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
-    const codeBlocks = [];
-    const withPlaceholders = String(text).replace(/```[a-zA-Z0-9]*\n?([\s\S]*?)```/g, (_, code) => {
-      codeBlocks.push(escapeHtml(code.replace(/\n$/, '')));
-      return '\nCODEBLOCK' + (codeBlocks.length - 1) + '\n';
-    });
-
-    const out = [];
-    let para = [];
-    let list = null;
-    const flushPara = () => { if (para.length) { out.push('<p>' + para.join('<br>') + '</p>'); para = []; } };
-    const flushList = () => { if (list) { out.push('<' + list.type + '>' + list.items.map((i) => '<li>' + i + '</li>').join('') + '</' + list.type + '>'); list = null; } };
-    for (const rawLine of withPlaceholders.split('\n')) {
-      const line = rawLine.trim();
-      const codeMatch = line.match(/^CODEBLOCK(\d+)$/);
-      const ul = line.match(/^[-*]\s+(.*)$/);
-      const ol = line.match(/^\d+\.\s+(.*)$/);
-      if (codeMatch) {
-        flushPara();
-        flushList();
-        out.push('<pre><code>' + codeBlocks[Number(codeMatch[1])] + '</code></pre>');
-      } else if (ul) {
-        flushPara();
-        if (!list || list.type !== 'ul') { flushList(); list = { type: 'ul', items: [] }; }
-        list.items.push(inline(ul[1]));
-      } else if (ol) {
-        flushPara();
-        if (!list || list.type !== 'ol') { flushList(); list = { type: 'ol', items: [] }; }
-        list.items.push(inline(ol[1]));
-      } else if (line === '') {
-        flushPara();
-        flushList();
-      } else {
-        flushList();
-        para.push(inline(line));
-      }
-    }
-    flushPara();
-    flushList();
-    return out.join('');
-  }
+  // Markdown rendering lives in js/markdown.js, shared with the /ask page
+  // and the student portal so all three render the same subset.
+  const renderMarkdown = (text) => window.litalkMarkdown(text);
 
   function appendMessage(role, text) {
     const messages = document.getElementById('ai-chat-messages');
