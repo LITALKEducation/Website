@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="css/student-portal.css?v=20260718d">
 </head>
 
-<body>
+<body data-service-surface="portal">
     <a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
 
 
@@ -374,9 +374,11 @@
         </a>
     </div>
 
-    <script src="js/markdown.js?v=20260727e"></script>
+    <script src="js/service-notice.js?v=20260727g" defer></script>
 
-    <script src="js/student-portal.js?v=20260727e"></script>
+    <script src="js/markdown.js?v=20260727g"></script>
+
+    <script src="js/student-portal.js?v=20260727g"></script>
     <script>
         // How many items the overview previews before linking to the full page
         const STUDY_LOG_PREVIEW_LIMIT = 3;

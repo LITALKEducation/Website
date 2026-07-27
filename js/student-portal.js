@@ -1374,6 +1374,15 @@ let aiChatConversationId = null;
 let aiChatStudentId = null;
 let aiChatBusy = false;
 
+// A notice can close the portal assistant without closing the portal it sits
+// in, so the fab follows the chat_portal surface rather than the page's own.
+document.addEventListener('litalk:serviceready', () => {
+    if (!window.litalkService || !window.litalkService.blocked('chat_portal')) return;
+    const fab = document.getElementById('ai-chat-fab');
+    if (fab) fab.style.display = 'none';
+    if (typeof toggleAIChat === 'function') toggleAIChat(false);
+});
+
 function initAIChatWidget(studentId) {
     aiChatStudentId = studentId;
     const fab = document.getElementById('ai-chat-fab');
