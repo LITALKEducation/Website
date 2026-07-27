@@ -572,6 +572,16 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
       pending: 'Thinking...',
       genericError: 'Something went wrong. Please try again.',
       connError: "Couldn't reach the AI assistant. Please try again.",
+      consentTitle: 'Before you start',
+      consentBody:
+        'Nong Lilly is an AI assistant. Replies are generated automatically and can be wrong, so please confirm anything important with our staff. Your messages are stored so we can improve the service and handle enquiries.',
+      consentNote: 'Please don’t send passwords, ID numbers, or payment details in this chat.',
+      consentLinks: 'By continuing you agree to our',
+      consentTerms: 'Terms of Service',
+      consentAnd: 'and',
+      consentPrivacy: 'Privacy Policy',
+      consentAccept: 'Accept and start chatting',
+      consentDecline: 'Not now',
     },
     th: {
       newChat: 'เริ่มการสนทนาใหม่',
@@ -583,6 +593,16 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
       pending: 'กำลังตอบ...',
       genericError: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
       connError: 'เชื่อมต่อระบบ AI ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+      consentTitle: 'ก่อนเริ่มใช้งาน',
+      consentBody:
+        'น้องลิลลี่เป็นผู้ช่วย AI คำตอบสร้างขึ้นโดยอัตโนมัติและอาจคลาดเคลื่อนได้ กรุณาตรวจสอบเรื่องสำคัญกับเจ้าหน้าที่อีกครั้ง ข้อความที่คุณพิมพ์จะถูกจัดเก็บไว้เพื่อพัฒนาบริการและติดตามคำถาม',
+      consentNote: 'กรุณาอย่าส่งรหัสผ่าน เลขบัตรประชาชน หรือข้อมูลการชำระเงินในแชทนี้',
+      consentLinks: 'การใช้งานต่อถือว่าคุณยอมรับ',
+      consentTerms: 'เงื่อนไขการใช้บริการ',
+      consentAnd: 'และ',
+      consentPrivacy: 'นโยบายความเป็นส่วนตัว',
+      consentAccept: 'ยอมรับและเริ่มแชท',
+      consentDecline: 'ไว้ก่อน',
     },
   };
   const t = (key) => (STRINGS[typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en'] || STRINGS.en)[key];
@@ -615,6 +635,105 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   let conversationId = null;
   let busy = false;
 
+  /* ---- Terms of use gate -------------------------------------------------
+     The first time someone opens the chat they have to accept the terms.
+     Bump CHAT_TERMS_VERSION (and the copy above) when the terms change and
+     everyone is asked again; it must match CHAT_TERMS_VERSION in the
+     worker, which enforces the same gate server-side so clearing
+     localStorage isn't a way around it.
+     The gate is built here rather than written into each page's markup
+     because the widget appears on several pages and this script is the only
+     thing they share. */
+  const CHAT_TERMS_VERSION = '2026-07-27';
+  const CONSENT_KEY = 'litalk_chat_terms_accepted';
+
+  const hasConsent = () => localStorage.getItem(CONSENT_KEY) === CHAT_TERMS_VERSION;
+
+  function rememberConsent() {
+    localStorage.setItem(CONSENT_KEY, CHAT_TERMS_VERSION);
+    // Recorded server-side too, so the acceptance survives the visitor
+    // clearing their browser and exists as a record the school holds.
+    // Fire-and-forget: /chat/general re-records it on the next message if
+    // this call never lands, so a failure here costs nothing.
+    const lang = typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en';
+    fetch(`${dataApiUrl}/chat/consent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visitorId: getVisitorId(), lang }),
+    }).catch(() => {});
+  }
+
+  function buildConsentGate() {
+    const panel = document.getElementById('ai-chat-panel');
+    if (!panel || panel.querySelector('.ai-chat-consent')) return panel && panel.querySelector('.ai-chat-consent');
+
+    const gate = document.createElement('div');
+    gate.className = 'ai-chat-consent';
+    gate.innerHTML = `
+      <div class="ai-chat-consent__inner">
+        <div class="ai-chat-consent__icon"><i class="fas fa-message"></i></div>
+        <h3 class="ai-chat-consent__title"></h3>
+        <p class="ai-chat-consent__body"></p>
+        <p class="ai-chat-consent__note"><i class="fas fa-circle-info"></i> <span></span></p>
+        <p class="ai-chat-consent__links">
+          <span class="ai-chat-consent__links-lead"></span>
+          <a class="ai-chat-consent__terms" href="/terms-of-service.html" target="_blank" rel="noopener"></a>
+          <span class="ai-chat-consent__and"></span>
+          <a class="ai-chat-consent__privacy" href="/privacy-policy.html" target="_blank" rel="noopener"></a>
+        </p>
+        <button type="button" class="ai-chat-consent__accept"></button>
+        <button type="button" class="ai-chat-consent__decline"></button>
+      </div>`;
+    panel.appendChild(gate);
+
+    gate.querySelector('.ai-chat-consent__accept').addEventListener('click', () => {
+      rememberConsent();
+      hideConsentGate();
+      const input = document.getElementById('ai-chat-input');
+      if (input) input.focus();
+      const messages = document.getElementById('ai-chat-messages');
+      if (messages && !messages.querySelector('.ai-chat-msg, .ai-chat-msg-row')) {
+        appendMessage('assistant', t('greeting'));
+      }
+    });
+    gate.querySelector('.ai-chat-consent__decline').addEventListener('click', () => toggleChat(false));
+    return gate;
+  }
+
+  function syncConsentLang() {
+    const gate = document.querySelector('.ai-chat-consent');
+    if (!gate) return;
+    gate.querySelector('.ai-chat-consent__title').textContent = t('consentTitle');
+    gate.querySelector('.ai-chat-consent__body').textContent = t('consentBody');
+    gate.querySelector('.ai-chat-consent__note span').textContent = t('consentNote');
+    gate.querySelector('.ai-chat-consent__links-lead').textContent = t('consentLinks');
+    gate.querySelector('.ai-chat-consent__terms').textContent = t('consentTerms');
+    gate.querySelector('.ai-chat-consent__and').textContent = t('consentAnd');
+    gate.querySelector('.ai-chat-consent__privacy').textContent = t('consentPrivacy');
+    gate.querySelector('.ai-chat-consent__accept').textContent = t('consentAccept');
+    gate.querySelector('.ai-chat-consent__decline').textContent = t('consentDecline');
+  }
+  document.addEventListener('litalk:langchange', syncConsentLang);
+
+  function showConsentGate() {
+    const gate = buildConsentGate();
+    if (!gate) return;
+    syncConsentLang();
+    gate.classList.add('show');
+    // The composer stays visible behind the gate but must not be usable,
+    // and must not be reachable by Tab either.
+    const form = document.getElementById('ai-chat-form');
+    if (form) form.setAttribute('inert', '');
+    requestAnimationFrame(() => gate.querySelector('.ai-chat-consent__accept').focus());
+  }
+
+  function hideConsentGate() {
+    const gate = document.querySelector('.ai-chat-consent');
+    if (gate) gate.classList.remove('show');
+    const form = document.getElementById('ai-chat-form');
+    if (form) form.removeAttribute('inert');
+  }
+
   function toggleChat(force) {
     const panel = document.getElementById('ai-chat-panel');
     if (!panel) return;
@@ -624,6 +743,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
       document.body.style.overflow = open ? 'hidden' : '';
     }
     if (open) {
+      if (!hasConsent()) {
+        showConsentGate();
+        return;
+      }
       const input = document.getElementById('ai-chat-input');
       if (input) input.focus();
       const messages = document.getElementById('ai-chat-messages');
@@ -740,11 +863,25 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
       const res = await fetch(`${dataApiUrl}/chat/general`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId, message, visitorId: getVisitorId(), lang }),
+        body: JSON.stringify({
+          conversationId,
+          message,
+          visitorId: getVisitorId(),
+          lang,
+          termsVersion: hasConsent() ? CHAT_TERMS_VERSION : undefined,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (pending) pending.remove();
       if (!res.ok || data.status === 'error') {
+        // The server rejects messages from a visitor with no consent on
+        // record — including after the terms are revised, which is how a
+        // returning visitor gets re-prompted rather than just erroring.
+        if (data.needsConsent) {
+          localStorage.removeItem(CONSENT_KEY);
+          showConsentGate();
+          return false;
+        }
         appendMessage('error', data.message || t('genericError'));
         return false;
       }

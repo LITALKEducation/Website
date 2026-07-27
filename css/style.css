@@ -3437,6 +3437,98 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
 .ai-chat-panel__send { border: none; background: var(--clr-black); color: var(--clr-bg); border-radius: 10px; padding: 0 14px; cursor: pointer; }
 .ai-chat-panel__send:disabled { opacity: .5; cursor: default; }
 
+/* Terms-of-use gate — covers the panel until the visitor accepts. Built by
+   js/main.js (initGeneralAIChat) rather than written into each page, since
+   the widget markup is duplicated across several pages. It covers the
+   header too, so the chat can't be worked around it — which is why the gate
+   carries its own "Not now" button to close the panel. */
+.ai-chat-consent {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: var(--clr-bg);
+  overflow-y: auto;
+}
+
+.ai-chat-consent.show { display: flex; }
+.ai-chat-consent__inner { max-width: 300px; text-align: center; }
+
+.ai-chat-consent__icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--clr-light-bg);
+  color: var(--clr-black);
+  font-size: 17px;
+}
+
+.ai-chat-consent__title { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--clr-black); }
+.ai-chat-consent__body { margin: 0 0 12px; font-size: 13px; line-height: 1.6; color: var(--clr-muted); }
+
+.ai-chat-consent__note {
+  display: flex;
+  gap: 7px;
+  text-align: left;
+  margin: 0 0 14px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background-color: var(--clr-light-bg);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--clr-muted);
+}
+
+.ai-chat-consent__note i { margin-top: 3px; flex-shrink: 0; }
+.ai-chat-consent__links { margin: 0 0 16px; font-size: 12px; line-height: 1.6; color: var(--clr-muted); }
+.ai-chat-consent__links a { color: var(--clr-black); text-decoration: underline; }
+
+/* 44px min height on both: this is the one thing standing between a phone
+   visitor and the chat, so neither button may be a small tap target. */
+.ai-chat-consent__accept,
+.ai-chat-consent__decline {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ai-chat-consent__accept {
+  border: 1px solid var(--clr-black);
+  background-color: var(--clr-black);
+  color: var(--clr-bg);
+  margin-bottom: 8px;
+  transition: opacity .15s ease-out;
+}
+
+.ai-chat-consent__accept:hover { opacity: .85; }
+
+.ai-chat-consent__decline {
+  border: 1px solid var(--clr-border);
+  background-color: transparent;
+  color: var(--clr-muted);
+  font-weight: 500;
+  transition: border-color .15s ease-out, color .15s ease-out;
+}
+
+.ai-chat-consent__decline:hover { border-color: var(--clr-muted); color: var(--clr-black); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-chat-consent__accept,
+  .ai-chat-consent__decline { transition: none; }
+}
+
 @media (max-width: 480px) {
   .ai-chat-panel__input { font-size: 16px; }
   .ai-chat-panel {
