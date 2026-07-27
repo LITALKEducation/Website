@@ -1475,9 +1475,14 @@ async function submitAIChat(event) {
     const pending = appendAIChatMessage('pending', 'กำลังตอบ...');
 
     try {
+        // The server now proves ownership on this route like every other
+        // /portal one, so the token has to go with it.
         const res = await fetch(`${dataApiUrl}/portal/${encodeURIComponent(aiChatStudentId)}/chat`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(portalAuthToken ? { Authorization: `Bearer ${portalAuthToken}` } : {}),
+            },
             body: JSON.stringify({ conversationId: aiChatConversationId, message }),
         });
         const data = await res.json().catch(() => ({}));
