@@ -21,6 +21,77 @@ const learnState = {
 
 const TF_LABEL = { true: 'จริง (True)', false: 'เท็จ (False)' };
 
+/* ---------------- On-device auto-save ----------------
+   While a student is taking a quiz their answers are kept on THIS device
+   only (localStorage) — nothing touches the cloud until they press "ส่งคำตอบ",
+   at which point the attempt is graded and stored server-side. This means a
+   refresh, an accidental tab close, or a flaky connection never loses
+   in-progress work, and half-finished answers never leave the device. */
+
+// Namespaced per student + quiz so two students sharing a browser, or the same
+// student across different quizzes, never collide.
+function draftKey(quizId) {
+  return `litalk_quiz_draft_${learnStudentId || 'anon'}_${quizId}`;
+}
+
+function saveDraft(quizId, answers) {
+  try {
+    localStorage.setItem(draftKey(quizId), JSON.stringify({ answers, savedAt: Date.now() }));
+  } catch (err) {
+    // Private-mode / quota errors: auto-save is best-effort, never fatal.
+    console.warn('saveDraft failed:', err);
+  }
+}
+
+function readDraft(quizId) {
+  try {
+    const raw = localStorage.getItem(draftKey(quizId));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function clearDraft(quizId) {
+  try {
+    localStorage.removeItem(draftKey(quizId));
+  } catch {
+    /* ignore */
+  }
+}
+
+// Write the answer a stored draft holds back into the freshly rendered form.
+function applyAnswer(q, value) {
+  const name = `q_${q.id}`;
+  if (q.type === 'single') {
+    const el = document.querySelector(`input[name="${name}"][value="${Number(value)}"]`);
+    if (el) el.checked = true;
+  } else if (q.type === 'multiple') {
+    (Array.isArray(value) ? value : []).forEach((v) => {
+      const el = document.querySelector(`input[name="${name}"][value="${Number(v)}"]`);
+      if (el) el.checked = true;
+    });
+  } else if (q.type === 'truefalse') {
+    if (value === true || value === false) {
+      const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
+      if (el) el.checked = true;
+    }
+  } else {
+    const el = document.querySelector(`input[name="${name}"]`);
+    if (el && value != null) el.value = value;
+  }
+}
+
+function autosaveStamp(ts) {
+  const el = document.getElementById('learn-autosave');
+  if (!el) return;
+  const t = ts ? new Date(ts) : new Date();
+  const hh = String(t.getHours()).padStart(2, '0');
+  const mm = String(t.getMinutes()).padStart(2, '0');
+  el.innerHTML = `<i class="fas fa-cloud-arrow-down"></i> บันทึกบนอุปกรณ์แล้ว ${hh}:${mm}`;
+}
+
 function mdToHtml(text) {
   if (!text) return '';
   return typeof window.litalkMarkdown === 'function' ? window.litalkMarkdown(text) : escapeHtml(text);
@@ -178,6 +249,7 @@ function renderQuiz() {
             <button type="button" class="btn-learn-primary" onclick="submitQuiz()">
               <i class="fas fa-paper-plane"></i> ส่งคำตอบ
             </button>
+            <span class="learn-autosave" id="learn-autosave"></span>
           </div>
           <div id="learn-result"></div>
         </section>`;
@@ -198,6 +270,31 @@ function renderQuiz() {
       ${lessonHtml}
       ${quizHtml}
     </div>`;
+
+  // Restore any on-device draft into the form, then keep saving on every
+  // change (debounced) until the attempt is submitted.
+  const form = document.getElementById('learn-form');
+  if (form && hasQuestions && canAttempt) {
+    const draft = readDraft(quiz.id);
+    if (draft && draft.answers) {
+      questions.forEach((q) => applyAnswer(q, draft.answers[q.id]));
+      autosaveStamp(draft.savedAt);
+    }
+    let timer = null;
+    const persist = () => {
+      const answers = {};
+      questions.forEach((q) => {
+        answers[q.id] = collectAnswer(q);
+      });
+      saveDraft(quiz.id, answers);
+      autosaveStamp();
+    };
+    form.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(persist, 400);
+    });
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -265,6 +362,9 @@ async function submitQuiz() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || 'ส่งคำตอบไม่สำเร็จ');
+    // Uploaded to the cloud successfully — the on-device draft is now
+    // redundant, so drop it (a retake starts a fresh draft).
+    clearDraft(quiz.id);
     showResult(data);
   } catch (err) {
     console.error('submitQuiz:', err);
