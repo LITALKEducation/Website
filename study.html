@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>LITALK Education - เรียนออนไลน์</title>
+    <meta name="description" content="LITALK Education - แดชบอร์ดผู้เรียนออนไลน์ ติดตามความคืบหน้าและคะแนน">
+    <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', savedTheme || (systemPrefersDark ? 'dark' : 'light'));
+        })();
+    </script>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/fonts.css?v=20260714h">
+    <link rel="stylesheet" href="css/student-portal.css?v=20260727b">
+    <style>
+        /* On-demand dashboard — reuses the portal theme tokens (bg-secondary /
+           text-primary / …) so it tracks light & dark automatically. */
+        .sd-hello { font-size: 1.15rem; margin: 4px 0 18px; color: var(--text-primary, #111); }
+        .sd-section-title { font-size: 1.15rem; font-weight: 700; margin: 26px 0 14px; display: flex; align-items: center; gap: 9px; color: var(--text-primary, #111); }
+        .sd-section-title i { color: #ff5a1f; }
+        .sd-section-sub { color: var(--text-secondary, #777); font-size: .9rem; margin: -6px 0 12px; }
+        .sd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .sd-card { background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 16px; padding: 18px; }
+        .sd-card__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .sd-card__title { font-size: 1rem; font-weight: 700; margin: 0; color: var(--text-primary, #111); }
+        .sd-pct { font-weight: 800; color: #ff5a1f; font-variant-numeric: tabular-nums; }
+        .sd-bar { height: 8px; border-radius: 999px; background: var(--bg-tertiary, #eef0f3); overflow: hidden; margin: 12px 0 10px; }
+        .sd-bar span { display: block; height: 100%; background: linear-gradient(90deg, #ff7a3c, #ff5a1f); border-radius: 999px; transition: width .4s; }
+        .sd-card__meta { color: var(--text-secondary, #777); font-size: .85rem; margin-bottom: 14px; }
+        .sd-card__meta i { color: #ff5a1f; opacity: .85; margin-right: 2px; }
+        .sd-btn { display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; text-decoration: none;
+            background: #ff5a1f; color: #fff; font-weight: 600; font-size: .9rem; padding: 9px 16px; border-radius: 10px; font-family: inherit; }
+        .sd-btn:hover { filter: brightness(1.05); }
+        .sd-btn--sm { padding: 7px 13px; font-size: .85rem; }
+        .sd-btn--ghost { background: transparent; color: var(--text-primary, #333); border: 1px solid var(--border-color, #ddd); }
+        .sd-btn--danger { background: transparent; color: #dc2626; border: 1px solid rgba(220,38,38,.4); }
+        .sd-rec-list { display: flex; flex-direction: column; gap: 12px; }
+        .sd-rec { display: flex; align-items: center; gap: 14px; background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 14px; padding: 14px 16px; }
+        .sd-rec__body { flex: 1; min-width: 0; }
+        .sd-rec__title { margin: 0; font-size: .98rem; font-weight: 700; color: var(--text-primary, #111); }
+        .sd-rec__desc { margin: 4px 0 0; color: var(--text-secondary, #777); font-size: .85rem; }
+        .sd-rec__meta { margin-top: 6px; font-size: .82rem; color: #ff5a1f; font-weight: 600; }
+        /* To-do */
+        .sd-todo-head { display: flex; align-items: center; gap: 8px; }
+        .sd-icon-btn { background: transparent; border: none; cursor: pointer; color: var(--text-secondary, #888); font-size: .95rem; padding: 4px; }
+        .sd-icon-btn:hover { color: #ff5a1f; }
+        .sd-todo-list { display: flex; flex-direction: column; gap: 10px; }
+        .sd-todo { display: flex; align-items: center; gap: 13px; background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 13px; padding: 12px 15px; }
+        .sd-todo.is-locked { opacity: .6; }
+        .sd-todo__icon { flex: 0 0 34px; height: 34px; width: 34px; border-radius: 10px; background: var(--bg-tertiary, #f1f3f7); color: #ff5a1f; display: flex; align-items: center; justify-content: center; }
+        .sd-todo__main { flex: 1; min-width: 0; }
+        .sd-todo__title { font-weight: 600; color: var(--text-primary, #111); }
+        .sd-todo__meta { font-size: .8rem; color: var(--text-secondary, #888); margin-top: 2px; }
+        .sd-lock { color: var(--text-secondary, #aaa); padding: 0 6px; }
+        /* Profile */
+        .sd-profile { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; background: var(--bg-secondary, #fff);
+            border: 1px solid var(--border-color, #e5e7eb); border-radius: 18px; padding: 20px; }
+        .sd-avatar { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; flex: 0 0 76px; }
+        .sd-avatar--initial { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#ff7a3c,#ff5a1f); color: #fff; font-size: 2rem; font-weight: 800; }
+        .sd-profile__info { flex: 1; min-width: 160px; }
+        .sd-profile__name { font-size: 1.3rem; font-weight: 800; color: var(--text-primary, #111); }
+        .sd-profile__email { color: var(--text-secondary, #888); font-size: .9rem; margin-top: 2px; }
+        .sd-profile__stats { display: flex; gap: 18px; margin-top: 10px; font-size: .88rem; color: var(--text-secondary, #666); flex-wrap: wrap; }
+        .sd-profile__stats strong { color: #ff5a1f; }
+        .sd-profile__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .sd-receipts { display: flex; flex-direction: column; gap: 10px; }
+        .sd-receipt { display: flex; align-items: center; gap: 12px; background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 13px; padding: 12px 15px; }
+        .sd-receipt__main { flex: 1; min-width: 0; }
+        .sd-receipt__title { font-weight: 600; color: var(--text-primary, #111); }
+        .sd-receipt__meta { font-size: .8rem; color: var(--text-secondary, #888); }
+        .sd-receipt__amt { font-weight: 700; color: var(--text-primary, #111); font-variant-numeric: tabular-nums; }
+        .sd-muted { color: var(--text-secondary, #aaa); }
+        .sd-settings { display: flex; flex-direction: column; gap: 14px; }
+        .sd-setting { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: var(--bg-secondary, #fff);
+            border: 1px solid var(--border-color, #e5e7eb); border-radius: 14px; padding: 16px 18px; }
+        .sd-setting__title { font-weight: 700; color: var(--text-primary, #111); }
+        .sd-setting__sub { font-size: .84rem; color: var(--text-secondary, #888); margin-top: 3px; max-width: 46ch; }
+        .sd-badge { flex: 0 0 auto; font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--bg-tertiary, #f1f3f7); color: var(--text-secondary, #888); }
+        .sd-empty { text-align: center; padding: 46px 20px; color: var(--text-secondary, #888); }
+        .sd-empty i { font-size: 2.2rem; opacity: .5; display: block; margin-bottom: 12px; }
+        .sd-empty p { font-weight: 600; margin: 0 0 14px; color: var(--text-primary, #333); }
+    </style>
+</head>
+
+<body data-service-surface="portal">
+    <a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
+
+    <div id="student-dashboard" class="dashboard-page" style="display:none;">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
+                    <span class="nav-brand-text">เรียนออนไลน์</span>
+                </a>
+                <div class="nav-actions">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                        <i id="theme-toggle-icon-dash" class="fas fa-moon"></i>
+                    </button>
+                    <button class="btn-logout-header" onclick="logout()" id="logout-btn">
+                        <i class="fas fa-arrow-right-from-bracket"></i>
+                        <span>ออกจากระบบ</span>
+                    </button>
+                </div>
+                <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="student-mobile-drawer">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+
+            <div class="nav-drawer t-panel-slide" id="student-mobile-drawer" data-open="false" role="navigation" aria-label="Mobile navigation">
+                <a href="study" class="drawer-link" data-tab="home" onclick="sdShowTab('home');return false;"><i class="fas fa-gauge-high"></i> หน้าหลัก</a>
+                <a href="study?tab=todo" class="drawer-link" data-tab="todo" onclick="sdShowTab('todo');return false;"><i class="fas fa-list-check"></i> <span data-tab-label="todo">สิ่งที่ต้องทำ</span></a>
+                <a href="learn" class="drawer-link"><i class="fas fa-book-open"></i> บทเรียน</a>
+                <a href="study?tab=me" class="drawer-link" data-tab="me" onclick="sdShowTab('me');return false;"><i class="fas fa-user"></i> หน้าตัวเอง</a>
+                <div class="drawer-divider"></div>
+                <a href="courses" class="drawer-link"><i class="fas fa-graduation-cap"></i> คอร์สทั้งหมด</a>
+                <a href="/" class="drawer-link"><i class="fas fa-home"></i> หน้าหลักเว็บไซต์</a>
+                <div class="drawer-divider"></div>
+                <div class="drawer-actions">
+                    <button class="drawer-action-btn theme-toggle-btn-mobile" onclick="toggleTheme()" aria-label="Toggle Theme">
+                        <i id="theme-toggle-icon-mobile" class="fas fa-moon"></i>
+                        <span id="theme-text-mobile">โหมดมืด</span>
+                    </button>
+                    <button class="drawer-action-btn logout-btn-mobile" onclick="logout()" id="logout-btn-mobile">
+                        <i class="fas fa-arrow-right-from-bracket"></i>
+                        <span>ออกจากระบบ</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="dashboard-content" id="main-content">
+            <nav class="portal-tabs" aria-label="Dashboard navigation">
+                <a href="study" class="portal-tab" data-tab="home" onclick="sdShowTab('home');return false;"><i class="fas fa-gauge-high"></i> หน้าหลัก</a>
+                <a href="study?tab=todo" class="portal-tab" data-tab="todo" onclick="sdShowTab('todo');return false;"><i class="fas fa-list-check"></i> <span data-tab-label="todo">สิ่งที่ต้องทำ</span></a>
+                <a href="learn" class="portal-tab"><i class="fas fa-book-open"></i> บทเรียน</a>
+                <a href="study?tab=me" class="portal-tab" data-tab="me" onclick="sdShowTab('me');return false;"><i class="fas fa-user"></i> หน้าตัวเอง</a>
+            </nav>
+
+            <section class="content-section" id="tab-home"></section>
+            <section class="content-section" id="tab-todo" hidden></section>
+            <section class="content-section" id="tab-me" hidden></section>
+        </main>
+
+        <footer class="dashboard-footer">
+            <div class="footer-content">
+                <i class="far fa-copyright"></i> 2026 LITALK Education <i class="fas fa-circle" style="font-size:4px;vertical-align:middle;margin:0 8px;"></i> All rights reserved
+            </div>
+        </footer>
+
+        <nav class="bottom-nav" aria-label="เมนูหลัก">
+            <a href="study" class="bottom-nav-item" data-tab="home" onclick="sdShowTab('home');return false;">
+                <i class="fas fa-gauge-high"></i><span>หน้าหลัก</span>
+            </a>
+            <a href="study?tab=todo" class="bottom-nav-item" data-tab="todo" onclick="sdShowTab('todo');return false;">
+                <i class="fas fa-list-check"></i><span data-tab-label="todo">สิ่งที่ต้องทำ</span>
+            </a>
+            <a href="learn" class="bottom-nav-item">
+                <i class="fas fa-book-open"></i><span>บทเรียน</span>
+            </a>
+            <a href="study?tab=me" class="bottom-nav-item" data-tab="me" onclick="sdShowTab('me');return false;">
+                <i class="fas fa-user"></i><span>ตัวเอง</span>
+            </a>
+        </nav>
+
+        <a id="fab-join" class="fab" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener" aria-label="ติดต่อแอดมินทาง LINE">
+            <i class="fab fa-line"></i>
+        </a>
+    </div>
+
+    <script src="js/service-notice.js?v=20260727h" defer></script>
+    <script src="js/markdown.js?v=20260727g"></script>
+    <script src="js/student-portal.js?v=20260727g"></script>
+    <script src="js/study.js?v=20260728a"></script>
+</body>
+
+</html>

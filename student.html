@@ -392,6 +392,13 @@
         async function enterFromAuth0Session() {
             const studentId = await resolveAuthedStudentId();
             if (studentId) {
+                // On-demand learners get the self-paced dashboard instead of the
+                // 1-on-1 tutoring portal. accountType is set by whoami during
+                // resolveAuthedStudentId; a null (whoami unavailable) stays here.
+                if (window.litalkAccountType === 'on_demand') {
+                    window.location.replace('study');
+                    return true;
+                }
                 showDashboard(studentId);
                 return true;
             }
