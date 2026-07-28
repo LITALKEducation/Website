@@ -207,14 +207,23 @@ function renderHome() {
     return;
   }
 
+  // Split the free quizzes by audience: self-paced "on demand" vs. those a
+  // 1-on-1 teacher uses. A quiz with no audience defaults to on demand.
+  const tutored = quizzes.filter((q) => q.audience === 'tutored');
+  const onDemand = quizzes.filter((q) => q.audience !== 'tutored');
+
   let html = '';
   if (courses.length) {
     html += `<h2 class="learn-section-title"><i class="fas fa-graduation-cap"></i> คอร์สเรียน</h2>
       <div class="learn-grid">${courses.map(courseCardHtml).join('')}</div>`;
   }
-  if (quizzes.length) {
-    html += `<h2 class="learn-section-title" style="margin-top:26px;"><i class="fas fa-clipboard-question"></i> แบบทดสอบฟรี</h2>
-      <div class="learn-grid">${quizzes.map(quizCardHtml).join('')}</div>`;
+  if (onDemand.length) {
+    html += `<h2 class="learn-section-title" style="margin-top:26px;"><i class="fas fa-bolt"></i> แบบทดสอบ · เรียน On Demand</h2>
+      <div class="learn-grid">${onDemand.map(quizCardHtml).join('')}</div>`;
+  }
+  if (tutored.length) {
+    html += `<h2 class="learn-section-title" style="margin-top:26px;"><i class="fas fa-chalkboard-user"></i> แบบทดสอบจากครูผู้สอน · เรียนตัวต่อตัว</h2>
+      <div class="learn-grid">${tutored.map(quizCardHtml).join('')}</div>`;
   }
   view.innerHTML = html;
 }
