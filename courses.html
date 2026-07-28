@@ -4,12 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Blog — LITALK Education</title>
-  <meta name="description" content="Articles, tips and guides from the LITALK team to support your English learning journey.">
-  <meta property="og:title" content="Blog — LITALK Education">
-  <meta property="og:description" content="Articles, tips and guides from the LITALK team to support your English learning journey.">
+  <title>Online Courses — LITALK Education</title>
+  <meta name="description" content="Self-paced online English courses from LITALK — learn on demand with video lessons and auto-graded tests. Browse and register.">
+  <meta property="og:title" content="Online Courses — LITALK Education">
+  <meta property="og:description" content="Self-paced online English courses from LITALK — learn on demand with video lessons and auto-graded tests.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://litalkeducation.com/blog">
+  <meta property="og:url" content="https://litalkeducation.com/courses">
   <meta property="og:image" content="https://litalkeducation.com/img/hero-visual.png">
   <meta property="og:site_name" content="LITALK Education">
   <meta name="twitter:card" content="summary_large_image">
@@ -19,6 +19,44 @@
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
   <link rel="stylesheet" href="css/style.css?v=20260727h">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* On-demand course catalogue — reuses the marketing tokens so it tracks
+       light/dark with the rest of the site. */
+    .course-card { display: flex; flex-direction: column; justify-content: space-between; }
+    .course-card__link { display: block; color: inherit; text-decoration: none; }
+    .course-card__desc { color: var(--clr-secondary); font-size: .95rem; line-height: 1.55; margin: 10px 0 0; }
+    .course-card__meta { margin-top: 14px; color: var(--clr-muted); font-size: .85rem; }
+    .course-card__meta i { margin-right: 5px; }
+    .course-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 16px 22px; border-top: 1px solid var(--clr-border); }
+    .course-price { font-weight: 700; font-size: 1.05rem; color: var(--clr-black); font-variant-numeric: tabular-nums; }
+    .course-price--free { color: #16a34a; }
+    .course-price--lg { font-size: 1.7rem; }
+    .course-empty { text-align: center; padding: 60px 20px; color: var(--clr-muted); }
+    .course-empty i { font-size: 2.2rem; opacity: .5; margin-bottom: 12px; display: block; }
+    /* Detail */
+    .course-back { display: inline-flex; align-items: center; gap: 8px; color: var(--clr-muted);
+      text-decoration: none; font-weight: 600; font-size: .9rem; margin-bottom: 16px; }
+    .course-back:hover { color: var(--clr-black); }
+    .course-detail__title { margin-top: 6px; }
+    .course-buy { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 22px 0 8px; }
+    .course-buy--bottom { margin-top: 34px; }
+    .course-overview { margin: 28px 0; line-height: 1.75; color: var(--clr-black); font-size: 1.02rem; }
+    .course-overview h1, .course-overview h2, .course-overview h3 { margin: 1em 0 .4em; }
+    .course-overview p { margin: .7em 0; }
+    .course-overview img { max-width: 100%; border-radius: 10px; }
+    .course-section-title { font-size: 1.25rem; font-weight: 700; margin: 32px 0 16px; color: var(--clr-black); }
+    .course-syl { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+    .course-syl__item { display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+      border: 1px solid var(--clr-border); border-radius: 14px; background: var(--clr-bg); }
+    .course-syl__num { flex: 0 0 30px; height: 30px; width: 30px; border-radius: 50%;
+      background: var(--clr-light-bg); color: var(--clr-black); font-weight: 700;
+      display: flex; align-items: center; justify-content: center; font-size: .9rem; }
+    .course-syl__main { display: flex; flex-direction: column; }
+    .course-syl__title { font-weight: 600; color: var(--clr-black); }
+    .course-syl__kind { font-size: .82rem; color: var(--clr-muted); margin-top: 2px; }
+    .course-detail__empty { color: var(--clr-muted); }
+  </style>
 </head>
 
 <body class="page-enter" data-service-surface="website">
@@ -36,11 +74,11 @@
           </a>
 
           <ul class="nav__links" role="list">
-            <li><a href="courses" class="nav__link" data-en="Online Learning" data-th="เรียนออนไลน์">Online Learning</a></li>
+            <li><a href="courses" class="nav__link nav__link--active" data-en="Online Learning" data-th="เรียนออนไลน์">Online Learning</a></li>
             <li><a href="programs" class="nav__link" data-en="1-on-1 Tutoring" data-th="เรียนตัวต่อตัว">1-on-1 Tutoring</a></li>
             <li><a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a></li>
             <li><a href="ask" class="nav__link" data-en="Ask" data-th="ถามคำศัพท์">Ask</a></li>
-            <li><a href="blog" class="nav__link nav__link--active" data-en="Blog" data-th="บทความ">Blog</a></li>
+            <li><a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a></li>
             <li><a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
           </ul>
 
@@ -84,11 +122,11 @@
       </div>
 
       <div class="nav__drawer" id="mobile-drawer" role="navigation" aria-label="Mobile navigation">
-        <a href="courses" class="nav__link" data-en="Online Learning" data-th="เรียนออนไลน์">Online Learning</a>
+        <a href="courses" class="nav__link nav__link--active" data-en="Online Learning" data-th="เรียนออนไลน์">Online Learning</a>
         <a href="programs" class="nav__link" data-en="1-on-1 Tutoring" data-th="เรียนตัวต่อตัว">1-on-1 Tutoring</a>
         <a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a>
         <a href="ask" class="nav__link" data-en="Ask" data-th="ถามคำศัพท์">Ask</a>
-        <a href="blog" class="nav__link nav__link--active" data-en="Blog" data-th="บทความ">Blog</a>
+        <a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a>
         <a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a>
         <div class="nav__actions">
           <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
@@ -115,66 +153,69 @@
       </div>
     </nav>
   </header>
+
   <main id="main-content">
 
     <!-- ============================================================
-         PAGE HERO
+         CATALOGUE VIEW
          ============================================================ -->
-    <section class="page-hero" aria-labelledby="blog-page-heading" style="padding-bottom: 48px;">
-      <div class="container">
-        <nav class="page-hero__breadcrumb" aria-label="Breadcrumb">
-          <a href="/" data-en="Home" data-th="หน้าหลัก">Home</a>
-          <span class="sep" aria-hidden="true">/</span>
-          <span data-en="Blog" data-th="บทความ">Blog</span>
-        </nav>
-        <span class="page-hero__label" data-en="Blog &amp; Resources" data-th="บทความและทรัพยากร">Blog &amp; Resources</span>
-        <h1 class="page-hero__title" id="blog-page-heading">
-          <span data-en="Keep learning," data-th="เรียนรู้ได้">Keep learning,</span><br>
-          <span data-en="every day." data-th="ทุกวัน">every day.</span>
-        </h1>
-        <p class="page-hero__sub" data-en="Articles, tips and guides from the LITALK team and our teachers to support your English journey between lessons." data-th="บทความ เคล็ดลับ และคู่มือจากทีม LITALK และอาจารย์ของเรา เพื่อสนับสนุนการเรียนภาษาอังกฤษของคุณระหว่างบทเรียน">
-          Articles, tips and guides from the LITALK team and our teachers to support your English journey between lessons.
-        </p>
-        <div class="blog-filter" id="blog-filter" role="group" aria-label="Filter by category" hidden></div>
-      </div>
-    </section>
+    <div id="course-catalog">
+      <section class="page-hero" aria-labelledby="courses-page-heading" style="padding-bottom: 40px;">
+        <div class="container">
+          <nav class="page-hero__breadcrumb" aria-label="Breadcrumb">
+            <a href="/" data-en="Home" data-th="หน้าหลัก">Home</a>
+            <span class="sep" aria-hidden="true">/</span>
+            <span data-en="Online Learning" data-th="เรียนออนไลน์">Online Learning</span>
+          </nav>
+          <span class="page-hero__label" data-en="Learn On Demand" data-th="เรียนได้ทุกที่ทุกเวลา">Learn On Demand</span>
+          <h1 class="page-hero__title" id="courses-page-heading">
+            <span data-en="Study online," data-th="เรียนออนไลน์">Study online,</span><br>
+            <span data-en="at your own pace." data-th="ในจังหวะของคุณ">at your own pace.</span>
+          </h1>
+          <p class="page-hero__sub" data-en="Self-paced English courses with video lessons and instant auto-graded tests. Pick a course, register, and start learning right away." data-th="คอร์สภาษาอังกฤษที่เรียนได้ด้วยตัวเอง พร้อมวีดีโอบทเรียนและแบบทดสอบที่ตรวจคะแนนอัตโนมัติทันที เลือกคอร์ส ลงทะเบียน แล้วเริ่มเรียนได้เลย">
+            Self-paced English courses with video lessons and instant auto-graded tests. Pick a course, register, and start learning right away.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" aria-label="Courses" style="padding-top: 40px;">
+        <div class="container">
+          <div class="blog__grid" id="course-grid" style="margin-top: 0;">
+            <article class="blog-card" aria-hidden="true">
+              <div class="blog-card__body">
+                <span class="blog-card__tag skeleton">......</span>
+                <h3 class="blog-card__title skeleton">..........................</h3>
+                <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
+              </div>
+            </article>
+            <article class="blog-card" aria-hidden="true">
+              <div class="blog-card__body">
+                <span class="blog-card__tag skeleton">......</span>
+                <h3 class="blog-card__title skeleton">..........................</h3>
+                <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
+              </div>
+            </article>
+            <article class="blog-card" aria-hidden="true">
+              <div class="blog-card__body">
+                <span class="blog-card__tag skeleton">......</span>
+                <h3 class="blog-card__title skeleton">..........................</h3>
+                <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
+              </div>
+            </article>
+          </div>
+          <div class="course-empty" id="course-empty" hidden>
+            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+            <span data-en="No courses available yet — check back soon." data-th="ยังไม่มีคอร์สในขณะนี้ — กลับมาดูใหม่เร็ว ๆ นี้"></span>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <!-- ============================================================
-         POSTS
+         DETAIL VIEW (single course)
          ============================================================ -->
-    <section class="section" aria-label="Blog posts" style="padding-top: 56px;">
-      <div class="container">
-        <div class="blog__grid" id="blog-grid" style="margin-top: 0;">
-          <article class="blog-card" aria-hidden="true">
-            <div class="blog-card__img skeleton"></div>
-            <div class="blog-card__body">
-              <span class="blog-card__tag skeleton">......</span>
-              <h3 class="blog-card__title skeleton">..........................</h3>
-              <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
-            </div>
-          </article>
-          <article class="blog-card" aria-hidden="true">
-            <div class="blog-card__img skeleton"></div>
-            <div class="blog-card__body">
-              <span class="blog-card__tag skeleton">......</span>
-              <h3 class="blog-card__title skeleton">..........................</h3>
-              <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
-            </div>
-          </article>
-          <article class="blog-card" aria-hidden="true">
-            <div class="blog-card__img skeleton"></div>
-            <div class="blog-card__body">
-              <span class="blog-card__tag skeleton">......</span>
-              <h3 class="blog-card__title skeleton">..........................</h3>
-              <div class="blog-card__meta"><span class="blog-card__date skeleton">..........</span></div>
-            </div>
-          </article>
-        </div>
-        <div class="blog-empty" id="blog-empty" hidden>
-          <i class="fas fa-feather" aria-hidden="true"></i>
-          <span data-en="No articles published yet — check back soon." data-th="ยังไม่มีบทความเผยแพร่ — กลับมาดูใหม่เร็ว ๆ นี้"></span>
-        </div>
-      </div>
+    <section class="page-hero" id="course-detail" hidden style="padding-bottom: 64px;">
+      <div class="container" id="course-detail-inner"></div>
     </section>
 
   </main>
@@ -189,28 +230,19 @@
             Building confident English communicators, one lesson at a time.
           </p>
           <div class="footer__socials" aria-label="Social media">
-            <a href="https://www.facebook.com/LITALKOfficial" class="footer__social-icon" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
-              <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="https://www.instagram.com/LITALKOfficial" class="footer__social-icon" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-              <i class="fab fa-instagram"></i>
-            </a>
-            <a href="https://x.com/LITALKOfficial" class="footer__social-icon" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer">
-              <i class="fab fa-x-twitter"></i>
-            </a>
-            <a href="https://lin.ee/n4zLBXa" class="footer__social-icon" aria-label="Line OA" target="_blank" rel="noopener noreferrer">
-              <i class="fab fa-line"></i>
-            </a>
+            <a href="https://www.facebook.com/LITALKOfficial" class="footer__social-icon" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/LITALKOfficial" class="footer__social-icon" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+            <a href="https://x.com/LITALKOfficial" class="footer__social-icon" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://lin.ee/n4zLBXa" class="footer__social-icon" aria-label="Line OA" target="_blank" rel="noopener noreferrer"><i class="fab fa-line"></i></a>
           </div>
         </div>
 
         <div>
-          <h3 class="footer__col-title" data-en="Programs" data-th="หลักสูตร">Programs</h3>
+          <h3 class="footer__col-title" data-en="Learn" data-th="เรียน">Learn</h3>
           <ul class="footer__links" role="list">
-            <li><a href="programs#starter" class="footer__link" data-en="Starter" data-th="ผู้เริ่มต้น">Starter</a></li>
-            <li><a href="programs#communicator" class="footer__link" data-en="Communicator" data-th="นักสื่อสาร">Communicator</a></li>
-            <li><a href="programs#pro" class="footer__link" data-en="Pro English" data-th="Pro English">Pro English</a></li>
-            <li><a href="programs#custom" class="footer__link" data-en="Custom Package" data-th="แพ็คเกจกำหนดเอง">Custom Package</a></li>
+            <li><a href="courses" class="footer__link" data-en="Online Courses" data-th="คอร์สออนไลน์">Online Courses</a></li>
+            <li><a href="programs" class="footer__link" data-en="1-on-1 Tutoring" data-th="เรียนตัวต่อตัว">1-on-1 Tutoring</a></li>
+            <li><a href="ask" class="footer__link" data-en="Ask a Word" data-th="ถามคำศัพท์">Ask a Word</a></li>
           </ul>
         </div>
 
@@ -226,13 +258,10 @@
         <div>
           <h3 class="footer__col-title" data-en="Resources" data-th="ทรัพยากร">Resources</h3>
           <ul class="footer__links" role="list">
-            <li><a href="ask" class="footer__link" data-en="Ask a Word" data-th="ถามคำศัพท์">Ask a Word</a></li>
             <li><a href="blog" class="footer__link" data-en="Blog" data-th="บทความ">Blog</a></li>
             <li><a href="/#faq" class="footer__link" data-en="FAQ" data-th="คำถามที่พบบ่อย">FAQ</a></li>
             <li><a href="privacy-policy" class="footer__link" data-en="Privacy Policy" data-th="นโยบายความเป็นส่วนตัว">Privacy Policy</a></li>
             <li><a href="terms-of-service" class="footer__link" data-en="Terms of Service" data-th="ข้อกำหนดการใช้งาน">Terms of Service</a></li>
-            <li><a href="ai-terms" class="footer__link" data-en="AI Chat Terms" data-th="ข้อกำหนดการใช้แชท AI">AI Chat Terms</a></li>
-            <li><a href="ai-privacy" class="footer__link" data-en="AI Chat Privacy" data-th="ความเป็นส่วนตัวแชท AI">AI Chat Privacy</a></li>
           </ul>
         </div>
 
@@ -261,56 +290,61 @@
   <script src="js/service-notice.js?v=20260727h" defer></script>
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
-  <script src="js/blog.js?v=20260727a" defer></script>
+  <script src="js/courses.js?v=20260728a" defer></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', async () => {
-      const grid = document.getElementById('blog-grid');
-      const empty = document.getElementById('blog-empty');
-      const filter = document.getElementById('blog-filter');
-      let posts = [];
-      let activeCat = null;
+      const catalog = document.getElementById('course-catalog');
+      const detailSection = document.getElementById('course-detail');
+      const detailInner = document.getElementById('course-detail-inner');
+      const grid = document.getElementById('course-grid');
+      const empty = document.getElementById('course-empty');
+      const id = new URLSearchParams(location.search).get('id');
+      const isTh = () => LitalkCourses.lang() === 'th';
 
-      function render() {
-        const shown = activeCat ? posts.filter(p => (p.category || 'Article') === activeCat) : posts;
-        if (shown.length === 0) {
+      // Re-apply the site's data-en/data-th text swap after we inject markup.
+      const applyLang = () => {
+        if (typeof window.litalkApplyLang === 'function') window.litalkApplyLang();
+      };
+
+      if (id) {
+        catalog.hidden = true;
+        detailSection.hidden = false;
+        try {
+          const data = await LitalkCourses.fetchCourse(id);
+          if (!data || !data.course) {
+            detailInner.innerHTML = `<a class="course-back" href="courses"><i class="fas fa-arrow-left"></i> ${isTh() ? 'คอร์สทั้งหมด' : 'All courses'}</a>
+              <div class="course-empty"><i class="fas fa-triangle-exclamation"></i><span>${isTh() ? 'ไม่พบคอร์สนี้' : 'Course not found.'}</span></div>`;
+          } else {
+            detailInner.innerHTML = LitalkCourses.detailHtml(data);
+          }
+        } catch (err) {
+          console.warn('courses: failed to load course', err);
+          detailInner.innerHTML = `<a class="course-back" href="courses"><i class="fas fa-arrow-left"></i> ${isTh() ? 'คอร์สทั้งหมด' : 'All courses'}</a>
+            <div class="course-empty"><i class="fas fa-triangle-exclamation"></i><span>${isTh() ? 'ไม่สามารถโหลดคอร์สได้ กรุณาลองใหม่ภายหลัง' : 'Could not load this course — please try again later.'}</span></div>`;
+        }
+        applyLang();
+        return;
+      }
+
+      // Catalogue
+      try {
+        const courses = await LitalkCourses.fetchCourses();
+        if (!courses.length) {
           grid.innerHTML = '';
           empty.hidden = false;
         } else {
           empty.hidden = true;
-          grid.innerHTML = shown.map(LitalkBlog.cardHtml).join('');
+          grid.innerHTML = courses.map(LitalkCourses.cardHtml).join('');
         }
-      }
-
-      function renderFilter() {
-        const cats = [...new Set(posts.map(p => p.category || 'Article'))];
-        if (cats.length < 2) { filter.hidden = true; return; }
-        filter.hidden = false;
-        const isTh = LitalkBlog.lang() === 'th';
-        filter.innerHTML = '<button class="blog-filter__chip active" data-cat="" data-en="All" data-th="ทั้งหมด">' + (isTh ? 'ทั้งหมด' : 'All') + '</button>' +
-          cats.map(c => `<button class="blog-filter__chip" data-cat="${LitalkBlog.escapeHtml(c)}">${LitalkBlog.escapeHtml(c)}</button>`).join('');
-        filter.querySelectorAll('.blog-filter__chip').forEach(chip => {
-          chip.addEventListener('click', () => {
-            activeCat = chip.getAttribute('data-cat') || null;
-            filter.querySelectorAll('.blog-filter__chip').forEach(c => c.classList.toggle('active', c === chip));
-            render();
-          });
-        });
-      }
-
-      try {
-        posts = await LitalkBlog.fetchPosts();
-        renderFilter();
-        render();
       } catch (err) {
-        console.warn('blog: failed to load posts', err);
+        console.warn('courses: failed to load catalogue', err);
         grid.innerHTML = '';
         empty.hidden = false;
-        empty.querySelector('span').setAttribute('data-en', 'Could not load articles right now — please try again later.');
-        empty.querySelector('span').setAttribute('data-th', 'ไม่สามารถโหลดบทความได้ในขณะนี้ กรุณาลองใหม่ภายหลัง');
-        empty.querySelector('span').textContent = LitalkBlog.lang() === 'th'
-          ? 'ไม่สามารถโหลดบทความได้ในขณะนี้ กรุณาลองใหม่ภายหลัง'
-          : 'Could not load articles right now — please try again later.';
+        const span = empty.querySelector('span');
+        span.setAttribute('data-en', 'Could not load courses right now — please try again later.');
+        span.setAttribute('data-th', 'ไม่สามารถโหลดคอร์สได้ในขณะนี้ กรุณาลองใหม่ภายหลัง');
       }
+      applyLang();
     });
   </script>
 

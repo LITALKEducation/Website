@@ -728,6 +728,15 @@ window.startTest = startTest;
 window.onload = async () => {
   updateThemeIcons(document.documentElement.getAttribute('data-theme'));
 
+  // A visitor may arrive from the public catalogue at learn?course=<id> wanting
+  // to open that course. Stash it BEFORE the (possible) login bounce so the
+  // intent survives sign-in, then consume it once signed in.
+  const params = new URLSearchParams(window.location.search);
+  const courseParam = params.get('course');
+  if (courseParam) {
+    try { localStorage.setItem('litalk_pending_course', courseParam); } catch { /* ignore */ }
+  }
+
   const studentId = await resolveAuthedStudentId();
   if (!studentId) {
     // Not signed in — the portal entry page handles login.
@@ -743,12 +752,21 @@ window.onload = async () => {
   // Coming back from a successful Stripe checkout: enrollment is granted by
   // the webhook, which may land a moment after the redirect, so tell the
   // student and reload shortly after.
-  const params = new URLSearchParams(window.location.search);
   if (params.get('paid') === '1') {
     window.history.replaceState({}, '', 'learn');
     if (typeof window.litalkToast === 'function') window.litalkToast('ชำระเงินสำเร็จ! กำลังปลดล็อกคอร์สให้คุณ');
     setTimeout(loadHome, 2500);
   }
 
-  loadHome();
+  let pendingCourse = courseParam;
+  if (!pendingCourse) {
+    try { pendingCourse = localStorage.getItem('litalk_pending_course'); } catch { /* ignore */ }
+  }
+  if (pendingCourse && params.get('paid') !== '1') {
+    try { localStorage.removeItem('litalk_pending_course'); } catch { /* ignore */ }
+    window.history.replaceState({}, '', 'learn');
+    openCourse(pendingCourse);
+  } else {
+    loadHome();
+  }
 };
