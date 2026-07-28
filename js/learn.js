@@ -175,8 +175,12 @@ function courseCardHtml(c) {
          ${Number(c.priceSatang) > 0 ? 'ดูรายละเอียด / ซื้อคอร์ส' : 'ดูรายละเอียด'} <i class="fas fa-arrow-right"></i>
        </button>`;
 
+  const cover = Number(c.hasCover)
+    ? `<div class="learn-card__img"><img src="${dataApiUrl}/courses/public/${Number(c.id)}/cover" alt="" loading="lazy"></div>`
+    : '';
   return `
     <article class="learn-card learn-card--course">
+      ${cover}
       <div class="learn-card__body">
         <div class="learn-card__head">
           <h3 class="learn-card__title">${title}</h3>

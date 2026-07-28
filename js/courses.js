@@ -78,9 +78,13 @@ window.LitalkCourses = (function () {
     const free = (Number(course.priceSatang) || 0) <= 0;
     const meta = [];
     if (Number(course.itemCount) > 0) meta.push(`<i class="fas fa-book-open"></i> ${course.itemCount} ${t('lessons', 'บทเรียน')}`);
+    const cover = Number(course.hasCover)
+      ? `<div class="course-card__img"><img src="${API}/courses/public/${Number(course.id)}/cover" alt="" loading="lazy"></div>`
+      : '';
     return `
       <article class="blog-card course-card">
         <a class="course-card__link" href="courses?id=${Number(course.id)}" aria-label="${title}">
+          ${cover}
           <div class="blog-card__body">
             <span class="blog-card__tag">${cat}</span>
             <h3 class="blog-card__title">${title}</h3>
@@ -131,8 +135,12 @@ window.LitalkCourses = (function () {
     const desc = escapeHtml(pick(course, 'description'));
     const overview = pick(course, 'overview');
     const free = (Number(course.priceSatang) || 0) <= 0;
+    const cover = Number(course.hasCover)
+      ? `<div class="course-detail__cover"><img src="${API}/courses/public/${Number(course.id)}/cover" alt=""></div>`
+      : '';
     return `
       <a class="course-back" href="courses"><i class="fas fa-arrow-left"></i> ${t('All courses', 'คอร์สทั้งหมด')}</a>
+      ${cover}
       <span class="page-hero__label">${course.category ? escapeHtml(course.category) : t('On-demand course', 'คอร์สเรียน On Demand')}</span>
       <h1 class="page-hero__title course-detail__title">${title}</h1>
       ${desc ? `<p class="page-hero__sub">${desc}</p>` : ''}

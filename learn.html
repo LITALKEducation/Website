@@ -30,6 +30,8 @@
             background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb);
             border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: box-shadow .2s, transform .2s; }
         .learn-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+        .learn-card__img { aspect-ratio: 16 / 9; background: var(--bg-tertiary, #f1f3f7); overflow: hidden; }
+        .learn-card__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .learn-card__body { padding: 18px 18px 8px; }
         .learn-card__head { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
         .learn-card__title { font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-primary, #111); }
@@ -131,7 +133,7 @@
     </style>
 </head>
 
-<body data-service-surface="portal">
+<body data-service-surface="portal,learning">
     <a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
 
     <!-- STUDENT DASHBOARD (Learn & Test page) -->

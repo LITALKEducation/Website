@@ -24,6 +24,10 @@
        light/dark with the rest of the site. */
     .course-card { display: flex; flex-direction: column; justify-content: space-between; }
     .course-card__link { display: block; color: inherit; text-decoration: none; }
+    .course-card__img { aspect-ratio: 16 / 9; background: var(--clr-light-bg); overflow: hidden; }
+    .course-card__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .course-detail__cover { border-radius: 16px; overflow: hidden; margin-bottom: 20px; aspect-ratio: 16 / 9; background: var(--clr-light-bg); }
+    .course-detail__cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .course-card__desc { color: var(--clr-secondary); font-size: .95rem; line-height: 1.55; margin: 10px 0 0; }
     .course-card__meta { margin-top: 14px; color: var(--clr-muted); font-size: .85rem; }
     .course-card__meta i { margin-right: 5px; }
@@ -59,7 +63,7 @@
   </style>
 </head>
 
-<body class="page-enter" data-service-surface="website">
+<body class="page-enter" data-service-surface="website,learning">
 
   <!-- ============================================================
        NAVIGATION
