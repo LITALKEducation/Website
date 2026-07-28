@@ -4028,11 +4028,16 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background-color: color-mix(in srgb, var(--clr-bg) 92%, transparent);
-  backdrop-filter: blur(6px);
+  /* Opaque, not a tint. This is a closed door, not a modal over content you
+     are coming back to — a page still ghosting through behind it reads as a
+     banner the visitor might be able to get past. */
+  background-color: var(--clr-bg);
+  overscroll-behavior: contain;
 }
 
-/* Only the blocking layer takes the page over. */
+/* Only the blocking layer takes the page over. Both elements are needed —
+   on iOS, overflow on <body> alone does not always stop the page moving. */
+html:has(body.svc-locked),
 body.svc-locked { overflow: hidden; }
 
 .svc-card {
@@ -4043,7 +4048,21 @@ body.svc-locked { overflow: hidden; }
   box-shadow: 0 18px 40px -12px rgba(16, 24, 40, .22);
 }
 
-.svc-card--blocking { max-width: 440px; text-align: center; padding: 32px 28px; }
+/* Lifted off the backdrop rather than sharing its colour: --clr-bg is pure
+   black in dark mode, so a card painted in it against a backdrop made of it
+   showed as nothing but a hairline border. */
+.svc-card--blocking {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  padding: 32px 28px;
+  background-color: var(--clr-light-bg);
+  box-shadow: 0 24px 60px -16px rgba(0, 0, 0, .5);
+  /* An admin can write a long message. Scroll inside the card rather than
+     letting it grow off the top and bottom of a small phone. */
+  max-height: 100%;
+  overflow-y: auto;
+}
 
 .svc-card__icon {
   width: 44px;
@@ -4057,16 +4076,28 @@ body.svc-locked { overflow: hidden; }
   color: var(--clr-black);
   font-size: 17px;
 }
-.svc-card--blocking .svc-card__icon { margin-left: auto; margin-right: auto; }
+/* The card is already --clr-light-bg here, so the circle needs its own tone. */
+.svc-card--blocking .svc-card__icon {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: color-mix(in srgb, var(--clr-black) 12%, transparent);
+}
 
 .svc-card__title { margin: 0 0 8px; font-size: 17px; font-weight: 700; color: var(--clr-black); }
-.svc-card--blocking .svc-card__title { font-size: 21px; }
+.svc-card--blocking .svc-card__title { font-size: 20px; line-height: 1.4; }
 .svc-card__body { margin: 0 0 12px; font-size: 14px; line-height: 1.65; color: var(--clr-muted); }
 .svc-card__meta { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--clr-black); }
 
 .svc-card__btn {
-  margin-top: 16px;
+  display: block;
+  /* Centred by its own margins, so it does not inherit whatever text-align
+     the card happens to use — and the label centred explicitly, because a
+     display:block button drops the centring a button normally gets and picks
+     up the card's left alignment instead. */
+  margin: 18px auto 0;
+  text-align: center;
   width: 100%;
+  max-width: 280px;
   min-height: 44px;
   border: 1px solid var(--clr-black);
   border-radius: 10px;
@@ -4081,7 +4112,13 @@ body.svc-locked { overflow: hidden; }
 .svc-card__btn:hover { opacity: .85; }
 
 @media (max-width: 640px) {
-  .svc-layer { inset: auto 12px 12px 12px; max-width: none; }
+  /* The announcement becomes a bottom sheet on a phone. The blocking layer
+     must NOT follow it: it is the only thing standing between the visitor and
+     a page that is meant to be closed, so it stays full-screen. */
+  .svc-layer:not(.svc-layer--blocking) { inset: auto 12px 12px 12px; max-width: none; }
+  .svc-layer--blocking { padding: 20px; }
+  .svc-card--blocking { padding: 28px 22px; }
+  .svc-card--blocking .svc-card__title { font-size: 19px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

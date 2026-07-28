@@ -3576,3 +3576,113 @@ button.menu-dropdown-item {
 @media (prefers-reduced-motion: reduce) {
     .idcard-qr-countdown::before { animation: none; }
 }
+
+/* ============================================================
+   Service notices (js/service-notice.js)
+   The portal loads the same script as the marketing site but not
+   the same stylesheet, so these rules have to exist here too —
+   without them the script appends a bare <div> to the end of
+   <body> and nothing appears to happen.
+   Kept visually in step with .svc-* in css/style.css, on the
+   portal's own theme variables so it follows light/dark.
+   ============================================================ */
+.svc-layer {
+    position: fixed;
+    z-index: 4000;
+    inset: auto 20px 20px auto;
+    max-width: min(380px, calc(100vw - 40px));
+}
+
+.svc-layer--blocking {
+    inset: 0;
+    max-width: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    /* Opaque, not a tint. This is a closed door, not a modal over content you
+       are coming back to — a page still ghosting through behind it reads as a
+       banner the visitor might be able to get past. */
+    background-color: var(--bg-primary);
+    overscroll-behavior: contain;
+}
+
+/* Only the blocking layer takes the page over. Both elements are needed —
+   on iOS, overflow on <body> alone does not always stop the page moving. */
+html:has(body.svc-locked),
+body.svc-locked { overflow: hidden; }
+
+.svc-card {
+    padding: 22px;
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background-color: var(--bg-secondary);
+    box-shadow: var(--shadow-lg);
+}
+
+.svc-card--blocking {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    padding: 32px 28px;
+    /* An admin can write a long message. Scroll inside the card rather than
+       letting it grow off the top and bottom of a small phone. */
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.svc-card__icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 17px;
+}
+.svc-card--blocking .svc-card__icon { margin-left: auto; margin-right: auto; }
+
+.svc-card__title { margin: 0 0 8px; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+.svc-card--blocking .svc-card__title { font-size: 20px; line-height: 1.4; }
+.svc-card__body { margin: 0 0 12px; font-size: 14px; line-height: 1.65; color: var(--text-secondary); }
+.svc-card__meta { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+
+.svc-card__btn {
+    display: block;
+    /* Centred by its own margins, so it does not inherit whatever text-align
+       the card happens to use — and the label centred explicitly, because a
+       display:block button drops the centring a button normally gets and
+       picks up the card's left alignment instead. */
+    margin: 18px auto 0;
+    text-align: center;
+    width: 100%;
+    max-width: 280px;
+    min-height: 44px;
+    border: none;
+    border-radius: 10px;
+    background: var(--brand-gradient);
+    color: var(--brand-btn-text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s ease-out;
+}
+.svc-card__btn:hover { opacity: .85; }
+
+@media (max-width: 640px) {
+    /* The announcement becomes a bottom sheet on a phone. The blocking layer
+       must NOT follow it: it is the only thing standing between the visitor
+       and a page meant to be closed, so it stays full-screen. */
+    .svc-layer:not(.svc-layer--blocking) { inset: auto 12px 12px 12px; max-width: none; }
+    .svc-layer--blocking { padding: 20px; }
+    .svc-card--blocking { padding: 28px 22px; }
+    .svc-card--blocking .svc-card__title { font-size: 19px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svc-card__btn { transition: none; }
+}

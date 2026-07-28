@@ -34,7 +34,14 @@ window.litalkService = (function initServiceNotices() {
 
   const state = { notices: [], bypass: false, ready: false };
 
-  const lang = () => (typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en');
+  // The marketing site has a language toggle; the student portal does not and
+  // is Thai throughout. Falling back to <html lang> rather than to 'en' means
+  // a portal visitor gets a Thai notice instead of an English one sitting in
+  // the middle of an otherwise Thai page.
+  const lang = () => {
+    if (typeof window.litalkGetLang === 'function') return window.litalkGetLang();
+    return document.documentElement.lang === 'th' ? 'th' : 'en';
+  };
 
   const COPY = {
     en: {
