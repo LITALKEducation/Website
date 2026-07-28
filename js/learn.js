@@ -14,9 +14,13 @@ let learnStudentId = null;
 // screen are just two things it renders, so a tiny bit of view state avoids a
 // second HTML page and a full reload between them.
 const learnState = {
+  courses: [],
   quizzes: [],
   current: null, // { quiz, questions, prior }
   startedAt: null,
+  // When a quiz is opened from inside a course, "back" returns to that course
+  // instead of the home list.
+  returnCourseId: null,
 };
 
 const TF_LABEL = { true: 'จริง (True)', false: 'เท็จ (False)' };
@@ -149,34 +153,193 @@ function quizCardHtml(q) {
     </article>`;
 }
 
-function renderList() {
+// ฿ price string from satang, or "ฟรี" for a free course.
+function priceLabel(priceSatang) {
+  const n = Number(priceSatang) || 0;
+  if (n <= 0) return 'ฟรี';
+  return `฿${(n / 100).toLocaleString('th-TH')}`;
+}
+
+function courseCardHtml(c) {
+  const title = escapeHtml(c.titleTh || c.title || 'คอร์สเรียน');
+  const desc = escapeHtml(c.descriptionTh || c.description || '');
+  const enrolled = Number(c.enrolled) === 1;
+  const meta = [];
+  if (Number(c.itemCount) > 0) meta.push(`<i class="fas fa-book-open"></i> ${c.itemCount} บทเรียน`);
+  meta.push(`<i class="fas fa-tag"></i> ${priceLabel(c.priceSatang)}`);
+
+  const chip = enrolled ? '<span class="learn-chip learn-chip--pass"><i class="fas fa-circle-check"></i> ลงทะเบียนแล้ว</span>' : '';
+  const btn = enrolled
+    ? `<button type="button" class="btn-learn-primary" onclick="openCourse(${Number(c.id)})">เข้าเรียน <i class="fas fa-arrow-right"></i></button>`
+    : `<button type="button" class="btn-learn-primary" onclick="openCourse(${Number(c.id)})">
+         ${Number(c.priceSatang) > 0 ? 'ดูรายละเอียด / ซื้อคอร์ส' : 'ดูรายละเอียด'} <i class="fas fa-arrow-right"></i>
+       </button>`;
+
+  return `
+    <article class="learn-card learn-card--course">
+      <div class="learn-card__body">
+        <div class="learn-card__head">
+          <h3 class="learn-card__title">${title}</h3>
+          ${chip}
+        </div>
+        ${desc ? `<p class="learn-card__desc">${desc}</p>` : ''}
+        <div class="learn-card__meta">${meta.map((m) => `<span>${m}</span>`).join('')}</div>
+      </div>
+      <div class="learn-card__foot">
+        <span class="learn-price">${priceLabel(c.priceSatang)}</span>
+        ${btn}
+      </div>
+    </article>`;
+}
+
+function renderHome() {
   const view = document.getElementById('learn-view');
+  const courses = learnState.courses;
   const quizzes = learnState.quizzes;
-  if (!quizzes.length) {
+
+  if (!courses.length && !quizzes.length) {
     view.innerHTML = `
       <div class="learn-empty">
         <i class="fas fa-clipboard-list"></i>
-        <p>ยังไม่มีบทเรียนหรือแบบทดสอบในขณะนี้</p>
-        <span>เมื่อครูเผยแพร่แบบทดสอบ จะปรากฏที่นี่ให้คุณทำได้ทันที</span>
+        <p>ยังไม่มีคอร์ส บทเรียน หรือแบบทดสอบในขณะนี้</p>
+        <span>เมื่อครูเผยแพร่เนื้อหา จะปรากฏที่นี่ให้คุณเรียนได้ทันที</span>
       </div>`;
     return;
   }
-  view.innerHTML = `<div class="learn-grid">${quizzes.map(quizCardHtml).join('')}</div>`;
+
+  let html = '';
+  if (courses.length) {
+    html += `<h2 class="learn-section-title"><i class="fas fa-graduation-cap"></i> คอร์สเรียน</h2>
+      <div class="learn-grid">${courses.map(courseCardHtml).join('')}</div>`;
+  }
+  if (quizzes.length) {
+    html += `<h2 class="learn-section-title" style="margin-top:26px;"><i class="fas fa-clipboard-question"></i> แบบทดสอบฟรี</h2>
+      <div class="learn-grid">${quizzes.map(quizCardHtml).join('')}</div>`;
+  }
+  view.innerHTML = html;
 }
 
-async function loadQuizzes() {
+async function loadHome() {
   const view = document.getElementById('learn-view');
   view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span></div>';
   try {
-    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/quizzes`);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.message || 'load failed');
-    learnState.quizzes = data.quizzes || [];
-    renderList();
+    const sid = encodeURIComponent(learnStudentId);
+    const [coursesRes, quizzesRes] = await Promise.all([
+      authedFetch(`/portal/${sid}/courses`).then((r) => r.json().catch(() => ({}))),
+      authedFetch(`/portal/${sid}/quizzes`).then((r) => r.json().catch(() => ({}))),
+    ]);
+    learnState.courses = coursesRes.courses || [];
+    learnState.quizzes = quizzesRes.quizzes || [];
+    renderHome();
   } catch (err) {
-    console.error('loadQuizzes:', err);
+    console.error('loadHome:', err);
     view.innerHTML = `<div class="learn-empty"><i class="fas fa-triangle-exclamation"></i><p>โหลดรายการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</p></div>`;
   }
+}
+
+/* ---------------- Course detail + purchase ---------------- */
+
+async function openCourse(courseId) {
+  const view = document.getElementById('learn-view');
+  view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span><span class="skeleton-loader skeleton-row medium"></span></div>';
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/courses/${encodeURIComponent(courseId)}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'load failed');
+    renderCourse(data.course, data.enrolled, data.items || []);
+  } catch (err) {
+    console.error('openCourse:', err);
+    view.innerHTML = `<div class="learn-empty"><i class="fas fa-triangle-exclamation"></i><p>เปิดคอร์สไม่สำเร็จ</p><button type="button" class="btn-learn-primary" onclick="backHome()">กลับไปยังรายการ</button></div>`;
+  }
+}
+
+function renderCourse(course, enrolled, items) {
+  const view = document.getElementById('learn-view');
+  const title = escapeHtml(course.titleTh || course.title);
+  const overview = course.overviewTh || course.overview;
+  const price = Number(course.priceSatang) || 0;
+
+  const itemsHtml = items
+    .map((it, i) => {
+      const t = escapeHtml(it.titleTh || it.title || `บทเรียนที่ ${i + 1}`);
+      const passed = Number(it.passed) === 1;
+      const badge = passed ? '<span class="learn-chip learn-chip--pass"><i class="fas fa-circle-check"></i> ผ่านแล้ว</span>' : '';
+      const right = enrolled
+        ? `<button type="button" class="btn-learn-primary" style="padding:8px 14px;" onclick="openQuiz(${Number(it.id)}, ${Number(course.id)})">เริ่มเรียน <i class="fas fa-arrow-right"></i></button>`
+        : '<span class="learn-lock"><i class="fas fa-lock"></i></span>';
+      return `
+        <div class="learn-course-item">
+          <div class="learn-course-item__num">${i + 1}</div>
+          <div class="learn-course-item__main">
+            <div class="learn-course-item__title">${t} ${badge}</div>
+            <div class="learn-course-item__meta">${Number(it.questionCount) > 0 ? `${it.questionCount} ข้อ` : ''}${Number(it.hasLesson) ? ' · มีบทเรียน' : ''}</div>
+          </div>
+          ${right}
+        </div>`;
+    })
+    .join('');
+
+  const buyBar = enrolled
+    ? ''
+    : `<div class="learn-buy-bar">
+         <div class="learn-buy-bar__price">${priceLabel(price)}</div>
+         <button type="button" class="btn-learn-primary" id="learn-buy-btn" onclick="buyCourse(${Number(course.id)})">
+           <i class="fas fa-cart-shopping"></i> ${price > 0 ? 'ซื้อคอร์สนี้' : 'ลงทะเบียนฟรี'}
+         </button>
+       </div>
+       ${price > 0 ? '<p class="learn-buy-note"><i class="fas fa-shield-halved"></i> ชำระเงินอย่างปลอดภัยผ่าน Stripe · หลังชำระเงินจะเข้าเรียนได้ทันที</p>' : ''}`;
+
+  view.innerHTML = `
+    <div class="learn-detail">
+      <button type="button" class="btn-learn-back" onclick="backHome()"><i class="fas fa-arrow-left"></i> กลับไปยังรายการ</button>
+      <h1 class="learn-detail__title">${title}</h1>
+      ${course.descriptionTh || course.description ? `<p class="learn-detail__desc">${escapeHtml(course.descriptionTh || course.description)}</p>` : ''}
+      ${buyBar}
+      ${overview ? `<section class="learn-lesson"><div class="learn-lesson__content">${mdToHtml(overview)}</div></section>` : ''}
+      <h2 class="learn-section-title" style="margin-top:22px;"><i class="fas fa-list-ol"></i> บทเรียนในคอร์ส (${items.length})</h2>
+      <div class="learn-course-items">${itemsHtml || '<p class="learn-detail__desc">ยังไม่มีบทเรียนในคอร์สนี้</p>'}</div>
+    </div>`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function buyCourse(courseId) {
+  const btn = document.getElementById('learn-buy-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังดำเนินการ...';
+  }
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/courses/${encodeURIComponent(courseId)}/checkout`, {
+      method: 'POST',
+      body: JSON.stringify({ returnUrl: window.location.origin + '/learn?paid=1' }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'ไม่สามารถดำเนินการได้');
+    if (data.url) {
+      // Paid course — off to Stripe checkout. Enrollment is granted by the
+      // webhook on payment; the return URL brings them back to this page.
+      window.location.href = data.url;
+      return;
+    }
+    if (data.enrolled) {
+      // Free course (or already enrolled) — refresh into the course.
+      openCourse(courseId);
+    }
+  } catch (err) {
+    console.error('buyCourse:', err);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-cart-shopping"></i> ลองอีกครั้ง';
+    }
+    window.alert(err.message || 'ไม่สามารถดำเนินการชำระเงินได้ กรุณาลองใหม่');
+  }
+}
+
+function backHome() {
+  learnState.current = null;
+  learnState.returnCourseId = null;
+  loadHome();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /* ---------------- Quiz / take view ---------------- */
@@ -298,12 +461,24 @@ function renderQuiz() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function openQuiz(quizId) {
+// fromCourseId (optional): when a quiz is opened from inside a course, "back"
+// returns to that course rather than the home list.
+async function openQuiz(quizId, fromCourseId) {
+  learnState.returnCourseId = fromCourseId != null ? Number(fromCourseId) : null;
   const view = document.getElementById('learn-view');
   view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span><span class="skeleton-loader skeleton-row medium"></span></div>';
   try {
     const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/quizzes/${encodeURIComponent(quizId)}`);
     const data = await res.json().catch(() => ({}));
+    if (res.status === 403 && data.locked) {
+      // Belongs to a paid course the student hasn't enrolled in — send them to
+      // the course to buy it.
+      if (data.courseId) {
+        openCourse(data.courseId);
+        return;
+      }
+      throw new Error(data.message || 'ต้องลงทะเบียนคอร์สก่อน');
+    }
     if (!res.ok) throw new Error(data.message || 'load failed');
     learnState.current = { quiz: data.quiz, questions: data.questions || [], prior: data.prior || { canAttempt: true } };
     learnState.startedAt = new Date().toISOString();
@@ -437,8 +612,14 @@ function formatCorrect(q, correct) {
 
 function backToList() {
   learnState.current = null;
-  renderList();
-  loadQuizzes();
+  // Returning from a course quiz goes back to that course; otherwise home.
+  if (learnState.returnCourseId != null) {
+    const courseId = learnState.returnCourseId;
+    learnState.returnCourseId = null;
+    openCourse(courseId);
+    return;
+  }
+  loadHome();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -448,6 +629,9 @@ function backToList() {
 window.openQuiz = openQuiz;
 window.submitQuiz = submitQuiz;
 window.backToList = backToList;
+window.openCourse = openCourse;
+window.buyCourse = buyCourse;
+window.backHome = backHome;
 
 /* ---------------- Boot ---------------- */
 
@@ -466,5 +650,15 @@ window.onload = async () => {
   initStudentHamburger();
   if (typeof initAIChatWidget === 'function') initAIChatWidget(studentId);
 
-  loadQuizzes();
+  // Coming back from a successful Stripe checkout: enrollment is granted by
+  // the webhook, which may land a moment after the redirect, so tell the
+  // student and reload shortly after.
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('paid') === '1') {
+    window.history.replaceState({}, '', 'learn');
+    if (typeof window.litalkToast === 'function') window.litalkToast('ชำระเงินสำเร็จ! กำลังปลดล็อกคอร์สให้คุณ');
+    setTimeout(loadHome, 2500);
+  }
+
+  loadHome();
 };
