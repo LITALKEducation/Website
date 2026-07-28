@@ -246,38 +246,45 @@ async function openCourse(courseId) {
     const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/courses/${encodeURIComponent(courseId)}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || 'load failed');
-    renderCourse(data.course, data.enrolled, data.items || []);
+    renderCourse(data);
   } catch (err) {
     console.error('openCourse:', err);
     view.innerHTML = `<div class="learn-empty"><i class="fas fa-triangle-exclamation"></i><p>เปิดคอร์สไม่สำเร็จ</p><button type="button" class="btn-learn-primary" onclick="backHome()">กลับไปยังรายการ</button></div>`;
   }
 }
 
-function renderCourse(course, enrolled, items) {
+// One row in the learning path — a pretest, lesson or posttest.
+function courseItemRow(item, numHtml, courseId, locked, label) {
+  const t = escapeHtml(item.titleTh || item.title || '');
+  const doneChip = Number(item.done) ? '<span class="learn-chip learn-chip--pass"><i class="fas fa-circle-check"></i> ผ่านแล้ว</span>' : '';
+  const meta = [];
+  if (Number(item.hasVideo)) meta.push('<i class="fas fa-video"></i> วีดีโอ');
+  if (Number(item.questionCount) > 0) meta.push(`<i class="fas fa-circle-question"></i> ${item.questionCount} ข้อ`);
+  const right = locked
+    ? '<span class="learn-lock"><i class="fas fa-lock"></i></span>'
+    : `<button type="button" class="btn-learn-primary" style="padding:8px 14px;" onclick="openQuiz(${Number(item.id)}, ${Number(courseId)})">${Number(item.done) ? 'ทบทวน' : label} <i class="fas fa-arrow-right"></i></button>`;
+  return `
+    <div class="learn-course-item${locked ? ' is-locked' : ''}">
+      <div class="learn-course-item__num">${numHtml}</div>
+      <div class="learn-course-item__main">
+        <div class="learn-course-item__title">${t} ${doneChip}</div>
+        <div class="learn-course-item__meta">${meta.join(' · ')}</div>
+      </div>
+      ${right}
+    </div>`;
+}
+
+// Renders the structured course flow: Pretest → Lessons → Posttest, with each
+// stage locked until the previous is done. `data` is the portal course detail.
+function renderCourse(data) {
+  const course = data.course;
+  const enrolled = !!data.enrolled;
+  const gates = data.gates || {};
   const view = document.getElementById('learn-view');
   const title = escapeHtml(course.titleTh || course.title);
   const overview = course.overviewTh || course.overview;
   const price = Number(course.priceSatang) || 0;
-
-  const itemsHtml = items
-    .map((it, i) => {
-      const t = escapeHtml(it.titleTh || it.title || `บทเรียนที่ ${i + 1}`);
-      const passed = Number(it.passed) === 1;
-      const badge = passed ? '<span class="learn-chip learn-chip--pass"><i class="fas fa-circle-check"></i> ผ่านแล้ว</span>' : '';
-      const right = enrolled
-        ? `<button type="button" class="btn-learn-primary" style="padding:8px 14px;" onclick="openQuiz(${Number(it.id)}, ${Number(course.id)})">เริ่มเรียน <i class="fas fa-arrow-right"></i></button>`
-        : '<span class="learn-lock"><i class="fas fa-lock"></i></span>';
-      return `
-        <div class="learn-course-item">
-          <div class="learn-course-item__num">${i + 1}</div>
-          <div class="learn-course-item__main">
-            <div class="learn-course-item__title">${t} ${badge}</div>
-            <div class="learn-course-item__meta">${Number(it.questionCount) > 0 ? `${it.questionCount} ข้อ` : ''}${Number(it.hasLesson) ? ' · มีบทเรียน' : ''}</div>
-          </div>
-          ${right}
-        </div>`;
-    })
-    .join('');
+  const lockAll = !enrolled; // must enrol/buy before anything opens
 
   const buyBar = enrolled
     ? ''
@@ -289,6 +296,28 @@ function renderCourse(course, enrolled, items) {
        </div>
        ${price > 0 ? '<p class="learn-buy-note"><i class="fas fa-shield-halved"></i> ชำระเงินอย่างปลอดภัยผ่าน Stripe · หลังชำระเงินจะเข้าเรียนได้ทันที</p>' : ''}`;
 
+  let path = '';
+  if (data.pretest) {
+    path += `<h2 class="learn-section-title"><i class="fas fa-flag-checkered"></i> แบบทดสอบก่อนเรียน (Pretest)</h2>
+      <div class="learn-course-items">${courseItemRow(data.pretest, '<i class="fas fa-flag"></i>', course.id, lockAll, 'ทำ Pretest')}</div>`;
+  }
+  const lessons = data.lessons || [];
+  if (lessons.length) {
+    path += `<h2 class="learn-section-title" style="margin-top:20px;"><i class="fas fa-book-open"></i> บทเรียน (${lessons.length})</h2>
+      <div class="learn-course-items">${lessons.map((l, i) => courseItemRow(l, String(i + 1), course.id, lockAll || !!l.locked, 'เริ่มเรียน')).join('')}</div>`;
+    if (!lockAll && !gates.pretestDone && data.pretest) {
+      path += '<p class="learn-hint-lock"><i class="fas fa-lock"></i> ทำ Pretest ให้เสร็จก่อน จึงจะเริ่มเรียนบทเรียนได้</p>';
+    }
+  }
+  if (data.posttest) {
+    const locked = lockAll || !!data.posttest.locked;
+    path += `<h2 class="learn-section-title" style="margin-top:20px;"><i class="fas fa-trophy"></i> แบบทดสอบหลังเรียน (Posttest)</h2>
+      <div class="learn-course-items">${courseItemRow(data.posttest, '<i class="fas fa-trophy"></i>', course.id, locked, 'ทำ Posttest')}</div>`;
+    if (!lockAll && locked) {
+      path += '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนและผ่านทุกบทเรียนให้ครบก่อน จึงจะทำ Posttest ได้</p>';
+    }
+  }
+
   view.innerHTML = `
     <div class="learn-detail">
       <button type="button" class="btn-learn-back" onclick="backHome()"><i class="fas fa-arrow-left"></i> กลับไปยังรายการ</button>
@@ -296,10 +325,38 @@ function renderCourse(course, enrolled, items) {
       ${course.descriptionTh || course.description ? `<p class="learn-detail__desc">${escapeHtml(course.descriptionTh || course.description)}</p>` : ''}
       ${buyBar}
       ${overview ? `<section class="learn-lesson"><div class="learn-lesson__content">${mdToHtml(overview)}</div></section>` : ''}
-      <h2 class="learn-section-title" style="margin-top:22px;"><i class="fas fa-list-ol"></i> บทเรียนในคอร์ส (${items.length})</h2>
-      <div class="learn-course-items">${itemsHtml || '<p class="learn-detail__desc">ยังไม่มีบทเรียนในคอร์สนี้</p>'}</div>
+      ${path || '<p class="learn-detail__desc">ยังไม่มีบทเรียนในคอร์สนี้</p>'}
     </div>`;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Turn a video URL (YouTube / Vimeo / direct file) into an embed.
+function videoEmbedHtml(url) {
+  const u = String(url || '').trim();
+  if (!u) return '';
+  let m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+  if (m) {
+    return `<div class="learn-video"><iframe src="https://www.youtube.com/embed/${m[1]}" title="วีดีโอการสอน" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
+  m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (m) {
+    return `<div class="learn-video"><iframe src="https://player.vimeo.com/video/${m[1]}" title="วีดีโอการสอน" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
+  if (/\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(u)) {
+    return `<div class="learn-video learn-video--file"><video controls preload="metadata" src="${escapeHtml(u)}"></video></div>`;
+  }
+  return `<p><a class="btn-learn-primary" href="${escapeHtml(u)}" target="_blank" rel="noopener"><i class="fas fa-play"></i> เปิดวีดีโอการสอน</a></p>`;
+}
+
+// Reveals the test after the student confirms they've watched the video.
+function startTest() {
+  const gate = document.getElementById('learn-test-gate');
+  const body = document.getElementById('learn-test-body');
+  if (gate) gate.style.display = 'none';
+  if (body) {
+    body.style.display = '';
+    body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 async function buyCourse(courseId) {
@@ -401,20 +458,41 @@ function renderQuiz() {
        </section>`
     : '';
 
+  // Teaching video shown before the test. When present, the test is hidden
+  // behind a "watched the video" gate so the flow is video → test.
+  const hasVideo = !!(quiz.videoUrl && String(quiz.videoUrl).trim());
+  const videoHtml = hasVideo
+    ? `<section class="learn-video-section">
+         <h2 class="learn-section-title"><i class="fas fa-video"></i> วีดีโอการสอน</h2>
+         ${videoEmbedHtml(quiz.videoUrl)}
+       </section>`
+    : '';
+
+  const testInner = `
+    <form id="learn-form">${questions.map(questionFieldHtml).join('')}</form>
+    <div class="learn-submit-bar">
+      <button type="button" class="btn-learn-primary" onclick="submitQuiz()">
+        <i class="fas fa-paper-plane"></i> ส่งคำตอบ
+      </button>
+      <span class="learn-autosave" id="learn-autosave"></span>
+    </div>
+    <div id="learn-result"></div>`;
+
   let quizHtml = '';
   if (hasQuestions) {
     if (canAttempt) {
       quizHtml = `
         <section class="learn-quiz">
           <h2 class="learn-section-title"><i class="fas fa-pen-to-square"></i> แบบทดสอบ</h2>
-          <form id="learn-form">${questions.map(questionFieldHtml).join('')}</form>
-          <div class="learn-submit-bar">
-            <button type="button" class="btn-learn-primary" onclick="submitQuiz()">
-              <i class="fas fa-paper-plane"></i> ส่งคำตอบ
-            </button>
-            <span class="learn-autosave" id="learn-autosave"></span>
-          </div>
-          <div id="learn-result"></div>
+          ${
+            hasVideo
+              ? `<div id="learn-test-gate">
+                   <p class="learn-note"><i class="fas fa-circle-info"></i> กรุณาดูวีดีโอด้านบนให้จบก่อน แล้วกดปุ่มเพื่อเริ่มทำแบบทดสอบ</p>
+                   <button type="button" class="btn-learn-primary" onclick="startTest()"><i class="fas fa-play"></i> ดูวีดีโอแล้ว เริ่มทำแบบทดสอบ</button>
+                 </div>
+                 <div id="learn-test-body" style="display:none;">${testInner}</div>`
+              : `<div id="learn-test-body">${testInner}</div>`
+          }
         </section>`;
     } else {
       quizHtml = `
@@ -430,6 +508,7 @@ function renderQuiz() {
       <button type="button" class="btn-learn-back" onclick="backToList()"><i class="fas fa-arrow-left"></i> กลับไปยังรายการ</button>
       <h1 class="learn-detail__title">${title}</h1>
       ${quiz.descriptionTh || quiz.description ? `<p class="learn-detail__desc">${escapeHtml(quiz.descriptionTh || quiz.description)}</p>` : ''}
+      ${videoHtml}
       ${lessonHtml}
       ${quizHtml}
     </div>`;
@@ -471,9 +550,10 @@ async function openQuiz(quizId, fromCourseId) {
     const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/quizzes/${encodeURIComponent(quizId)}`);
     const data = await res.json().catch(() => ({}));
     if (res.status === 403 && data.locked) {
-      // Belongs to a paid course the student hasn't enrolled in — send them to
-      // the course to buy it.
+      // Locked by the course sequence (not enrolled, or Pretest/Lessons not yet
+      // done). Explain why for out-of-sequence cases, then show the course.
       if (data.courseId) {
+        if (data.reason === 'pretest' || data.reason === 'lessons') window.alert(data.message || 'ยังเปิดบทเรียนนี้ไม่ได้');
         openCourse(data.courseId);
         return;
       }
@@ -632,6 +712,7 @@ window.backToList = backToList;
 window.openCourse = openCourse;
 window.buyCourse = buyCourse;
 window.backHome = backHome;
+window.startTest = startTest;
 
 /* ---------------- Boot ---------------- */
 

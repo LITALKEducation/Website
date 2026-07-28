@@ -118,6 +118,16 @@
         .learn-course-item__title { font-weight: 600; color: var(--text-primary, #111); }
         .learn-course-item__meta { font-size: .8rem; color: var(--text-secondary, #888); margin-top: 2px; }
         .learn-lock { color: var(--text-secondary, #aaa); font-size: 1.1rem; padding: 0 8px; }
+        .learn-course-item.is-locked { opacity: .62; }
+        .learn-hint-lock { font-size: .84rem; color: var(--text-secondary, #888); margin: 8px 0 0; }
+        .learn-hint-lock i { margin-right: 5px; }
+        /* Teaching video — responsive 16:9 embed */
+        .learn-video { position: relative; width: 100%; padding-top: 56.25%; border-radius: 14px; overflow: hidden;
+            background: #000; margin-bottom: 6px; }
+        .learn-video iframe, .learn-video video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+        .learn-video--file { padding-top: 0; height: auto; background: transparent; }
+        .learn-video--file video { position: static; border-radius: 14px; }
+        #learn-test-gate { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
     </style>
 </head>
 
