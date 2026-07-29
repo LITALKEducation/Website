@@ -1504,6 +1504,11 @@ textarea {
 }
 .course-countdown-lbl { font-size: .84rem; font-weight: 700; color: #2563eb; display: inline-flex; align-items: center; gap: 6px; }
 .btn--soon { opacity: .75; pointer-events: none; }
+/* Inline status badge — used at the top of the body on cover-less cards so the
+   flag doesn't overlap the title/category. */
+.course-card__flags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.course-soon-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; font-weight: 800;
+  color: #fff; background: #2563eb; padding: 3px 10px; border-radius: 999px; line-height: 1; }
 
 /* LITALK+ subscription — standalone showcase card */
 .plus-card {

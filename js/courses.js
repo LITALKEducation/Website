@@ -153,13 +153,21 @@ window.LitalkCourses = (function () {
     const free = onSale(course) ? (Number(course.discountSatang) || 0) <= 0 : (Number(course.priceSatang) || 0) <= 0;
     const meta = [];
     if (Number(course.itemCount) > 0) meta.push(`<i class="fas fa-book-open"></i> ${course.itemCount} ${t('lessons', 'บทเรียน')}`);
-    const cover = Number(course.hasCover)
-      ? `<div class="course-card__img"><img src="${API}/courses/public/${Number(course.id)}/cover" alt="" loading="lazy"></div>`
-      : '';
     const soon = isComingSoon(course);
-    const flag = soon
+    const hasCover = Number(course.hasCover);
+    // Status flag: overlaid on the cover image when there is one, otherwise
+    // shown inline at the top of the body so it never lands on the category/
+    // title of a cover-less card.
+    const overlayFlag = soon
       ? `<span class="course-card__soon"><i class="fas fa-clock"></i> ${t('Coming soon', 'เร็ว ๆ นี้')}</span>`
       : onSale(course) ? `<span class="course-card__sale">-${discountPct(course)}%</span>` : '';
+    const inlineFlag = soon
+      ? `<span class="course-soon-badge"><i class="fas fa-clock"></i> ${t('Coming soon', 'เร็ว ๆ นี้')}</span>`
+      : onSale(course) ? `<span class="course-sale-badge">-${discountPct(course)}%</span>` : '';
+    const coverBlock = hasCover
+      ? `<div class="course-card__img"><img src="${API}/courses/public/${Number(course.id)}/cover" alt="" loading="lazy">${overlayFlag}</div>`
+      : '';
+    const bodyFlags = !hasCover && inlineFlag ? `<div class="course-card__flags">${inlineFlag}</div>` : '';
     const foot = soon
       ? `<span class="course-countdown-lbl"><i class="fas fa-hourglass-half"></i> ${t('Opens in', 'เปิดใน')} ${countdownHtml(course.availableAt)}</span>
          <span class="btn btn--primary btn--sm btn--soon" aria-disabled="true">${t('Coming soon', 'เร็ว ๆ นี้')}</span>`
@@ -170,8 +178,9 @@ window.LitalkCourses = (function () {
     return `
       <article class="blog-card course-card${soon ? ' course-card--soon' : ''}">
         <a class="course-card__link" href="courses?id=${Number(course.id)}" aria-label="${title}">
-          ${cover}${flag}
+          ${coverBlock}
           <div class="blog-card__body">
+            ${bodyFlags}
             <span class="blog-card__tag">${cat}</span>${plusBadge(course)}
             <h3 class="blog-card__title">${title}</h3>
             ${desc ? `<p class="course-card__desc">${desc}</p>` : ''}
