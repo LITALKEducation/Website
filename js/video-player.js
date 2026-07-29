@@ -87,7 +87,16 @@ window.litalkVideo = (function () {
   function shellHtml(id) {
     return (
       '<div class="lv__frame"><div class="lv__mount"></div></div>' +
+      // Covers the strip where YouTube draws its title, channel and "Watch on
+      // YouTube" while the player is paused. That overlay is driven by the
+      // paused STATE, not by pointer activity, so pointer-events cannot stop
+      // it — only something on top of it can. Shown only when not playing, so
+      // it never sits over moving picture.
+      '<div class="lv__top" aria-hidden="true"></div>' +
+      '<img class="lv__wm" src="img/LITALK-White.png" alt="" aria-hidden="true" width="96" height="16">' +
       '<button type="button" class="lv__surface" aria-label="เล่นหรือหยุดวีดีโอ"></button>' +
+      '<div class="lv__hint lv__hint--back" aria-hidden="true"><i class="fas fa-backward"></i><span>10</span></div>' +
+      '<div class="lv__hint lv__hint--fwd" aria-hidden="true"><i class="fas fa-forward"></i><span>10</span></div>' +
       '<div class="lv__center">' +
         '<button type="button" class="lv__big" aria-label="เล่นวีดีโอ"><i class="fas fa-play"></i></button>' +
       '</div>' +
@@ -98,11 +107,21 @@ window.litalkVideo = (function () {
         '</div>' +
         '<span class="lv__time">0:00 / 0:00</span>' +
         '<button type="button" class="lv__btn lv__mute" aria-label="ปิดเสียง"><i class="fas fa-volume-high"></i></button>' +
+        '<div class="lv__q" hidden>' +
+          '<button type="button" class="lv__btn lv__qbtn" aria-haspopup="true" aria-expanded="false" aria-label="ความละเอียด"><i class="fas fa-gear"></i></button>' +
+          '<div class="lv__qmenu" role="menu" hidden></div>' +
+        '</div>' +
         '<button type="button" class="lv__btn lv__fs" aria-label="เต็มจอ"><i class="fas fa-expand"></i></button>' +
       '</div>' +
       '<noscript><iframe src="' + EMBED_HOST + '/embed/' + id + '" title="วีดีโอการสอน" allowfullscreen></iframe></noscript>'
     );
   }
+
+  // YouTube's own level names, newest first. 'auto' is added separately.
+  const Q_LABELS = {
+    highres: '4K+', hd2160: '2160p', hd1440: '1440p', hd1080: '1080p',
+    hd720: '720p', large: '480p', medium: '360p', small: '240p', tiny: '144p',
+  };
 
   /* ---- the fallback: an ordinary embed, native controls and all --------- */
   function fallback(root, id) {
@@ -131,6 +150,11 @@ window.litalkVideo = (function () {
     const timeEl = q('.lv__time');
     const muteBtn = q('.lv__mute');
     const fsBtn = q('.lv__fs');
+    const qWrap = q('.lv__q');
+    const qBtn = q('.lv__qbtn');
+    const qMenu = q('.lv__qmenu');
+    const hintBack = q('.lv__hint--back');
+    const hintFwd = q('.lv__hint--fwd');
 
     let player = null;
     let duration = 0;
@@ -147,6 +171,58 @@ window.litalkVideo = (function () {
       icon(playBtn, on ? 'pause' : 'play');
       playBtn.setAttribute('aria-label', on ? 'หยุดชั่วคราว' : 'เล่น');
       surface.setAttribute('aria-label', on ? 'หยุดวีดีโอชั่วคราว' : 'เล่นวีดีโอ');
+    }
+
+    // Double-tap seek. Flashes the matching hint so the jump is visible even
+    // when the picture barely changes.
+    function nudge(delta) {
+      if (!player || !duration) return;
+      const t = Math.max(0, Math.min(duration, player.getCurrentTime() + delta));
+      ended = false;
+      root.classList.remove('is-ended');
+      player.seekTo(t, true);
+      const hint = delta < 0 ? hintBack : hintFwd;
+      hint.classList.remove('is-on');
+      void hint.offsetWidth;               // restart the animation
+      hint.classList.add('is-on');
+      setTimeout(() => hint.classList.remove('is-on'), 500);
+      paint();
+    }
+
+    // Quality is a *request*: YouTube has treated setPlaybackQuality as a hint
+    // since it started picking levels from bandwidth and viewport, and it is
+    // free to ignore it. So the menu is only built when the API actually
+    // reports levels, and it always shows what is really playing rather than
+    // what was asked for.
+    function buildQuality() {
+      if (!player || !player.getAvailableQualityLevels) return;
+      const levels = (player.getAvailableQualityLevels() || []).filter((l) => l !== 'auto');
+      if (levels.length < 2) return;       // nothing meaningful to choose
+      qWrap.hidden = false;
+      const current = player.getPlaybackQuality ? player.getPlaybackQuality() : 'auto';
+      qMenu.innerHTML =
+        ['auto'].concat(levels).map((l) => {
+          const label = l === 'auto' ? 'อัตโนมัติ' : (Q_LABELS[l] || l);
+          const on = l === current;
+          return '<button type="button" role="menuitemradio" aria-checked="' + on + '"' +
+                 ' class="lv__qitem' + (on ? ' is-on' : '') + '" data-q="' + l + '">' +
+                 label + '</button>';
+        }).join('');
+      qMenu.querySelectorAll('.lv__qitem').forEach((b) => {
+        b.addEventListener('click', () => {
+          const level = b.getAttribute('data-q');
+          if (player.setPlaybackQuality) player.setPlaybackQuality(level);
+          closeQuality();
+          // Re-read after the player has had a moment to accept or ignore it,
+          // so the tick reflects reality rather than the request.
+          setTimeout(buildQuality, 700);
+        });
+      });
+    }
+
+    function closeQuality() {
+      qMenu.hidden = true;
+      qBtn.setAttribute('aria-expanded', 'false');
     }
 
     function paint() {
@@ -224,6 +300,7 @@ window.litalkVideo = (function () {
           onReady: () => {
             duration = player.getDuration() || 0;
             root.classList.add('is-ready');
+            buildQuality();
             paint();
           },
           onStateChange: (e) => {
@@ -247,9 +324,56 @@ window.litalkVideo = (function () {
     }, () => fallback(root, id));
 
     /* ---- wiring ---- */
-    surface.addEventListener('click', toggle);
+    // A mouse gets an immediate play/pause — waiting to see whether a second
+    // click arrives would make every click feel laggy. Touch gets the
+    // double-tap-to-seek behaviour people expect from a video, which does mean
+    // the single tap has to wait long enough to know it is single.
+    const DOUBLE_MS = 280;
+    let lastTap = 0;
+    let tapTimer = null;
+
+    // A touch produces pointerup AND a click; this flag stops the click
+    // handler acting on a tap that pointerup has already dealt with.
+    let handledByTouch = false;
+
+    surface.addEventListener('pointerup', (e) => {
+      if (e.pointerType !== 'touch') return;      // mouse is handled by click
+      handledByTouch = true;
+      const now = Date.now();
+      const r = surface.getBoundingClientRect();
+      const left = (e.clientX - r.left) < r.width / 2;
+      if (now - lastTap < DOUBLE_MS) {
+        clearTimeout(tapTimer);
+        tapTimer = null;
+        lastTap = 0;
+        nudge(left ? -10 : 10);
+        return;
+      }
+      lastTap = now;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => { tapTimer = null; toggle(); }, DOUBLE_MS);
+    });
+
+    surface.addEventListener('click', () => {
+      if (handledByTouch) { handledByTouch = false; return; }
+      // Mouse only, so no waiting to see whether a second click follows —
+      // seeking with a mouse is the arrow keys on the scrubber instead.
+      toggle();
+    });
+
     big.addEventListener('click', toggle);
     playBtn.addEventListener('click', toggle);
+
+    qBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = qMenu.hidden;
+      qMenu.hidden = !open;
+      qBtn.setAttribute('aria-expanded', String(open));
+      if (open) buildQuality();
+    });
+    document.addEventListener('click', (e) => {
+      if (!qMenu.hidden && !qWrap.contains(e.target)) closeQuality();
+    });
 
     let dragging = false;
     seek.addEventListener('pointerdown', (e) => {
