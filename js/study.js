@@ -327,7 +327,10 @@ window.onload = async () => {
     }
   } catch { /* ignore */ }
 
-  document.getElementById('student-dashboard').style.display = 'block';
+  // 'flex' (not 'block') keeps the .dashboard-page flex column intact so the
+  // content fills the height and the footer sits at the bottom with proper
+  // spacing, instead of collapsing right under short content.
+  document.getElementById('student-dashboard').style.display = 'flex';
   initStudentHamburger();
 
   // Reflect the (possibly renamed) to-do label in the nav.

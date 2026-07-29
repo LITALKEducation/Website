@@ -783,7 +783,9 @@ window.onload = async () => {
   // portal tabs.
   if (window.litalkAccountType === 'on_demand') applyOnDemandNav();
 
-  document.getElementById('student-dashboard').style.display = 'block';
+  // 'flex' (not 'block') keeps the .dashboard-page flex column intact so the
+  // footer sits at the bottom with proper spacing on short pages.
+  document.getElementById('student-dashboard').style.display = 'flex';
   initStudentHamburger();
   if (typeof initAIChatWidget === 'function') initAIChatWidget(studentId);
 
