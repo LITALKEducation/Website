@@ -65,8 +65,21 @@
      most-used duration in this file — eleven declarations — and the only one
      with no token, so it was the easiest to drift. */
   --transition-fast: 150ms ease-out;
+  --transition-dur: 250ms;
   --transition:    250ms ease;
   --transition-md: 300ms ease;
+
+  /* The curve for surface motion — anything that opens, closes, slides,
+     resizes or changes position. --panel-ease, --tabs-ease and --acc-ease are
+     all this same curve under component-specific names; they predate this
+     token and can fold into it. */
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Per-item offset for a staggered reveal. Kept as one number because the
+     thing that goes wrong is the TOTAL: offset x item count wants to stay
+     under ~300ms, or the last card lands after the reader has already
+     looked at it. */
+  --stagger-step: 80ms;
 
   /* Stacking order, lowest to highest. Pick the rung that describes what the
      thing IS, rather than a number big enough to win today — that is how a
@@ -433,7 +446,7 @@ textarea {
   background: var(--clr-black);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform var(--transition);
+  transition: transform var(--transition-dur) var(--ease-smooth-out);
 }
 
 .nav__link:hover { color: var(--clr-black); }
@@ -509,7 +522,7 @@ textarea {
   height: 2px;
   background: var(--clr-black);
   border-radius: 2px;
-  transition: transform var(--transition), opacity var(--transition);
+  transition: transform var(--transition-dur) var(--ease-smooth-out), opacity var(--transition-dur) var(--ease-smooth-out);
 }
 
 .nav__hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -1388,7 +1401,7 @@ textarea {
   height: 6px;
   border-radius: 50%;
   background: var(--clr-border);
-  transition: background var(--transition), transform var(--transition);
+  transition: background var(--transition), transform var(--transition-dur) var(--ease-smooth-out);
   cursor: pointer;
 }
 
@@ -2097,10 +2110,10 @@ textarea {
   transform: translateY(0);
 }
 
-.animate--delay-1 { transition-delay: 0.1s; }
-.animate--delay-2 { transition-delay: 0.2s; }
-.animate--delay-3 { transition-delay: 0.3s; }
-.animate--delay-4 { transition-delay: 0.4s; }
+.animate--delay-1 { transition-delay: calc(var(--stagger-step) * 1); }
+.animate--delay-2 { transition-delay: calc(var(--stagger-step) * 2); }
+.animate--delay-3 { transition-delay: calc(var(--stagger-step) * 3); }
+.animate--delay-4 { transition-delay: calc(var(--stagger-step) * 4); }
 
 /* Page load */
 .page-enter { animation: fadeIn 0.6s ease both; }
@@ -2852,7 +2865,7 @@ textarea {
 
 .login-menu__btn .fa-chevron-down {
   font-size: 10px;
-  transition: transform var(--transition);
+  transition: transform var(--transition-dur) var(--ease-smooth-out);
 }
 
 .login-menu.open .login-menu__btn .fa-chevron-down { transform: rotate(180deg); }
@@ -3550,7 +3563,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   justify-content: center;
   z-index: 900;
   cursor: pointer;
-  transition: transform var(--transition);
+  transition: transform var(--transition-dur) var(--ease-smooth-out);
 }
 .ai-chat-fab:hover { transform: scale(1.05); }
 
