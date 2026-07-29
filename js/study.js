@@ -89,27 +89,37 @@ function renderHome() {
 
   const greeting = `<div class="sd-hello">สวัสดี, <strong>${escapeHtml(d.student.name || 'ผู้เรียน')}</strong> 👋</div>`;
 
-  let progress;
-  if (!enrolled.length) {
-    progress = `
-      <div class="sd-empty">
-        <i class="fas fa-graduation-cap"></i>
-        <p>คุณยังไม่ได้ลงทะเบียนคอร์สใด ๆ</p>
-        <a class="sd-btn" href="courses">เลือกคอร์สเรียน</a>
-      </div>`;
-  } else {
-    progress = `<div class="sd-grid">${enrolled.map(progressCardHtml).join('')}</div>`;
-  }
-
   const recSection = rec.length
     ? `<h2 class="sd-section-title"><i class="fas fa-wand-magic-sparkles"></i> คอร์สแนะนำ</h2>
        <div class="sd-rec-list">${rec.map(recCardHtml).join('')}</div>`
     : '';
 
+  if (!enrolled.length) {
+    // Not registered for anything yet — lead with a promo + how it works, then
+    // recommended courses, instead of a bare empty state.
+    el.innerHTML = `
+      ${greeting}
+      <div class="sd-promo">
+        <div class="sd-promo__body">
+          <span class="sd-promo__eyebrow"><i class="fas fa-bolt"></i> เรียนได้ทุกที่ทุกเวลา</span>
+          <h2 class="sd-promo__title">เริ่มต้นเรียนออนไลน์กับ LITALK</h2>
+          <p class="sd-promo__sub">เลือกคอร์สที่สนใจ ดูวีดีโอบทเรียน ทำแบบทดสอบ และติดตามความคืบหน้าของคุณได้ในที่เดียว</p>
+          <a class="sd-btn sd-btn--lg" href="courses"><i class="fas fa-graduation-cap"></i> เลือกคอร์สเรียน</a>
+        </div>
+      </div>
+      <div class="sd-steps">
+        <div class="sd-step"><span class="sd-step__n">1</span><div><strong>เลือกคอร์ส</strong><span>เลือกจากคอร์สที่เปิดสอน</span></div></div>
+        <div class="sd-step"><span class="sd-step__n">2</span><div><strong>ลงทะเบียน</strong><span>ชำระเงินหรือลงทะเบียนฟรี</span></div></div>
+        <div class="sd-step"><span class="sd-step__n">3</span><div><strong>เริ่มเรียน</strong><span>ดูวีดีโอและทำแบบทดสอบ</span></div></div>
+      </div>
+      ${recSection}`;
+    return;
+  }
+
   el.innerHTML = `
     ${greeting}
     <h2 class="sd-section-title"><i class="fas fa-chart-line"></i> ความคืบหน้าการเรียน</h2>
-    ${progress}
+    <div class="sd-grid">${enrolled.map(progressCardHtml).join('')}</div>
     ${recSection}`;
 }
 
@@ -183,6 +193,21 @@ function receiptRowHtml(r) {
     </div>`;
 }
 
+// One row in the account menu.
+function menuItemHtml(view, icon, title, sub) {
+  return `
+    <button type="button" class="sd-menu-item" onclick="sdAccountView('${view}')">
+      <span class="sd-menu-item__icon"><i class="fas ${icon}"></i></span>
+      <span class="sd-menu-item__main">
+        <span class="sd-menu-item__title">${title}</span>
+        ${sub ? `<span class="sd-menu-item__sub">${sub}</span>` : ''}
+      </span>
+      <i class="fas fa-chevron-right sd-menu-item__chev"></i>
+    </button>`;
+}
+
+// Account tab — a profile header + a settings-style menu; each item drills
+// into its own sub-view (sdAccountView).
 function renderMe() {
   const d = sdState.data;
   const el = document.getElementById('tab-me');
@@ -195,44 +220,82 @@ function renderMe() {
     <div class="sd-profile">
       ${avatarHtml(s.name, s.hasAvatar)}
       <div class="sd-profile__info">
-        <div class="sd-profile__name" id="me-name">${escapeHtml(s.name || 'ผู้เรียน')}</div>
+        <div class="sd-profile__name">${escapeHtml(s.name || 'ผู้เรียน')}</div>
         <div class="sd-profile__email">${escapeHtml(s.email || '')}</div>
         <div class="sd-profile__stats">
-          <span><strong>${completed.length}</strong> คอร์สที่สำเร็จ</span>
-          <span><strong>${enrolled.length}</strong> คอร์สที่ลงทะเบียน</span>
+          <span><strong>${completed.length}</strong> สำเร็จ</span>
+          <span><strong>${enrolled.length}</strong> ลงทะเบียน</span>
         </div>
-      </div>
-      <div class="sd-profile__actions">
-        <button type="button" class="sd-btn sd-btn--ghost sd-btn--sm" id="me-edit-name"><i class="fas fa-pen"></i> แก้ไขชื่อ</button>
-        <button type="button" class="sd-btn sd-btn--ghost sd-btn--sm" id="me-edit-photo"><i class="fas fa-camera"></i> เปลี่ยนรูป</button>
-        <input type="file" accept="image/*" id="me-photo-input" style="display:none;">
       </div>
     </div>
 
-    <h2 class="sd-section-title"><i class="fas fa-trophy"></i> คอร์สที่เรียนสำเร็จ</h2>
-    ${completed.length
-      ? `<div class="sd-grid">${completed.map(progressCardHtml).join('')}</div>`
-      : '<p class="sd-section-sub">ยังไม่มีคอร์สที่เรียนสำเร็จ — สู้ ๆ นะ!</p>'}
-
-    <h2 class="sd-section-title"><i class="fas fa-receipt"></i> คอร์สที่ลงทะเบียน & ใบเสร็จ</h2>
-    ${receipts.length
-      ? `<div class="sd-receipts">${receipts.map(receiptRowHtml).join('')}</div>`
-      : '<p class="sd-section-sub">ยังไม่มีการลงทะเบียน</p>'}
-
-    <h2 class="sd-section-title"><i class="fas fa-gear"></i> ตั้งค่าบัญชี</h2>
-    <div class="sd-settings">
-      <div class="sd-setting sd-soon">
-        <div>
-          <div class="sd-setting__title">เชื่อมบัญชี LITALK <span class="sd-badge sd-badge--soon">เร็ว ๆ นี้</span></div>
-          <div class="sd-setting__sub">หากคุณเป็นนักเรียนตัวต่อตัวของ LITALK จะสามารถเชื่อมบัญชีเพื่อเข้าสู่ระบบด้วย LITALK Account หรืออีเมลส่วนตัวได้ — กำลังพัฒนา</div>
-        </div>
-        <button type="button" class="sd-btn sd-btn--ghost sd-btn--sm" disabled aria-disabled="true"><i class="fas fa-link"></i> เชื่อมบัญชี</button>
+    <div class="sd-menu">
+      ${menuItemHtml('profile', 'fa-user-pen', 'ข้อมูลบัญชี', 'แก้ไขชื่อและรูปโปรไฟล์')}
+      ${menuItemHtml('completed', 'fa-trophy', 'คอร์สที่เรียนสำเร็จ', `${completed.length} คอร์ส`)}
+      ${menuItemHtml('receipts', 'fa-receipt', 'คอร์สที่ลงทะเบียน & ใบเสร็จ', `${receipts.length} รายการ`)}
+      <div class="sd-menu-item sd-menu-item--static">
+        <span class="sd-menu-item__icon"><i class="fas fa-link"></i></span>
+        <span class="sd-menu-item__main">
+          <span class="sd-menu-item__title">เชื่อมบัญชี LITALK</span>
+          <span class="sd-menu-item__sub">เข้าสู่ระบบด้วย LITALK Account หรืออีเมลส่วนตัว</span>
+        </span>
+        <span class="sd-badge sd-badge--soon">เร็ว ๆ นี้</span>
       </div>
-      <button type="button" class="sd-btn sd-btn--danger" onclick="logout()"><i class="fas fa-arrow-right-from-bracket"></i> ออกจากระบบ</button>
+      <button type="button" class="sd-menu-item sd-menu-item--danger" onclick="logout()">
+        <span class="sd-menu-item__icon"><i class="fas fa-arrow-right-from-bracket"></i></span>
+        <span class="sd-menu-item__main"><span class="sd-menu-item__title">ออกจากระบบ</span></span>
+      </button>
     </div>`;
-
-  wireProfileActions();
 }
+
+// Drill-down view opened from an account menu item.
+function sdAccountView(view) {
+  const d = sdState.data;
+  const el = document.getElementById('tab-me');
+  let title = '';
+  let body = '';
+
+  if (view === 'profile') {
+    title = 'ข้อมูลบัญชี';
+    body = `
+      <div class="sd-profile">
+        ${avatarHtml(d.student.name, d.student.hasAvatar)}
+        <div class="sd-profile__info">
+          <div class="sd-profile__name" id="me-name">${escapeHtml(d.student.name || 'ผู้เรียน')}</div>
+          <div class="sd-profile__email">${escapeHtml(d.student.email || '')}</div>
+        </div>
+        <div class="sd-profile__actions">
+          <button type="button" class="sd-btn sd-btn--ghost sd-btn--sm" id="me-edit-name"><i class="fas fa-pen"></i> แก้ไขชื่อ</button>
+          <button type="button" class="sd-btn sd-btn--ghost sd-btn--sm" id="me-edit-photo"><i class="fas fa-camera"></i> เปลี่ยนรูป</button>
+          <input type="file" accept="image/*" id="me-photo-input" style="display:none;">
+        </div>
+      </div>`;
+  } else if (view === 'completed') {
+    title = 'คอร์สที่เรียนสำเร็จ';
+    const completed = d.completed || [];
+    body = completed.length
+      ? `<div class="sd-grid">${completed.map(progressCardHtml).join('')}</div>`
+      : '<div class="sd-empty"><i class="fas fa-trophy"></i><p>ยังไม่มีคอร์สที่เรียนสำเร็จ — สู้ ๆ นะ!</p></div>';
+  } else if (view === 'receipts') {
+    title = 'คอร์สที่ลงทะเบียน & ใบเสร็จ';
+    const receipts = d.receipts || [];
+    body = receipts.length
+      ? `<div class="sd-receipts">${receipts.map(receiptRowHtml).join('')}</div>`
+      : '<div class="sd-empty"><i class="fas fa-receipt"></i><p>ยังไม่มีการลงทะเบียน</p></div>';
+  } else {
+    renderMe();
+    return;
+  }
+
+  el.innerHTML = `
+    <button type="button" class="sd-back" onclick="renderMe()"><i class="fas fa-arrow-left"></i> บัญชี</button>
+    <h2 class="sd-section-title">${title}</h2>
+    ${body}`;
+  if (view === 'profile') wireProfileActions();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+window.renderMe = renderMe;
+window.sdAccountView = sdAccountView;
 
 function wireProfileActions() {
   const editName = document.getElementById('me-edit-name');
@@ -270,7 +333,7 @@ function wireProfileActions() {
         const res = await authedFetch(`/portal/${encodeURIComponent(sdStudentId)}/avatar`, { method: 'POST', body: form });
         if (!res.ok) throw new Error('upload failed');
         sdState.data.student.hasAvatar = true;
-        renderMe();
+        sdAccountView('profile');
       } catch {
         window.alert('อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่');
       }
@@ -292,6 +355,8 @@ function showTab(name) {
     if (a.getAttribute('data-tab') === active) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   });
+  // Always open the account tab at its menu, not a stale drill-down sub-view.
+  if (active === 'me' && sdState.data) renderMe();
   try { window.history.replaceState({}, '', active === 'home' ? 'study' : `study?tab=${active}`); } catch { /* ignore */ }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }

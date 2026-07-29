@@ -735,7 +735,7 @@ function applyOnDemandNav() {
   const map = {
     student: { href: 'study', icon: 'fa-gauge-high', label: 'หน้าหลัก' },
     'student-study-log': { href: 'study?tab=todo', icon: 'fa-list-check', label: 'สิ่งที่ต้องทำ' },
-    'student-payments': { href: 'study?tab=me', icon: 'fa-user', label: 'หน้าตัวเอง' },
+    'student-payments': { href: 'study?tab=me', icon: 'fa-circle-user', label: 'บัญชี' },
     learn: { href: 'learn', icon: 'fa-book-open', label: 'บทเรียน' },
     programs: { href: 'courses', icon: 'fa-graduation-cap', label: 'คอร์สทั้งหมด' },
   };

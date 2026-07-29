@@ -130,6 +130,25 @@
         .learn-video--file { padding-top: 0; height: auto; background: transparent; }
         .learn-video--file video { position: static; border-radius: 14px; }
         #learn-test-gate { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+
+        /* Blog-scale sizing — makes the learning page read as its own page
+           rather than a cramped portal tab. */
+        #main-content .page-head h1 { font-size: 1.9rem; letter-spacing: -.01em; }
+        #main-content .page-head p { font-size: 1rem; }
+        .learn-section-title { font-size: 1.35rem; margin: 30px 0 16px; }
+        .learn-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 22px; }
+        .learn-card__body { padding: 22px 22px 10px; }
+        .learn-card__title { font-size: 1.18rem; }
+        .learn-card__desc { font-size: .95rem; }
+        .learn-card__foot { padding: 16px 22px; }
+        .learn-detail__title { font-size: 1.9rem; }
+        .learn-detail__desc { font-size: 1.02rem; }
+        .learn-lesson__content { font-size: 1.02rem; padding: 24px 26px; }
+        @media (max-width: 640px) {
+          #main-content .page-head h1 { font-size: 1.5rem; }
+          .learn-detail__title { font-size: 1.5rem; }
+          .learn-section-title { font-size: 1.2rem; }
+        }
     </style>
 </head>
 
