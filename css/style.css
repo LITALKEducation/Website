@@ -40,7 +40,19 @@
   --font-th: 'Montserrat', 'Noto Sans Thai', sans-serif;
 
   /* Spacing */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
   --section-py:    100px;
+  /* Heading block to the content under it. Named because it is the one
+     measurement that has drifted twice — it was 64px in one section and 48px
+     in another against 56px everywhere else. */
+  --section-head-gap: 56px;
   --container-max: 1200px;
   --container-px:  24px;
   --radius:        14px;
@@ -49,8 +61,29 @@
   --radius-pill:   980px;
 
   /* Transitions */
+  /* The quick one, for a control reacting to a press or hover. It was the
+     most-used duration in this file — eleven declarations — and the only one
+     with no token, so it was the easiest to drift. */
+  --transition-fast: 150ms ease-out;
   --transition:    250ms ease;
   --transition-md: 300ms ease;
+
+  /* Stacking order, lowest to highest. Pick the rung that describes what the
+     thing IS, rather than a number big enough to win today — that is how a
+     file ends up with twelve unrelated z-index values and a 4000 someone
+     picked to be safe.
+     Existing rules still carry raw numbers that map onto this ladder; they
+     are documented here but not rewritten, because reordering a stacking
+     context wants its own pass with something to look at. New code uses the
+     tokens. */
+  --z-raised:   10;   /* lifts within a component */
+  --z-sticky:  900;   /* sticky headers, in-page bars */
+  --z-nav:    1000;   /* the site header */
+  --z-drawer: 1200;   /* mobile menu */
+  --z-overlay:1300;   /* dimmers behind a dialog */
+  --z-modal:  2000;   /* dialogs, the chat panel */
+  --z-notice: 4000;   /* service notices: above everything, including a modal,
+                         because they can close the page under it */
 
   /* Shadows — minimal */
   --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
@@ -865,7 +898,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  margin-top: 56px;
+  margin-top: var(--section-head-gap);
 }
 
 .program-card {
@@ -1048,7 +1081,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
-  margin-top: 56px;
+  margin-top: var(--section-head-gap);
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -1136,7 +1169,9 @@ textarea {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0;
-  margin-top: 64px;
+  /* 56px is what every other section puts between its heading and its
+     content; this was the one at 64. */
+  margin-top: var(--section-head-gap);
 }
 
 .journey__track::before {
@@ -1204,7 +1239,7 @@ textarea {
 
 .testimonials__carousel-wrap {
   position: relative;
-  margin-top: 56px;
+  margin-top: var(--section-head-gap);
   /* Clip the off-screen slides so the cards (and their text) stay inside the
      slider instead of spilling past its edges as the track translates. */
   overflow: hidden;
@@ -1363,7 +1398,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 32px;
-  margin-top: 56px;
+  margin-top: var(--section-head-gap);
 }
 
 .blog-card {
@@ -1570,7 +1605,7 @@ textarea {
    FAQ
    ============================================================ */
 .faq__list {
-  margin-top: 56px;
+  margin-top: var(--section-head-gap);
   max-width: 760px;
   margin-left: auto;
   margin-right: auto;
@@ -2122,7 +2157,12 @@ textarea {
   .nav__links { display: none; }
   .nav__actions .btn,
   .nav__actions .login-menu { display: none; }
-  .nav__actions .lang-toggle { display: inline-flex; }
+  /* The language switch lives in the drawer on a phone, not beside the
+     hamburger — two controls competing for the same corner, when everything
+     else has already collapsed into the menu. */
+  .nav__inner > .nav__actions .lang-toggle { display: none; }
+  .nav__drawer .nav__actions .lang-toggle { display: inline-flex; }
+  .nav__drawer .nav__actions .btn { display: inline-flex; }
   .nav__hamburger { display: flex; }
 
   .hero__headline { font-size: clamp(38px, 12vw, 60px); }
@@ -2303,7 +2343,7 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  margin-top: 56px;
+  margin-top: var(--section-head-gap);
 }
 
 .vm-card {
@@ -2396,7 +2436,7 @@ textarea {
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  margin-top: 56px;
+  margin-top: var(--section-head-gap);
 }
 
 .value-card {
@@ -2428,7 +2468,8 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-top: 48px;
+  /* Was 48px — the other section on this page uses 56px. */
+  margin-top: var(--section-head-gap);
 }
 
 .why-check-item {
@@ -2564,7 +2605,7 @@ textarea {
   -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-lg);
-  margin-top: 56px;
+  margin-top: var(--section-head-gap);
 }
 
 .compare__table {
@@ -3638,7 +3679,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   background-color: var(--clr-black);
   color: var(--clr-bg);
   margin-bottom: 8px;
-  transition: opacity .15s ease-out;
+  transition: opacity var(--transition-fast);
 }
 
 .ai-chat-consent__accept:hover { opacity: .85; }
@@ -3648,7 +3689,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   background-color: transparent;
   color: var(--clr-muted);
   font-weight: 500;
-  transition: border-color .15s ease-out, color .15s ease-out;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .ai-chat-consent__decline:hover { border-color: var(--clr-muted); color: var(--clr-black); }
@@ -3755,7 +3796,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   background-color: var(--clr-bg);
   box-shadow: 0 10px 15px -3px rgba(16, 24, 40, .08), 0 4px 6px -4px rgba(16, 24, 40, .06);
   cursor: text;
-  transition: border-color .15s ease-out;
+  transition: border-color var(--transition-fast);
 }
 
 /* Once the text needs more than one line the controls drop below it, so a
@@ -3812,7 +3853,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   border-radius: 50%;
   font-size: 15px;
   cursor: pointer;
-  transition: background-color .15s ease-out, opacity .15s ease-out;
+  transition: background-color var(--transition-fast), opacity var(--transition-fast);
 }
 
 .ask-icon-btn { border: 0; background: transparent; color: var(--clr-muted); }
@@ -3869,7 +3910,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   font-size: 14px;
   text-align: left;
   cursor: pointer;
-  transition: background-color .15s ease-out;
+  transition: background-color var(--transition-fast);
 }
 .ask-menu__item:hover { background-color: var(--clr-light-bg); }
 .ask-menu__item i { color: var(--clr-muted); font-size: 13px; flex-shrink: 0; }
@@ -4046,7 +4087,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color .15s ease-out, background-color .15s ease-out;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 .ask-account__btn:hover { border-color: var(--clr-black); background-color: var(--clr-light-bg); }
 .ask-account__btn[hidden] { display: none; }
@@ -4086,7 +4127,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color .15s ease-out;
+  transition: background-color var(--transition-fast);
 }
 .ask-history__item:hover { background-color: var(--clr-light-bg); }
 .ask-history__q {
@@ -4129,7 +4170,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
    ============================================================ */
 .svc-layer {
   position: fixed;
-  z-index: 2000;
+  z-index: var(--z-notice);
   inset: auto 20px 20px auto;
   max-width: min(380px, calc(100vw - 40px));
 }
@@ -4220,7 +4261,7 @@ body.svc-locked { overflow: hidden; }
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity .15s ease-out;
+  transition: opacity var(--transition-fast);
 }
 .svc-card__btn:hover { opacity: .85; }
 
