@@ -66,6 +66,9 @@ window.LitalkCourses = (function () {
 
   function md(text) {
     if (!text) return '';
+    if (window.marked) {
+      try { return window.marked.parse ? window.marked.parse(text) : window.marked(text); } catch (e) { /* fall through */ }
+    }
     return typeof window.litalkMarkdown === 'function' ? window.litalkMarkdown(text) : escapeHtml(text);
   }
 

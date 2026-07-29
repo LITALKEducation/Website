@@ -96,8 +96,17 @@ function autosaveStamp(ts) {
   el.innerHTML = `<i class="fas fa-cloud-arrow-down"></i> บันทึกบนอุปกรณ์แล้ว ${hh}:${mm}`;
 }
 
+// Full Markdown via marked (tables, lists, code fences, blockquotes, …) so
+// lesson content reads like a proper article. Falls back to the lightweight
+// renderer, then to plain escaped text. Lesson content is authored by staff
+// in the admin console, same trust model as the blog.
 function mdToHtml(text) {
   if (!text) return '';
+  if (window.marked) {
+    try {
+      return window.marked.parse ? window.marked.parse(text) : window.marked(text);
+    } catch { /* fall through */ }
+  }
   return typeof window.litalkMarkdown === 'function' ? window.litalkMarkdown(text) : escapeHtml(text);
 }
 
