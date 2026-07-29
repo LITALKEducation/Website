@@ -421,6 +421,31 @@
     </section>
 
     <!-- ============================================================
+         3.5 ON-DEMAND COURSES
+         Filled by js/home-courses.js from the public catalogue, reusing the
+         card renderer from js/courses.js so the strip and /courses never
+         disagree. Starts hidden and only appears once at least one course
+         loads — a fresh site shows nothing rather than an empty grid.
+         ============================================================ -->
+    <section class="section" id="courses-promo" aria-labelledby="courses-promo-heading" hidden>
+      <div class="container">
+        <div class="text-center animate">
+          <span class="section-label" data-en="On-Demand Courses" data-th="คอร์สออนไลน์">On-Demand Courses</span>
+          <h2 class="section-heading" id="courses-promo-heading" data-en="Learn at your own pace." data-th="เรียนตามจังหวะของคุณ">Learn at your own pace.</h2>
+          <p class="section-sub" data-en="Video lessons and quizzes you can start any time — buy a course on its own, or get the whole library with LITALK+." data-th="บทเรียนวิดีโอและแบบทดสอบที่เริ่มเรียนเมื่อไหร่ก็ได้ ซื้อเป็นรายคอร์ส หรือเข้าถึงทั้งหมดด้วย LITALK+">
+            Video lessons and quizzes you can start any time — buy a course on its own, or get the whole library with LITALK+.
+          </p>
+        </div>
+
+        <div class="blog__grid" id="home-courses-grid"></div>
+
+        <div class="text-center" style="margin-top: 48px;">
+          <a href="courses" class="btn btn--outline" data-en="Browse all courses" data-th="ดูคอร์สทั้งหมด">Browse all courses</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
          4. WHY CHOOSE LITALK
          ============================================================ -->
     <section class="section" id="why" aria-labelledby="why-heading">
@@ -1054,6 +1079,8 @@
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
   <script src="js/blog.js?v=20260727a" defer></script>
+  <script src="js/courses.js?v=20260729d" defer></script>
+  <script src="js/home-courses.js?v=20260729d" defer></script>
 
   <!-- AI chat assistant (general — not tied to a specific student account) -->
   <button class="ai-chat-fab" id="ai-chat-fab" onclick="toggleAIChat()" aria-label="Nong Lilly" title="Nong Lilly"><i class="fas fa-message"></i></button>
