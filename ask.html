@@ -17,7 +17,7 @@
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-  <link rel="stylesheet" href="css/style.css?v=20260729g">
+  <link rel="stylesheet" href="css/style.css?v=20260729h">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 </head>
@@ -205,10 +205,10 @@
             Nong Lilly is an AI and can make mistakes. For anything about your own classes, schedule or payments, use the student portal.
           </p>
 
-          <div class="ask-consent" id="ask-consent" hidden>
+          <div class="ask-consent" id="ask-consent" role="dialog" aria-modal="true" aria-labelledby="ask-consent-title" hidden>
             <div class="ask-consent__inner">
               <div class="ask-consent__icon"><i class="fas fa-message"></i></div>
-              <h2 class="ask-consent__title" data-en="Before you start" data-th="ก่อนเริ่มใช้งาน">Before you start</h2>
+              <h2 class="ask-consent__title" id="ask-consent-title" data-en="Before you start" data-th="ก่อนเริ่มใช้งาน">Before you start</h2>
               <p class="ask-consent__body" data-en="Nong Lilly is an AI assistant. Explanations are generated automatically and can be wrong, so check anything important with your teacher. Your questions are stored so we can improve the service." data-th="น้องลิลลี่เป็นผู้ช่วย AI คำอธิบายสร้างขึ้นโดยอัตโนมัติและอาจคลาดเคลื่อนได้ เรื่องสำคัญควรตรวจสอบกับคุณครูอีกครั้ง คำถามของคุณจะถูกจัดเก็บไว้เพื่อพัฒนาบริการ">
                 Nong Lilly is an AI assistant. Explanations are generated automatically and can be wrong, so check anything important with your teacher. Your questions are stored so we can improve the service.
               </p>
@@ -314,7 +314,7 @@
   <script src="js/service-notice.js?v=20260727h" defer></script>
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
-  <script src="js/ask.js?v=20260727g" defer></script>
+  <script src="js/ask.js?v=20260729h" defer></script>
 </body>
 
 </html>

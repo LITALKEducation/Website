@@ -221,11 +221,18 @@
     // order so the gate can't be skipped with a keyboard.
     form.setAttribute('inert', '');
     closeMenu();
+    // On a phone the gate is a real dialog over the page, so the page behind
+    // it must not scroll. Harmless on desktop, where it is an inline panel.
+    document.body.classList.add('ask-gated');
+    // Move focus into the dialog, or a keyboard user is left on the inert
+    // composer with nothing to tab to.
+    if (consentAccept) consentAccept.focus({ preventScroll: true });
   }
 
   function hideConsent() {
     if (consent) consent.hidden = true;
     form.removeAttribute('inert');
+    document.body.classList.remove('ask-gated');
     syncAccount();
     input.focus();
   }

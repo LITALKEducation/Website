@@ -3999,7 +3999,69 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   .ask-hero { padding: 100px 0 0; }
   .ask-section { padding: 24px 0 72px; }
   .ask-msg { max-width: 94%; }
-  .ask-consent { position: static; margin-bottom: 16px; }
+
+  /* A real dialog on a phone.
+     This used to be `position: static`, which dropped the gate out of the
+     overlay and left it sitting in the page flow BELOW the composer — so the
+     composer looked usable while being inert, and the gate read as a page
+     section rather than something to answer. */
+  .ask-consent {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: color-mix(in srgb, var(--clr-bg) 82%, transparent);
+    backdrop-filter: blur(8px);
+    overscroll-behavior: contain;
+  }
+
+  .ask-consent__inner {
+    width: 100%;
+    max-width: 400px;
+    /* Lifted off the scrim: --clr-bg is pure black in dark mode, so a card
+       painted in it against a backdrop made of it is invisible. */
+    background-color: var(--clr-light-bg);
+    border: 1px solid var(--clr-border);
+    border-radius: 22px;
+    padding: 26px 22px;
+    box-shadow: 0 24px 60px -16px rgba(0, 0, 0, .5);
+    /* The gate is long in Thai; scroll inside it rather than off the screen. */
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  /* Tighter rhythm than the desktop panel — the phone has less room and the
+     card carries seven stacked blocks. */
+  /* The card is --clr-light-bg here, and so was the note — same colour on
+     same colour, so the note's box disappeared. Tint it from the ink instead,
+     which stays a step away from whatever the card is in either theme. */
+  .ask-consent__note {
+    background-color: color-mix(in srgb, var(--clr-black) 9%, transparent);
+  }
+
+  /* Same reason as the note above — the circle was --clr-light-bg too. */
+  .ask-consent__icon {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 12px;
+    background-color: color-mix(in srgb, var(--clr-black) 12%, transparent);
+  }
+  .ask-consent__title { font-size: 17px; margin-bottom: 8px; }
+  .ask-consent__body { font-size: 13.5px; margin-bottom: 12px; }
+  .ask-consent__note { margin-bottom: 12px; }
+  .ask-consent__links { margin-bottom: 14px; }
+  .ask-consent .btn { width: 100%; }
+
+  /* Only here: the gate covers the viewport on a phone, so the page behind it
+     must not scroll. On desktop it is an inline panel and locking the page
+     would strand the reader. showConsent() sets the class either way. */
+  body.ask-gated { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
