@@ -727,6 +727,36 @@ window.buyCourse = buyCourse;
 window.backHome = backHome;
 window.startTest = startTest;
 
+// learn.html ships with the 1-on-1 student-portal tabs (ภาพรวม / บันทึกการเรียน
+// / การชำระเงิน). For an on-demand (non-LITALK) account those pages don't apply,
+// so point the nav at the on-demand dashboard (study) instead — keeping the
+// on-demand experience separate from the classic student portal.
+function applyOnDemandNav() {
+  const map = {
+    student: { href: 'study', icon: 'fa-gauge-high', label: 'หน้าหลัก' },
+    'student-study-log': { href: 'study?tab=todo', icon: 'fa-list-check', label: 'สิ่งที่ต้องทำ' },
+    'student-payments': { href: 'study?tab=me', icon: 'fa-user', label: 'หน้าตัวเอง' },
+    learn: { href: 'learn', icon: 'fa-book-open', label: 'บทเรียน' },
+    programs: { href: 'courses', icon: 'fa-graduation-cap', label: 'คอร์สทั้งหมด' },
+  };
+  document.querySelectorAll('.portal-tab, .bottom-nav-item, .drawer-link').forEach((a) => {
+    const m = map[a.getAttribute('href')];
+    if (!m) return;
+    a.setAttribute('href', m.href);
+    const span = a.querySelector('span');
+    if (span) {
+      // bottom-nav item: <i> + <span>label</span>
+      span.textContent = m.label;
+      const icon = a.querySelector('i');
+      if (icon) icon.className = `fas ${m.icon}`;
+    } else {
+      // portal-tab / drawer-link: <i> + text (active class & aria-current stay
+      // on the <a>, so replacing the children keeps them).
+      a.innerHTML = `<i class="fas ${m.icon}"></i> ${m.label}`;
+    }
+  });
+}
+
 /* ---------------- Boot ---------------- */
 
 window.onload = async () => {
@@ -748,6 +778,10 @@ window.onload = async () => {
     return;
   }
   learnStudentId = studentId;
+
+  // Non-LITALK (on-demand) accounts get the on-demand nav, not the tutoring
+  // portal tabs.
+  if (window.litalkAccountType === 'on_demand') applyOnDemandNav();
 
   document.getElementById('student-dashboard').style.display = 'block';
   initStudentHamburger();
