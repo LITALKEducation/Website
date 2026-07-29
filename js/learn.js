@@ -196,7 +196,14 @@ function courseCardHtml(c) {
     </article>`;
 }
 
+// Show the hero on the home feed; hide it while viewing a course/quiz detail.
+function showHero(visible) {
+  const h = document.getElementById('learn-hero');
+  if (h) h.style.display = visible ? '' : 'none';
+}
+
 function renderHome() {
+  showHero(true);
   const view = document.getElementById('learn-view');
   const courses = learnState.courses;
   const quizzes = learnState.quizzes;
@@ -253,6 +260,7 @@ async function loadHome() {
 /* ---------------- Course detail + purchase ---------------- */
 
 async function openCourse(courseId) {
+  showHero(false);
   const view = document.getElementById('learn-view');
   view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span><span class="skeleton-loader skeleton-row medium"></span></div>';
   try {
@@ -556,6 +564,7 @@ function renderQuiz() {
 // fromCourseId (optional): when a quiz is opened from inside a course, "back"
 // returns to that course rather than the home list.
 async function openQuiz(quizId, fromCourseId) {
+  showHero(false);
   learnState.returnCourseId = fromCourseId != null ? Number(fromCourseId) : null;
   const view = document.getElementById('learn-view');
   view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span><span class="skeleton-loader skeleton-row medium"></span></div>';

@@ -131,6 +131,27 @@
         .learn-video--file video { position: static; border-radius: 14px; }
         #learn-test-gate { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
 
+        /* Full-width hero — a bold banner that makes /learn its own page. */
+        .learn-hero { position: relative; overflow: hidden; text-align: center; color: #fff;
+            border-radius: 22px; padding: 54px 32px; margin: 6px 0 28px;
+            background: linear-gradient(135deg, #ff8a4c 0%, #ff5a1f 58%, #f2480f 100%);
+            box-shadow: 0 16px 44px rgba(255,90,31,.28); }
+        .learn-hero::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(circle at 82% -25%, rgba(255,255,255,.28), transparent 46%); }
+        .learn-hero__inner { position: relative; max-width: 680px; margin: 0 auto; }
+        .learn-hero__eyebrow { display: inline-flex; align-items: center; gap: 7px; font-size: .84rem; font-weight: 700;
+            background: rgba(255,255,255,.2); padding: 6px 14px; border-radius: 999px; }
+        .learn-hero__title { font-size: 2.3rem; font-weight: 800; line-height: 1.2; margin: 16px 0 12px; color: #fff; }
+        .learn-hero__sub { font-size: 1.08rem; line-height: 1.6; color: rgba(255,255,255,.92); margin: 0 auto 24px; max-width: 52ch; }
+        .learn-hero__btn { display: inline-flex; align-items: center; gap: 9px; background: #fff; color: #ff5a1f;
+            font-weight: 700; padding: 13px 24px; border-radius: 12px; text-decoration: none; transition: transform .12s, box-shadow .12s; }
+        .learn-hero__btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.18); }
+        @media (max-width: 640px) {
+          .learn-hero { padding: 40px 22px; }
+          .learn-hero__title { font-size: 1.7rem; }
+          .learn-hero__sub { font-size: 1rem; }
+        }
+
         /* Blog-scale sizing — makes the learning page read as its own page
            rather than a cramped portal tab. */
         #main-content .page-head h1 { font-size: 1.9rem; letter-spacing: -.01em; }
@@ -215,19 +236,17 @@
                 <a href="student-payments" class="portal-tab"><i class="fas fa-receipt"></i> การชำระเงิน</a>
             </nav>
 
-            <!-- Page Header -->
-            <header class="page-head">
-                <div class="page-head-main">
-                    <span class="page-head-icon"><i class="fas fa-clipboard-question"></i></span>
-                    <div class="page-head-text">
-                        <h1>บทเรียน & แบบทดสอบออนไลน์</h1>
-                        <p>เรียนบทเรียนและทำแบบทดสอบที่ครูมอบหมาย ระบบตรวจคะแนนและเฉลยให้ทันทีหลังส่งคำตอบ</p>
+            <!-- Full-width hero (hidden by learn.js while viewing a course/quiz) -->
+            <section class="learn-hero" id="learn-hero">
+                <div class="learn-hero__inner">
+                    <span class="learn-hero__eyebrow"><i class="fas fa-bolt"></i> เรียนได้ทุกที่ ทุกเวลา</span>
+                    <h1 class="learn-hero__title">บทเรียน &amp; แบบทดสอบออนไลน์</h1>
+                    <p class="learn-hero__sub">ดูวีดีโอบทเรียน ทำแบบทดสอบตรวจคะแนนอัตโนมัติ และติดตามความคืบหน้าของคุณได้ในที่เดียว</p>
+                    <div class="learn-hero__actions">
+                        <a class="learn-hero__btn" href="courses"><i class="fas fa-graduation-cap"></i> เลือกคอร์สทั้งหมด</a>
                     </div>
                 </div>
-                <div class="page-head-side">
-                    <a href="student" class="btn-back-overview"><i class="fas fa-arrow-left"></i> กลับหน้าภาพรวม</a>
-                </div>
-            </header>
+            </section>
 
             <!-- Learning content (list / quiz) rendered by js/learn.js -->
             <section class="content-section">
