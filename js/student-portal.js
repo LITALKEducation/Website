@@ -92,6 +92,11 @@ async function getPortalToken() {
 // client-side guess (login email's local part) silently broke for accounts
 // whose email doesn't follow the <id>@domain convention — the server
 // resolves by email AND by Auth0 sub against students.auth0_user_id.
+// Set from GET /portal/whoami: 'tutored' | 'on_demand' | null. Lets each
+// portal page send an on-demand learner to the on-demand dashboard (study)
+// and keep tutored students on the classic portal.
+window.litalkAccountType = null;
+
 async function resolveStudentIdFromToken(token) {
     if (!token) return null;
     try {
@@ -99,7 +104,10 @@ async function resolveStudentIdFromToken(token) {
             headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json().catch(() => ({}));
-        if (res.ok && data.studentId) return data.studentId;
+        if (res.ok && data.studentId) {
+            window.litalkAccountType = data.accountType || null;
+            return data.studentId;
+        }
     } catch (err) {
         console.warn('whoami failed:', err);
     }

@@ -27,9 +27,11 @@
            tracks light/dark automatically. */
         .learn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
         .learn-card { display: flex; flex-direction: column; justify-content: space-between;
-            background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e5e7eb);
+            background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb);
             border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: box-shadow .2s, transform .2s; }
         .learn-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+        .learn-card__img { aspect-ratio: 16 / 9; background: var(--bg-tertiary, #f1f3f7); overflow: hidden; }
+        .learn-card__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .learn-card__body { padding: 18px 18px 8px; }
         .learn-card__head { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
         .learn-card__title { font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-primary, #111); }
@@ -54,12 +56,12 @@
         .learn-detail__title { font-size: 1.5rem; font-weight: 800; margin: 4px 0 4px; color: var(--text-primary, #111); }
         .learn-detail__desc { color: var(--text-secondary, #555); margin: 0 0 18px; }
         .learn-section-title { font-size: 1.1rem; font-weight: 700; margin: 22px 0 12px; display: flex; align-items: center; gap: 8px; color: var(--text-primary, #111); }
-        .learn-lesson__content { background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e5e7eb);
+        .learn-lesson__content { background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb);
             border-radius: 14px; padding: 18px 20px; line-height: 1.7; color: var(--text-primary, #222); }
         .learn-lesson__content h1, .learn-lesson__content h2, .learn-lesson__content h3 { margin: .8em 0 .4em; }
         .learn-lesson__content p { margin: .6em 0; }
         .learn-lesson__content img { max-width: 100%; border-radius: 8px; }
-        .learn-question { background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e5e7eb);
+        .learn-question { background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb);
             border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
         .learn-question.is-correct { border-color: #16a34a; box-shadow: 0 0 0 1px rgba(22,163,74,.25); }
         .learn-question.is-wrong { border-color: #dc2626; box-shadow: 0 0 0 1px rgba(220,38,38,.2); }
@@ -75,7 +77,7 @@
         .learn-option:hover { border-color: var(--brand, #ff5a1f); }
         .learn-option input { accent-color: var(--brand, #ff5a1f); width: 17px; height: 17px; }
         .learn-short-input { padding: 10px 12px; border: 1px solid var(--border-color, #ddd); border-radius: 10px;
-            font-family: inherit; font-size: .95rem; background: var(--input-bg, #fff); color: var(--text-primary, #111); width: 100%; }
+            font-family: inherit; font-size: .95rem; background: var(--bg-tertiary, #fff); color: var(--text-primary, #111); width: 100%; }
         .learn-question__feedback { margin: 10px 0 0 36px; font-size: .85rem; font-weight: 600; }
         .is-correct .learn-question__feedback { color: #16a34a; }
         .is-wrong .learn-question__feedback { color: #dc2626; }
@@ -103,25 +105,35 @@
         .learn-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .learn-price { font-weight: 800; color: var(--brand, #ff5a1f); font-size: 1rem; }
         .learn-buy-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-            background: var(--card-bg, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 14px;
+            background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 14px;
             padding: 16px 18px; margin: 14px 0 6px; }
         .learn-buy-bar__price { font-size: 1.5rem; font-weight: 800; color: var(--brand, #ff5a1f); }
         .learn-buy-note { font-size: .82rem; color: var(--text-secondary, #777); margin: 4px 0 0; }
         .learn-buy-note i { margin-right: 4px; color: #16a34a; }
         .learn-course-items { display: flex; flex-direction: column; gap: 10px; }
-        .learn-course-item { display: flex; align-items: center; gap: 12px; background: var(--card-bg, #fff);
+        .learn-course-item { display: flex; align-items: center; gap: 12px; background: var(--bg-secondary, #fff);
             border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; padding: 12px 14px; }
         .learn-course-item__num { flex: 0 0 28px; height: 28px; width: 28px; border-radius: 50%;
-            background: var(--surface-2, #f1f5f9); color: var(--text-primary, #333); font-weight: 700;
+            background: var(--bg-tertiary, #f1f5f9); color: var(--text-primary, #333); font-weight: 700;
             display: flex; align-items: center; justify-content: center; font-size: .85rem; }
         .learn-course-item__main { flex: 1; min-width: 0; }
         .learn-course-item__title { font-weight: 600; color: var(--text-primary, #111); }
         .learn-course-item__meta { font-size: .8rem; color: var(--text-secondary, #888); margin-top: 2px; }
         .learn-lock { color: var(--text-secondary, #aaa); font-size: 1.1rem; padding: 0 8px; }
+        .learn-course-item.is-locked { opacity: .62; }
+        .learn-hint-lock { font-size: .84rem; color: var(--text-secondary, #888); margin: 8px 0 0; }
+        .learn-hint-lock i { margin-right: 5px; }
+        /* Teaching video — responsive 16:9 embed */
+        .learn-video { position: relative; width: 100%; padding-top: 56.25%; border-radius: 14px; overflow: hidden;
+            background: #000; margin-bottom: 6px; }
+        .learn-video iframe, .learn-video video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+        .learn-video--file { padding-top: 0; height: auto; background: transparent; }
+        .learn-video--file video { position: static; border-radius: 14px; }
+        #learn-test-gate { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
     </style>
 </head>
 
-<body data-service-surface="portal">
+<body data-service-surface="portal,learning">
     <a href="#main-content" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
 
     <!-- STUDENT DASHBOARD (Learn & Test page) -->
