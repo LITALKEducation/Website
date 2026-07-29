@@ -221,12 +221,12 @@ function renderMe() {
 
     <h2 class="sd-section-title"><i class="fas fa-gear"></i> ตั้งค่าบัญชี</h2>
     <div class="sd-settings">
-      <div class="sd-setting">
+      <div class="sd-setting sd-soon">
         <div>
-          <div class="sd-setting__title">เชื่อมบัญชี LITALK</div>
-          <div class="sd-setting__sub">หากคุณเป็นนักเรียนตัวต่อตัวของ LITALK สามารถเชื่อมบัญชีเพื่อเข้าสู่ระบบด้วย LITALK Account หรืออีเมลส่วนตัวได้</div>
+          <div class="sd-setting__title">เชื่อมบัญชี LITALK <span class="sd-badge sd-badge--soon">เร็ว ๆ นี้</span></div>
+          <div class="sd-setting__sub">หากคุณเป็นนักเรียนตัวต่อตัวของ LITALK จะสามารถเชื่อมบัญชีเพื่อเข้าสู่ระบบด้วย LITALK Account หรืออีเมลส่วนตัวได้ — กำลังพัฒนา</div>
         </div>
-        <span class="sd-badge">เร็ว ๆ นี้</span>
+        <button type="button" class="sd-btn sd-btn--ghost sd-btn--sm" disabled aria-disabled="true"><i class="fas fa-link"></i> เชื่อมบัญชี</button>
       </div>
       <button type="button" class="sd-btn sd-btn--danger" onclick="logout()"><i class="fas fa-arrow-right-from-bracket"></i> ออกจากระบบ</button>
     </div>`;
