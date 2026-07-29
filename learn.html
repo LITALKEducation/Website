@@ -123,14 +123,30 @@
         .learn-empty span { font-size: .88rem; }
         /* Courses */
         .learn-card--course { border-top: 3px solid var(--brand, #ff5a1f); }
+        .learn-card { position: relative; }
+        .learn-card__img { position: relative; }
         .learn-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .learn-price { font-weight: 800; color: var(--brand, #ff5a1f); font-size: 1rem; }
+        /* Discount / LITALK+ */
+        .learn-price-wrap { display: inline-flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+        .learn-price--was { font-weight: 500; font-size: .9em; color: var(--text-secondary, #999);
+            text-decoration: line-through; }
+        .learn-sale-badge { font-size: .68rem; font-weight: 800; color: #fff; background: #e0245e;
+            padding: 3px 8px; border-radius: 999px; line-height: 1; }
+        .learn-card__sale { position: absolute; top: 10px; left: 10px; z-index: 2; font-size: .74rem; font-weight: 800;
+            color: #fff; background: #e0245e; padding: 4px 10px; border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(224,36,94,.35); }
+        .learn-plus-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .66rem; font-weight: 800;
+            color: #8a5a00; background: linear-gradient(120deg,#ffe9a8,#ffd564); padding: 3px 9px; border-radius: 999px; }
         .learn-buy-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
             background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 14px;
             padding: 16px 18px; margin: 14px 0 6px; }
         .learn-buy-bar__price { font-size: 1.5rem; font-weight: 800; color: var(--brand, #ff5a1f); }
+        .learn-buy-bar__price .learn-price--was { font-size: .62em; }
         .learn-buy-note { font-size: .82rem; color: var(--text-secondary, #777); margin: 4px 0 0; }
         .learn-buy-note i { margin-right: 4px; color: #16a34a; }
+        .learn-buy-note--sale { color: #e0245e; font-weight: 700; }
+        .learn-buy-note--sale i { color: #e0245e; }
         .learn-course-items { display: flex; flex-direction: column; gap: 10px; }
         .learn-course-item { display: flex; align-items: center; gap: 12px; background: var(--bg-secondary, #fff);
             border: 1px solid var(--border-color, #e5e7eb); border-radius: 12px; padding: 12px 14px; }

@@ -169,23 +169,51 @@ function priceLabel(priceSatang) {
   return `฿${(n / 100).toLocaleString('th-TH')}`;
 }
 
+// A course is on sale when its discount price is below the list price.
+function courseOnSale(c) {
+  const p = Number(c.priceSatang) || 0;
+  const d = c.discountSatang;
+  return d != null && Number(d) < p;
+}
+function courseDiscountPct(c) {
+  const p = Number(c.priceSatang) || 0;
+  if (!courseOnSale(c) || p <= 0) return 0;
+  return Math.round((1 - (Number(c.discountSatang) || 0) / p) * 100);
+}
+// The price a student actually pays (discount when on sale).
+function effectivePrice(c) {
+  return courseOnSale(c) ? Number(c.discountSatang) || 0 : Number(c.priceSatang) || 0;
+}
+// Struck-through original + sale price when on sale; otherwise a single price.
+function priceHtml(c) {
+  if (courseOnSale(c)) {
+    return `<span class="learn-price learn-price--was">${priceLabel(c.priceSatang)}</span>` +
+      `<span class="learn-price">${priceLabel(c.discountSatang)}</span>` +
+      `<span class="learn-sale-badge">-${courseDiscountPct(c)}%</span>`;
+  }
+  return `<span class="learn-price">${priceLabel(c.priceSatang)}</span>`;
+}
+function plusBadge(c) {
+  return Number(c.includedInPlus) ? '<span class="learn-plus-badge"><i class="fas fa-crown"></i> LITALK+</span>' : '';
+}
+
 function courseCardHtml(c) {
   const title = escapeHtml(c.titleTh || c.title || 'คอร์สเรียน');
   const desc = escapeHtml(c.descriptionTh || c.description || '');
   const enrolled = Number(c.enrolled) === 1;
   const meta = [];
   if (Number(c.itemCount) > 0) meta.push(`<i class="fas fa-book-open"></i> ${c.itemCount} บทเรียน`);
-  meta.push(`<i class="fas fa-tag"></i> ${priceLabel(c.priceSatang)}`);
+  meta.push(`<i class="fas fa-tag"></i> ${priceLabel(effectivePrice(c))}`);
 
   const chip = enrolled ? '<span class="learn-chip learn-chip--pass"><i class="fas fa-circle-check"></i> ลงทะเบียนแล้ว</span>' : '';
   const btn = enrolled
     ? `<button type="button" class="btn-learn-primary" onclick="openCourse(${Number(c.id)})">เข้าเรียน <i class="fas fa-arrow-right"></i></button>`
     : `<button type="button" class="btn-learn-primary" onclick="openCourse(${Number(c.id)})">
-         ${Number(c.priceSatang) > 0 ? 'ดูรายละเอียด / ซื้อคอร์ส' : 'ดูรายละเอียด'} <i class="fas fa-arrow-right"></i>
+         ${effectivePrice(c) > 0 ? 'ดูรายละเอียด / ซื้อคอร์ส' : 'ดูรายละเอียด'} <i class="fas fa-arrow-right"></i>
        </button>`;
 
   const cover = Number(c.hasCover)
-    ? `<div class="learn-card__img"><img src="${dataApiUrl}/courses/public/${Number(c.id)}/cover" alt="" loading="lazy"></div>`
+    ? `<div class="learn-card__img"><img src="${dataApiUrl}/courses/public/${Number(c.id)}/cover" alt="" loading="lazy"></div>${courseOnSale(c) ? `<span class="learn-card__sale">-${courseDiscountPct(c)}%</span>` : ''}`
     : '';
   return `
     <article class="learn-card learn-card--course">
@@ -193,13 +221,13 @@ function courseCardHtml(c) {
       <div class="learn-card__body">
         <div class="learn-card__head">
           <h3 class="learn-card__title">${title}</h3>
-          ${chip}
+          ${chip}${plusBadge(c)}
         </div>
         ${desc ? `<p class="learn-card__desc">${desc}</p>` : ''}
         <div class="learn-card__meta">${meta.map((m) => `<span>${m}</span>`).join('')}</div>
       </div>
       <div class="learn-card__foot">
-        <span class="learn-price">${priceLabel(c.priceSatang)}</span>
+        <span class="learn-price-wrap">${priceHtml(c)}</span>
         ${btn}
       </div>
     </article>`;
@@ -313,17 +341,18 @@ function renderCourse(data) {
   const view = document.getElementById('learn-view');
   const title = escapeHtml(course.titleTh || course.title);
   const overview = course.overviewTh || course.overview;
-  const price = Number(course.priceSatang) || 0;
+  const price = effectivePrice(course); // discounted price when on sale
   const lockAll = !enrolled; // must enrol/buy before anything opens
 
   const buyBar = enrolled
     ? ''
     : `<div class="learn-buy-bar">
-         <div class="learn-buy-bar__price">${priceLabel(price)}</div>
+         <div class="learn-buy-bar__price learn-price-wrap">${priceHtml(course)}</div>
          <button type="button" class="btn-learn-primary" id="learn-buy-btn" onclick="buyCourse(${Number(course.id)})">
            <i class="fas fa-cart-shopping"></i> ${price > 0 ? 'ซื้อคอร์สนี้' : 'ลงทะเบียนฟรี'}
          </button>
        </div>
+       ${courseOnSale(course) ? `<p class="learn-buy-note learn-buy-note--sale"><i class="fas fa-tags"></i> ราคาโปรโมชันช่วงเวลาจำกัด · ประหยัด ${courseDiscountPct(course)}%</p>` : ''}
        ${price > 0 ? '<p class="learn-buy-note"><i class="fas fa-shield-halved"></i> ชำระเงินอย่างปลอดภัยผ่าน Stripe · หลังชำระเงินจะเข้าเรียนได้ทันที</p>' : ''}`;
 
   let path = '';
