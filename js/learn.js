@@ -460,6 +460,27 @@ function videoEmbedHtml(url) {
   return `<p><a class="btn-learn-primary" href="${escapeHtml(u)}" target="_blank" rel="noopener"><i class="fas fa-play"></i> เปิดวีดีโอการสอน</a></p>`;
 }
 
+// A video the school hosts itself, in R2. Same shell as the YouTube case —
+// js/video-player.js drives a plain <video> through the same controls — but
+// the src is a ticketed stream URL rather than an embed. See videoTicketUrl().
+function videoFileHtml(src) {
+  return `<div class="lv" data-src="${escapeHtml(src)}" tabindex="0" aria-label="วีดีโอการสอน"></div>`;
+}
+
+// Mint a short-lived playback ticket and build the stream URL from it. A
+// <video src> cannot carry an Authorization header, so this authenticated
+// call is where the Worker checks ownership and the course sequence; the URL
+// it produces is what the element actually loads.
+async function videoTicketUrl(quizId) {
+  const res = await authedFetch(
+    `/portal/${encodeURIComponent(learnStudentId)}/quizzes/${encodeURIComponent(quizId)}/video-ticket`,
+    { method: 'POST' },
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.token) throw new Error(data.message || 'video ticket failed');
+  return `${dataApiUrl}/portal/${encodeURIComponent(learnStudentId)}/quizzes/${encodeURIComponent(quizId)}/video?t=${encodeURIComponent(data.token)}`;
+}
+
 // Reveals the test after the student confirms they've watched the video.
 function startTest() {
   const gate = document.getElementById('learn-test-gate');
@@ -572,11 +593,16 @@ function renderQuiz() {
 
   // Teaching video shown before the test. When present, the test is hidden
   // behind a "watched the video" gate so the flow is video → test.
-  const hasVideo = !!(quiz.videoUrl && String(quiz.videoUrl).trim());
+  //
+  // An uploaded file wins over a link when a lesson has both — it is the copy
+  // the school controls. openQuiz() has already minted its ticket; if that
+  // failed, videoSrc is empty and the link (when there is one) still plays.
+  const videoSrc = learnState.current.videoSrc || '';
+  const hasVideo = !!videoSrc || !!(quiz.videoUrl && String(quiz.videoUrl).trim());
   const videoHtml = hasVideo
     ? `<section class="learn-video-section">
          <h2 class="learn-section-title"><i class="fas fa-video"></i> วีดีโอการสอน</h2>
-         ${videoEmbedHtml(quiz.videoUrl)}
+         ${videoSrc ? videoFileHtml(videoSrc) : videoEmbedHtml(quiz.videoUrl)}
        </section>`
     : '';
 
@@ -676,6 +702,16 @@ async function openQuiz(quizId, fromCourseId) {
     }
     if (!res.ok) throw new Error(data.message || 'load failed');
     learnState.current = { quiz: data.quiz, questions: data.questions || [], prior: data.prior || { canAttempt: true } };
+    // A lesson whose video is a file in R2 needs a ticket before it can be
+    // played. Failing to get one must not cost the student the lesson text or
+    // the test, so it degrades to "no uploaded video" rather than throwing.
+    if (data.quiz && data.quiz.hasVideoFile) {
+      try {
+        learnState.current.videoSrc = await videoTicketUrl(quizId);
+      } catch (err) {
+        console.warn('videoTicketUrl:', err);
+      }
+    }
     learnState.startedAt = new Date().toISOString();
     renderQuiz();
   } catch (err) {
