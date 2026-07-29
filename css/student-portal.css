@@ -3588,6 +3588,9 @@ button.menu-dropdown-item {
    ============================================================ */
 .svc-layer {
     position: fixed;
+    /* Above every other layer in the portal — a notice can close the page
+       under a dialog, so it has to sit over one. See --z-notice in
+       css/style.css for the ladder this belongs to. */
     z-index: 4000;
     inset: auto 20px 20px auto;
     max-width: min(380px, calc(100vw - 40px));
