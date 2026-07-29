@@ -404,7 +404,9 @@ textarea {
 .nav__links {
   display: flex;
   align-items: center;
-  gap: 36px;
+  /* 36px with five short labels; six phrase-length ones overflowed the
+     container by 6px, and nowrap means the list cannot shrink to absorb it. */
+  gap: 28px;
   flex: 1;
   justify-content: center;
 }
@@ -415,6 +417,10 @@ textarea {
   color: var(--clr-secondary);
   transition: color var(--transition);
   position: relative;
+  /* Labels are phrases now — "Online Learning", "1-on-1 Tutoring" — and
+     without this they break at the space, putting the bar on two lines and
+     the underline indicator under half a word. */
+  white-space: nowrap;
 }
 
 .nav__link::after {
@@ -2143,6 +2149,24 @@ textarea {
   .footer__top { grid-template-columns: 1fr 1fr; gap: 36px; }
 }
 
+/* The nav collapses earlier than everything else. Six items with labels like
+   "1-on-1 Tutoring" fill the 1152px container exactly at the widest; one pixel
+   narrower and the bar overflows, because nowrap labels cannot shrink to
+   absorb it. So the bar shows only at the container's full width and the
+   hamburger takes over below. The rest of the mobile layout still switches at
+   768px. */
+@media (max-width: 1199px) {
+  .nav__links { display: none; }
+  .nav__actions .btn,
+  .nav__actions .login-menu { display: none; }
+  /* The language switch lives in the drawer once the hamburger is showing —
+     two controls competing for the same corner otherwise. */
+  .nav__inner > .nav__actions .lang-toggle { display: none; }
+  .nav__drawer .nav__actions .lang-toggle { display: inline-flex; }
+  .nav__drawer .nav__actions .btn { display: inline-flex; }
+  .nav__hamburger { display: flex; }
+}
+
 @media (max-width: 768px) {
   :root { --section-py: 64px; --container-px: 20px; }
 
@@ -2153,17 +2177,6 @@ textarea {
   .newsletter__input {
     font-size: 16px;
   }
-
-  .nav__links { display: none; }
-  .nav__actions .btn,
-  .nav__actions .login-menu { display: none; }
-  /* The language switch lives in the drawer on a phone, not beside the
-     hamburger — two controls competing for the same corner, when everything
-     else has already collapsed into the menu. */
-  .nav__inner > .nav__actions .lang-toggle { display: none; }
-  .nav__drawer .nav__actions .lang-toggle { display: inline-flex; }
-  .nav__drawer .nav__actions .btn { display: inline-flex; }
-  .nav__hamburger { display: flex; }
 
   .hero__headline { font-size: clamp(38px, 12vw, 60px); }
   .hero__bg-text { display: none; }
