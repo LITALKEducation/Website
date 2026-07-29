@@ -1205,6 +1205,13 @@ textarea {
 .testimonials__carousel-wrap {
   position: relative;
   margin-top: 56px;
+  /* Clip the off-screen slides so the cards (and their text) stay inside the
+     slider instead of spilling past its edges as the track translates. */
+  overflow: hidden;
+  /* Room so the cards' hover lift (translateY(-3px)) isn't clipped at the top.
+     Vertical only — horizontal padding would skew the JS card-width calc,
+     which reads this element's offsetWidth. */
+  padding-top: 4px;
 }
 
 .testimonials__track {

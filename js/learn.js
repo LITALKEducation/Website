@@ -196,7 +196,14 @@ function courseCardHtml(c) {
     </article>`;
 }
 
+// Show the hero on the home feed; hide it while viewing a course/quiz detail.
+function showHero(visible) {
+  const h = document.getElementById('learn-hero');
+  if (h) h.style.display = visible ? '' : 'none';
+}
+
 function renderHome() {
+  showHero(true);
   const view = document.getElementById('learn-view');
   const courses = learnState.courses;
   const quizzes = learnState.quizzes;
@@ -253,6 +260,7 @@ async function loadHome() {
 /* ---------------- Course detail + purchase ---------------- */
 
 async function openCourse(courseId) {
+  showHero(false);
   const view = document.getElementById('learn-view');
   view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span><span class="skeleton-loader skeleton-row medium"></span></div>';
   try {
@@ -556,6 +564,7 @@ function renderQuiz() {
 // fromCourseId (optional): when a quiz is opened from inside a course, "back"
 // returns to that course rather than the home list.
 async function openQuiz(quizId, fromCourseId) {
+  showHero(false);
   learnState.returnCourseId = fromCourseId != null ? Number(fromCourseId) : null;
   const view = document.getElementById('learn-view');
   view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span><span class="skeleton-loader skeleton-row medium"></span></div>';
@@ -727,6 +736,36 @@ window.buyCourse = buyCourse;
 window.backHome = backHome;
 window.startTest = startTest;
 
+// learn.html ships with the 1-on-1 student-portal tabs (ภาพรวม / บันทึกการเรียน
+// / การชำระเงิน). For an on-demand (non-LITALK) account those pages don't apply,
+// so point the nav at the on-demand dashboard (study) instead — keeping the
+// on-demand experience separate from the classic student portal.
+function applyOnDemandNav() {
+  const map = {
+    student: { href: 'study', icon: 'fa-gauge-high', label: 'หน้าหลัก' },
+    'student-study-log': { href: 'study?tab=todo', icon: 'fa-list-check', label: 'สิ่งที่ต้องทำ' },
+    'student-payments': { href: 'study?tab=me', icon: 'fa-circle-user', label: 'บัญชี' },
+    learn: { href: 'learn', icon: 'fa-book-open', label: 'บทเรียน' },
+    programs: { href: 'courses', icon: 'fa-graduation-cap', label: 'คอร์สทั้งหมด' },
+  };
+  document.querySelectorAll('.portal-tab, .bottom-nav-item, .drawer-link').forEach((a) => {
+    const m = map[a.getAttribute('href')];
+    if (!m) return;
+    a.setAttribute('href', m.href);
+    const span = a.querySelector('span');
+    if (span) {
+      // bottom-nav item: <i> + <span>label</span>
+      span.textContent = m.label;
+      const icon = a.querySelector('i');
+      if (icon) icon.className = `fas ${m.icon}`;
+    } else {
+      // portal-tab / drawer-link: <i> + text (active class & aria-current stay
+      // on the <a>, so replacing the children keeps them).
+      a.innerHTML = `<i class="fas ${m.icon}"></i> ${m.label}`;
+    }
+  });
+}
+
 /* ---------------- Boot ---------------- */
 
 window.onload = async () => {
@@ -749,7 +788,13 @@ window.onload = async () => {
   }
   learnStudentId = studentId;
 
-  document.getElementById('student-dashboard').style.display = 'block';
+  // Non-LITALK (on-demand) accounts get the on-demand nav, not the tutoring
+  // portal tabs.
+  if (window.litalkAccountType === 'on_demand') applyOnDemandNav();
+
+  // 'flex' (not 'block') keeps the .dashboard-page flex column intact so the
+  // footer sits at the bottom with proper spacing on short pages.
+  document.getElementById('student-dashboard').style.display = 'flex';
   initStudentHamburger();
   if (typeof initAIChatWidget === 'function') initAIChatWidget(studentId);
 
