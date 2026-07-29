@@ -49,6 +49,10 @@
   --radius-pill:   980px;
 
   /* Transitions */
+  /* The quick one, for a control reacting to a press or hover. It was the
+     most-used duration in this file — eleven declarations — and the only one
+     with no token, so it was the easiest to drift. */
+  --transition-fast: 150ms ease-out;
   --transition:    250ms ease;
   --transition-md: 300ms ease;
 
@@ -1136,7 +1140,9 @@ textarea {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0;
-  margin-top: 64px;
+  /* 56px is what every other section puts between its heading and its
+     content; this was the one at 64. */
+  margin-top: 56px;
 }
 
 .journey__track::before {
@@ -2122,7 +2128,12 @@ textarea {
   .nav__links { display: none; }
   .nav__actions .btn,
   .nav__actions .login-menu { display: none; }
-  .nav__actions .lang-toggle { display: inline-flex; }
+  /* The language switch lives in the drawer on a phone, not beside the
+     hamburger — two controls competing for the same corner, when everything
+     else has already collapsed into the menu. */
+  .nav__inner > .nav__actions .lang-toggle { display: none; }
+  .nav__drawer .nav__actions .lang-toggle { display: inline-flex; }
+  .nav__drawer .nav__actions .btn { display: inline-flex; }
   .nav__hamburger { display: flex; }
 
   .hero__headline { font-size: clamp(38px, 12vw, 60px); }
@@ -2428,7 +2439,8 @@ textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin-top: 48px;
+  /* Was 48px — the other section on this page uses 56px. */
+  margin-top: 56px;
 }
 
 .why-check-item {
@@ -3638,7 +3650,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   background-color: var(--clr-black);
   color: var(--clr-bg);
   margin-bottom: 8px;
-  transition: opacity .15s ease-out;
+  transition: opacity var(--transition-fast);
 }
 
 .ai-chat-consent__accept:hover { opacity: .85; }
@@ -3648,7 +3660,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   background-color: transparent;
   color: var(--clr-muted);
   font-weight: 500;
-  transition: border-color .15s ease-out, color .15s ease-out;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .ai-chat-consent__decline:hover { border-color: var(--clr-muted); color: var(--clr-black); }
@@ -3755,7 +3767,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   background-color: var(--clr-bg);
   box-shadow: 0 10px 15px -3px rgba(16, 24, 40, .08), 0 4px 6px -4px rgba(16, 24, 40, .06);
   cursor: text;
-  transition: border-color .15s ease-out;
+  transition: border-color var(--transition-fast);
 }
 
 /* Once the text needs more than one line the controls drop below it, so a
@@ -3812,7 +3824,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   border-radius: 50%;
   font-size: 15px;
   cursor: pointer;
-  transition: background-color .15s ease-out, opacity .15s ease-out;
+  transition: background-color var(--transition-fast), opacity var(--transition-fast);
 }
 
 .ask-icon-btn { border: 0; background: transparent; color: var(--clr-muted); }
@@ -3869,7 +3881,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   font-size: 14px;
   text-align: left;
   cursor: pointer;
-  transition: background-color .15s ease-out;
+  transition: background-color var(--transition-fast);
 }
 .ask-menu__item:hover { background-color: var(--clr-light-bg); }
 .ask-menu__item i { color: var(--clr-muted); font-size: 13px; flex-shrink: 0; }
@@ -4046,7 +4058,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color .15s ease-out, background-color .15s ease-out;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 .ask-account__btn:hover { border-color: var(--clr-black); background-color: var(--clr-light-bg); }
 .ask-account__btn[hidden] { display: none; }
@@ -4086,7 +4098,7 @@ article.reading-font-times { font-family: 'Times New Roman', Times, serif; }
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color .15s ease-out;
+  transition: background-color var(--transition-fast);
 }
 .ask-history__item:hover { background-color: var(--clr-light-bg); }
 .ask-history__q {
@@ -4220,7 +4232,7 @@ body.svc-locked { overflow: hidden; }
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity .15s ease-out;
+  transition: opacity var(--transition-fast);
 }
 .svc-card__btn:hover { opacity: .85; }
 
