@@ -17,7 +17,7 @@
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-  <link rel="stylesheet" href="css/style.css?v=20260729a">
+  <link rel="stylesheet" href="css/style.css?v=20260729b">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     /* On-demand course catalogue — reuses the marketing tokens so it tracks
@@ -51,6 +51,19 @@
       margin-left: 8px; vertical-align: middle; }
     .course-detail__sale { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 0;
       color: #e0245e; font-weight: 700; font-size: .95rem; }
+    /* Coming soon */
+    .course-card__soon { position: absolute; top: 12px; left: 12px; z-index: 2; display: inline-flex; align-items: center;
+      gap: 5px; font-size: .78rem; font-weight: 800; color: #fff; background: #2563eb; padding: 5px 11px;
+      border-radius: 999px; box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+    .course-countdown-lbl { font-size: .84rem; font-weight: 700; color: #2563eb; display: inline-flex; align-items: center; gap: 6px; }
+    .btn--soon { opacity: .75; pointer-events: none; }
+    .course-soon { margin: 22px 0 8px; padding: 22px 24px; border: 1px solid var(--clr-border); border-radius: 18px;
+      background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(37,99,235,.02)); }
+    .course-soon__badge { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 800;
+      color: #fff; background: #2563eb; padding: 5px 13px; border-radius: 999px; }
+    .course-soon__count { font-size: 2rem; font-weight: 800; color: var(--clr-black); margin: 14px 0 4px;
+      font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+    .course-soon__date { color: var(--clr-muted); font-size: .92rem; margin: 0 0 16px; }
     .course-empty { text-align: center; padding: 60px 20px; color: var(--clr-muted); }
     .course-empty i { font-size: 2.2rem; opacity: .5; margin-bottom: 12px; display: block; }
     /* Detail */
@@ -323,7 +336,7 @@
   <script src="js/service-notice.js?v=20260727h" defer></script>
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
-  <script src="js/courses.js?v=20260729b" defer></script>
+  <script src="js/courses.js?v=20260729c" defer></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', async () => {
       const catalog = document.getElementById('course-catalog');

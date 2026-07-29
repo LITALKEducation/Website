@@ -43,6 +43,20 @@
         .learn-chip { font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
         .learn-chip--pass { background: rgba(22,163,74,.12); color: #16a34a; }
         .learn-chip--try { background: rgba(234,179,8,.14); color: #b45309; }
+        .learn-chip--soon { background: rgba(37,99,235,.12); color: #2563eb; }
+        /* Coming soon */
+        .learn-card__soon { position: absolute; top: 10px; left: 10px; z-index: 2; display: inline-flex; align-items: center;
+            gap: 5px; font-size: .74rem; font-weight: 800; color: #fff; background: #2563eb; padding: 4px 10px; border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+        .learn-countdown-lbl { font-size: .84rem; font-weight: 700; color: #2563eb; display: inline-flex; align-items: center; gap: 6px; }
+        .learn-soon { background: var(--bg-secondary, #fff); border: 1px solid var(--border-color, #e5e7eb); border-radius: 16px;
+            padding: 20px; margin: 14px 0 6px; text-align: center;
+            background-image: linear-gradient(135deg, rgba(37,99,235,.08), rgba(37,99,235,.02)); }
+        .learn-soon__badge { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 800;
+            color: #fff; background: #2563eb; padding: 5px 13px; border-radius: 999px; }
+        .learn-soon__count { font-size: 1.9rem; font-weight: 800; color: var(--text-primary, #111); margin: 12px 0 4px; font-variant-numeric: tabular-nums; }
+        .learn-soon__date { color: var(--text-secondary, #777); font-size: .9rem; margin: 0 0 14px; }
+        .btn-learn-primary:disabled { opacity: .6; cursor: default; }
         .btn-learn-primary { display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer;
             background: var(--brand, #ff5a1f); color: #fff; font-weight: 600; font-size: .92rem;
             padding: 10px 18px; border-radius: 10px; transition: filter .15s; font-family: inherit; }
@@ -335,7 +349,7 @@
     <script src="js/service-notice.js?v=20260727h" defer></script>
     <script src="js/markdown.js?v=20260727g"></script>
     <script src="js/student-portal.js?v=20260727g"></script>
-    <script src="js/learn.js?v=20260729a"></script>
+    <script src="js/learn.js?v=20260729b"></script>
 </body>
 
 </html>

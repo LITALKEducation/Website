@@ -197,26 +197,68 @@ function plusBadge(c) {
   return Number(c.includedInPlus) ? '<span class="learn-plus-badge">LITALK+</span>' : '';
 }
 
+// A course is "coming soon" when its launch time is set and still in the future.
+function courseComingSoon(c) {
+  const iso = c && c.availableAt;
+  if (!iso) return false;
+  const ts = new Date(iso).getTime();
+  return !Number.isNaN(ts) && ts > Date.now();
+}
+function fmtOpenDate(iso) {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+}
+function countdownText(iso) {
+  const diff = new Date(iso).getTime() - Date.now();
+  if (!(diff > 0)) return 'กำลังเปิด…';
+  const s = Math.floor(diff / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (d > 0) return `${d} วัน ${h} ชม.`;
+  if (h > 0) return `${h} ชม. ${m} นาที`;
+  if (m > 0) return `${m} นาที ${sec} วิ`;
+  return `${sec} วินาที`;
+}
+function countdownHtml(iso) {
+  return `<span class="learn-countdown" data-countdown-to="${iso}">${countdownText(iso)}</span>`;
+}
+
 function courseCardHtml(c) {
   const title = escapeHtml(c.titleTh || c.title || 'คอร์สเรียน');
   const desc = escapeHtml(c.descriptionTh || c.description || '');
   const enrolled = Number(c.enrolled) === 1;
+  const soon = !enrolled && courseComingSoon(c);
   const meta = [];
   if (Number(c.itemCount) > 0) meta.push(`<i class="fas fa-book-open"></i> ${c.itemCount} บทเรียน`);
-  meta.push(`<i class="fas fa-tag"></i> ${priceLabel(effectivePrice(c))}`);
+  if (soon) meta.push(`<i class="fas fa-clock"></i> เปิด ${fmtOpenDate(c.availableAt)}`);
+  else meta.push(`<i class="fas fa-tag"></i> ${priceLabel(effectivePrice(c))}`);
 
-  const chip = enrolled ? '<span class="learn-chip learn-chip--pass"><i class="fas fa-circle-check"></i> ลงทะเบียนแล้ว</span>' : '';
+  const chip = enrolled
+    ? '<span class="learn-chip learn-chip--pass"><i class="fas fa-circle-check"></i> ลงทะเบียนแล้ว</span>'
+    : soon
+      ? '<span class="learn-chip learn-chip--soon"><i class="fas fa-clock"></i> เร็ว ๆ นี้</span>'
+      : '';
   const btn = enrolled
     ? `<button type="button" class="btn-learn-primary" onclick="openCourse(${Number(c.id)})">เข้าเรียน <i class="fas fa-arrow-right"></i></button>`
-    : `<button type="button" class="btn-learn-primary" onclick="openCourse(${Number(c.id)})">
-         ${effectivePrice(c) > 0 ? 'ดูรายละเอียด / ซื้อคอร์ส' : 'ดูรายละเอียด'} <i class="fas fa-arrow-right"></i>
-       </button>`;
+    : soon
+      ? `<button type="button" class="btn-learn-primary" onclick="openCourse(${Number(c.id)})">ดูรายละเอียด <i class="fas fa-arrow-right"></i></button>`
+      : `<button type="button" class="btn-learn-primary" onclick="openCourse(${Number(c.id)})">
+           ${effectivePrice(c) > 0 ? 'ดูรายละเอียด / ซื้อคอร์ส' : 'ดูรายละเอียด'} <i class="fas fa-arrow-right"></i>
+         </button>`;
 
+  const flag = soon
+    ? '<span class="learn-card__soon"><i class="fas fa-clock"></i> เร็ว ๆ นี้</span>'
+    : courseOnSale(c) ? `<span class="learn-card__sale">-${courseDiscountPct(c)}%</span>` : '';
   const cover = Number(c.hasCover)
-    ? `<div class="learn-card__img"><img src="${dataApiUrl}/courses/public/${Number(c.id)}/cover" alt="" loading="lazy"></div>${courseOnSale(c) ? `<span class="learn-card__sale">-${courseDiscountPct(c)}%</span>` : ''}`
+    ? `<div class="learn-card__img"><img src="${dataApiUrl}/courses/public/${Number(c.id)}/cover" alt="" loading="lazy"></div>${flag}`
     : '';
+  const footLeft = soon
+    ? `<span class="learn-countdown-lbl"><i class="fas fa-hourglass-half"></i> เปิดใน ${countdownHtml(c.availableAt)}</span>`
+    : `<span class="learn-price-wrap">${priceHtml(c)}</span>`;
   return `
-    <article class="learn-card learn-card--course">
+    <article class="learn-card learn-card--course${soon ? ' learn-card--soon' : ''}">
       ${cover}
       <div class="learn-card__body">
         <div class="learn-card__head">
@@ -227,7 +269,7 @@ function courseCardHtml(c) {
         <div class="learn-card__meta">${meta.map((m) => `<span>${m}</span>`).join('')}</div>
       </div>
       <div class="learn-card__foot">
-        <span class="learn-price-wrap">${priceHtml(c)}</span>
+        ${footLeft}
         ${btn}
       </div>
     </article>`;
@@ -342,18 +384,26 @@ function renderCourse(data) {
   const title = escapeHtml(course.titleTh || course.title);
   const overview = course.overviewTh || course.overview;
   const price = effectivePrice(course); // discounted price when on sale
+  const soon = !enrolled && courseComingSoon(course);
   const lockAll = !enrolled; // must enrol/buy before anything opens
 
   const buyBar = enrolled
     ? ''
-    : `<div class="learn-buy-bar">
-         <div class="learn-buy-bar__price learn-price-wrap">${priceHtml(course)}</div>
-         <button type="button" class="btn-learn-primary" id="learn-buy-btn" onclick="buyCourse(${Number(course.id)})">
-           <i class="fas fa-cart-shopping"></i> ${price > 0 ? 'ซื้อคอร์สนี้' : 'ลงทะเบียนฟรี'}
-         </button>
-       </div>
-       ${courseOnSale(course) ? `<p class="learn-buy-note learn-buy-note--sale"><i class="fas fa-tags"></i> ราคาโปรโมชันช่วงเวลาจำกัด · ประหยัด ${courseDiscountPct(course)}%</p>` : ''}
-       ${price > 0 ? '<p class="learn-buy-note"><i class="fas fa-shield-halved"></i> ชำระเงินอย่างปลอดภัยผ่าน Stripe · หลังชำระเงินจะเข้าเรียนได้ทันที</p>' : ''}`;
+    : soon
+      ? `<div class="learn-soon">
+           <span class="learn-soon__badge"><i class="fas fa-clock"></i> เร็ว ๆ นี้</span>
+           <div class="learn-soon__count" data-countdown-to="${course.availableAt}">${countdownText(course.availableAt)}</div>
+           <p class="learn-soon__date">เปิดให้ลงทะเบียน ${fmtOpenDate(course.availableAt)}</p>
+           <button type="button" class="btn-learn-primary" disabled><i class="fas fa-hourglass-half"></i> ยังไม่เปิดให้ลงทะเบียน</button>
+         </div>`
+      : `<div class="learn-buy-bar">
+           <div class="learn-buy-bar__price learn-price-wrap">${priceHtml(course)}</div>
+           <button type="button" class="btn-learn-primary" id="learn-buy-btn" onclick="buyCourse(${Number(course.id)})">
+             <i class="fas fa-cart-shopping"></i> ${price > 0 ? 'ซื้อคอร์สนี้' : 'ลงทะเบียนฟรี'}
+           </button>
+         </div>
+         ${courseOnSale(course) ? `<p class="learn-buy-note learn-buy-note--sale"><i class="fas fa-tags"></i> ราคาโปรโมชันช่วงเวลาจำกัด · ประหยัด ${courseDiscountPct(course)}%</p>` : ''}
+         ${price > 0 ? '<p class="learn-buy-note"><i class="fas fa-shield-halved"></i> ชำระเงินอย่างปลอดภัยผ่าน Stripe · หลังชำระเงินจะเข้าเรียนได้ทันที</p>' : ''}`;
 
   let path = '';
   if (data.pretest) {
@@ -773,6 +823,27 @@ window.openCourse = openCourse;
 window.buyCourse = buyCourse;
 window.backHome = backHome;
 window.startTest = startTest;
+
+// Live countdown ticker for "coming soon" courses: refresh every
+// [data-countdown-to] element each second; when one hits its launch time,
+// reload once so the course flips from "coming soon" to open.
+(function () {
+  let reloading = false;
+  setInterval(() => {
+    const els = document.querySelectorAll('[data-countdown-to]');
+    if (!els.length) return;
+    let expired = false;
+    els.forEach((el) => {
+      const iso = el.getAttribute('data-countdown-to');
+      if (new Date(iso).getTime() - Date.now() <= 0) expired = true;
+      el.textContent = countdownText(iso);
+    });
+    if (expired && !reloading) {
+      reloading = true;
+      setTimeout(() => window.location.reload(), 1500);
+    }
+  }, 1000);
+})();
 
 // learn.html ships with the 1-on-1 student-portal tabs (ภาพรวม / บันทึกการเรียน
 // / การชำระเงิน). For an on-demand (non-LITALK) account those pages don't apply,

@@ -84,17 +84,34 @@ function progressCardHtml(c) {
     </div>`;
 }
 
+// A course is "coming soon" when its launch time is set and still in the future.
+function recComingSoon(c) {
+  const iso = c && c.availableAt;
+  if (!iso) return false;
+  const ts = new Date(iso).getTime();
+  return !Number.isNaN(ts) && ts > Date.now();
+}
+function recOpenDate(iso) {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
 function recCardHtml(c) {
   const title = escapeHtml(c.titleTh || c.title || 'คอร์ส');
   const desc = escapeHtml(c.descriptionTh || c.description || '');
+  const soon = recComingSoon(c);
+  const meta = soon
+    ? `${Number(c.itemCount) || 0} บทเรียน · <span class="sd-rec__soon"><i class="fas fa-clock"></i> เปิด ${recOpenDate(c.availableAt)}</span>`
+    : `${Number(c.itemCount) || 0} บทเรียน · ${recPriceHtml(c)}`;
+  const plus = Number(c.includedInPlus) ? ' <span class="sd-rec__plus">LITALK+</span>' : '';
   return `
     <div class="sd-rec">
       <div class="sd-rec__body">
-        <h4 class="sd-rec__title">${title}${Number(c.includedInPlus) ? ' <span class="sd-rec__plus">LITALK+</span>' : ''}</h4>
+        <h4 class="sd-rec__title">${title}${plus}</h4>
         ${desc ? `<p class="sd-rec__desc">${desc}</p>` : ''}
-        <div class="sd-rec__meta">${Number(c.itemCount) || 0} บทเรียน · ${recPriceHtml(c)}</div>
+        <div class="sd-rec__meta">${meta}</div>
       </div>
-      <a class="sd-btn sd-btn--ghost" href="learn?course=${Number(c.id)}">ดูคอร์ส</a>
+      <a class="sd-btn sd-btn--ghost" href="learn?course=${Number(c.id)}">${soon ? 'ดูรายละเอียด' : 'ดูคอร์ส'}</a>
     </div>`;
 }
 

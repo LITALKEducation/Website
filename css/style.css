@@ -1496,6 +1496,14 @@ textarea {
   color: #8a5a00; background: linear-gradient(120deg,#ffe9a8,#ffd564);
   padding: 3px 9px; border-radius: 999px; margin-left: 8px; vertical-align: middle;
 }
+/* Coming soon (home promo cards) */
+.course-card__soon {
+  position: absolute; top: 12px; left: 12px; z-index: 2; display: inline-flex; align-items: center; gap: 5px;
+  font-size: .78rem; font-weight: 800; color: #fff; background: #2563eb; padding: 5px 11px; border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(37,99,235,.35);
+}
+.course-countdown-lbl { font-size: .84rem; font-weight: 700; color: #2563eb; display: inline-flex; align-items: center; gap: 6px; }
+.btn--soon { opacity: .75; pointer-events: none; }
 
 /* LITALK+ subscription — standalone showcase card */
 .plus-card {

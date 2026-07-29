@@ -93,6 +93,43 @@ window.LitalkCourses = (function () {
       : '';
   }
 
+  /* ---------- "coming soon" ---------- */
+
+  // A course is "coming soon" when its launch time is set and still in the
+  // future — visible in the catalogue, but not yet open for enrollment.
+  function isComingSoon(course) {
+    const iso = course && course.availableAt;
+    if (!iso) return false;
+    const ts = new Date(iso).getTime();
+    return !Number.isNaN(ts) && ts > Date.now();
+  }
+
+  function fmtOpenDate(iso) {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleString(lang() === 'th' ? 'th-TH' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  // A compact remaining-time string, e.g. "3 วัน 4 ชม." / "3d 4h".
+  function countdownText(iso) {
+    const diff = new Date(iso).getTime() - Date.now();
+    if (!(diff > 0)) return t('Opening…', 'กำลังเปิด…');
+    const s = Math.floor(diff / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (d > 0) return `${d} ${t('d', 'วัน')} ${h} ${t('h', 'ชม.')}`;
+    if (h > 0) return `${h} ${t('h', 'ชม.')} ${m} ${t('m', 'นาที')}`;
+    if (m > 0) return `${m} ${t('m', 'นาที')} ${sec} ${t('s', 'วิ')}`;
+    return `${sec} ${t('s', 'วินาที')}`;
+  }
+
+  // A live-updating countdown span (the ticker below refreshes it each second).
+  function countdownHtml(iso) {
+    return `<span class="course-countdown" data-countdown-to="${escapeHtml(iso)}">${countdownText(iso)}</span>`;
+  }
+
   // Where "register / start" sends the visitor: the portal learn page, opening
   // this course straight away (after login).
   function enrolUrl(id) {
@@ -119,11 +156,21 @@ window.LitalkCourses = (function () {
     const cover = Number(course.hasCover)
       ? `<div class="course-card__img"><img src="${API}/courses/public/${Number(course.id)}/cover" alt="" loading="lazy"></div>`
       : '';
-    const saleFlag = onSale(course) ? `<span class="course-card__sale">-${discountPct(course)}%</span>` : '';
+    const soon = isComingSoon(course);
+    const flag = soon
+      ? `<span class="course-card__soon"><i class="fas fa-clock"></i> ${t('Coming soon', 'เร็ว ๆ นี้')}</span>`
+      : onSale(course) ? `<span class="course-card__sale">-${discountPct(course)}%</span>` : '';
+    const foot = soon
+      ? `<span class="course-countdown-lbl"><i class="fas fa-hourglass-half"></i> ${t('Opens in', 'เปิดใน')} ${countdownHtml(course.availableAt)}</span>
+         <span class="btn btn--primary btn--sm btn--soon" aria-disabled="true">${t('Coming soon', 'เร็ว ๆ นี้')}</span>`
+      : `<span class="course-price-wrap">${priceHtml(course)}</span>
+         <a class="btn btn--primary btn--sm" href="${enrolUrl(course.id)}">
+           ${free ? t('Enroll free', 'ลงทะเบียนฟรี') : t('Register', 'ลงทะเบียนเรียน')}
+         </a>`;
     return `
-      <article class="blog-card course-card">
+      <article class="blog-card course-card${soon ? ' course-card--soon' : ''}">
         <a class="course-card__link" href="courses?id=${Number(course.id)}" aria-label="${title}">
-          ${cover}${saleFlag}
+          ${cover}${flag}
           <div class="blog-card__body">
             <span class="blog-card__tag">${cat}</span>${plusBadge(course)}
             <h3 class="blog-card__title">${title}</h3>
@@ -131,12 +178,7 @@ window.LitalkCourses = (function () {
             <div class="course-card__meta">${meta.join('')}</div>
           </div>
         </a>
-        <div class="course-card__foot">
-          <span class="course-price-wrap">${priceHtml(course)}</span>
-          <a class="btn btn--primary btn--sm" href="${enrolUrl(course.id)}">
-            ${free ? t('Enroll free', 'ลงทะเบียนฟรี') : t('Register', 'ลงทะเบียนเรียน')}
-          </a>
-        </div>
+        <div class="course-card__foot">${foot}</div>
       </article>`;
   }
 
@@ -177,9 +219,37 @@ window.LitalkCourses = (function () {
     const cover = Number(course.hasCover)
       ? `<div class="course-detail__cover"><img src="${API}/courses/public/${Number(course.id)}/cover" alt=""></div>`
       : '';
-    const saleNote = onSale(course)
+    const soon = isComingSoon(course);
+    const saleNote = !soon && onSale(course)
       ? `<p class="course-detail__sale"><i class="fas fa-tags"></i> ${t('Limited-time offer', 'ราคาโปรโมชันช่วงเวลาจำกัด')} · ${t('save', 'ลด')} ${discountPct(course)}%</p>`
       : '';
+    // Prominent countdown panel shown instead of the price + buy button while
+    // the course is still in "coming soon" mode.
+    const soonPanel = soon
+      ? `<div class="course-soon">
+           <span class="course-soon__badge"><i class="fas fa-clock"></i> ${t('Coming soon', 'เร็ว ๆ นี้')}</span>
+           <div class="course-soon__count" data-countdown-to="${escapeHtml(course.availableAt)}">${countdownText(course.availableAt)}</div>
+           <p class="course-soon__date">${t('Enrollment opens', 'เปิดให้ลงทะเบียน')} ${fmtOpenDate(course.availableAt)}</p>
+           <span class="btn btn--primary btn--soon" aria-disabled="true"><i class="fas fa-hourglass-half"></i> ${t('Not open yet', 'ยังไม่เปิดให้ลงทะเบียน')}</span>
+         </div>`
+      : '';
+    const buyTop = soon
+      ? soonPanel
+      : `<div class="course-buy">
+           <span class="course-price-wrap course-price-wrap--lg">${priceHtml(course, true)}</span>
+           <a class="btn btn--primary" href="${enrolUrl(course.id)}">
+             <i class="fas fa-graduation-cap"></i> ${free ? t('Enroll free', 'ลงทะเบียนฟรี') : t('Register &amp; start', 'ลงทะเบียนเรียน')}
+           </a>
+         </div>`;
+    const buyBottom = soon
+      ? `<div class="course-buy course-buy--bottom">
+           <span class="btn btn--primary btn--lg btn--soon" aria-disabled="true"><i class="fas fa-clock"></i> ${t('Opens in', 'เปิดใน')} ${countdownHtml(course.availableAt)}</span>
+         </div>`
+      : `<div class="course-buy course-buy--bottom">
+           <a class="btn btn--primary btn--lg" href="${enrolUrl(course.id)}">
+             <i class="fas fa-graduation-cap"></i> ${free ? t('Enroll free', 'ลงทะเบียนฟรี') : t('Register &amp; start', 'ลงทะเบียนเรียน')}
+           </a>
+         </div>`;
     return `
       <a class="course-back" href="courses"><i class="fas fa-arrow-left"></i> ${t('All courses', 'คอร์สทั้งหมด')}</a>
       ${cover}
@@ -187,24 +257,36 @@ window.LitalkCourses = (function () {
       <h1 class="page-hero__title course-detail__title">${title}</h1>
       ${desc ? `<p class="page-hero__sub">${desc}</p>` : ''}
       ${saleNote}
-      <div class="course-buy">
-        <span class="course-price-wrap course-price-wrap--lg">${priceHtml(course, true)}</span>
-        <a class="btn btn--primary" href="${enrolUrl(course.id)}">
-          <i class="fas fa-graduation-cap"></i> ${free ? t('Enroll free', 'ลงทะเบียนฟรี') : t('Register &amp; start', 'ลงทะเบียนเรียน')}
-        </a>
-      </div>
+      ${buyTop}
       ${overview ? `<div class="course-overview">${md(overview)}</div>` : ''}
       <h2 class="course-section-title">${t('What you will learn', 'เนื้อหาในคอร์ส')}</h2>
       ${syllabusHtml(data.items) || `<p class="course-detail__empty">${t('Syllabus coming soon.', 'กำลังจัดเตรียมเนื้อหา')}</p>`}
-      <div class="course-buy course-buy--bottom">
-        <a class="btn btn--primary btn--lg" href="${enrolUrl(course.id)}">
-          <i class="fas fa-graduation-cap"></i> ${free ? t('Enroll free', 'ลงทะเบียนฟรี') : t('Register &amp; start', 'ลงทะเบียนเรียน')}
-        </a>
-      </div>`;
+      ${buyBottom}`;
+  }
+
+  // Live countdown ticker: refresh every [data-countdown-to] element each
+  // second, wherever a card or detail put one in the DOM. When one reaches its
+  // launch time, reload once so the course flips from "coming soon" to open.
+  if (typeof document !== 'undefined') {
+    let reloading = false;
+    setInterval(() => {
+      const els = document.querySelectorAll('[data-countdown-to]');
+      if (!els.length) return;
+      let anyExpired = false;
+      els.forEach((el) => {
+        const iso = el.getAttribute('data-countdown-to');
+        if (new Date(iso).getTime() - Date.now() <= 0) anyExpired = true;
+        el.textContent = countdownText(iso);
+      });
+      if (anyExpired && !reloading) {
+        reloading = true;
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    }, 1000);
   }
 
   return {
     API, lang, t, fetchCourses, fetchCourse, cardHtml, detailHtml, escapeHtml, pick,
-    priceLabel, priceHtml, onSale, discountPct, plusBadge, enrolUrl,
+    priceLabel, priceHtml, onSale, discountPct, plusBadge, enrolUrl, isComingSoon, countdownText, fmtOpenDate,
   };
 })();
