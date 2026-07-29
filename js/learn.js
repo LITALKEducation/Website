@@ -445,7 +445,10 @@ function videoEmbedHtml(url) {
   if (!u) return '';
   let m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
   if (m) {
-    return `<div class="learn-video"><iframe src="https://www.youtube.com/embed/${m[1]}" title="วีดีโอการสอน" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    // Just the shell — js/video-player.js swaps in the real player once the
+    // markup is in the document, and falls back to an ordinary embed if the
+    // IFrame API cannot be reached.
+    return `<div class="lv" data-yt="${escapeHtml(m[1])}" tabindex="0" aria-label="วีดีโอการสอน"></div>`;
   }
   m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   if (m) {
@@ -621,6 +624,8 @@ function renderQuiz() {
       ${lessonHtml}
       ${quizHtml}
     </div>`;
+
+  if (window.litalkVideo) window.litalkVideo.mount(view);
 
   // Restore any on-device draft into the form, then keep saving on every
   // change (debounced) until the attempt is submitted.
