@@ -190,6 +190,16 @@ async function resolveAuthedStudentId() {
         const user = await auth0Client.getUser().catch(() => null);
         if (user && user.email) studentId = user.email.split('@')[0];
     }
+    // Fallback: if the API didn't report an account type (e.g. an older
+    // Worker), infer it from the login email domain. Tutored (1-on-1)
+    // students always sign in with an <id>@litalkeducation.com account;
+    // anything else is a self-registered on-demand learner. The server value
+    // (set in resolveStudentIdFromToken) always wins when present.
+    if (!window.litalkAccountType) {
+        const user = await auth0Client.getUser().catch(() => null);
+        const email = ((user && user.email) || '').toLowerCase();
+        if (email) window.litalkAccountType = email.endsWith('@litalkeducation.com') ? 'tutored' : 'on_demand';
+    }
     return studentId;
 }
 
