@@ -89,7 +89,7 @@ window.LitalkCourses = (function () {
 
   function plusBadge(course) {
     return Number(course.includedInPlus)
-      ? `<span class="course-plus-badge"><i class="fas fa-crown"></i> LITALK+</span>`
+      ? `<span class="course-plus-badge">LITALK+</span>`
       : '';
   }
 

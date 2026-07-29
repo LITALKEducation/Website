@@ -194,7 +194,7 @@ function priceHtml(c) {
   return `<span class="learn-price">${priceLabel(c.priceSatang)}</span>`;
 }
 function plusBadge(c) {
-  return Number(c.includedInPlus) ? '<span class="learn-plus-badge"><i class="fas fa-crown"></i> LITALK+</span>' : '';
+  return Number(c.includedInPlus) ? '<span class="learn-plus-badge">LITALK+</span>' : '';
 }
 
 function courseCardHtml(c) {

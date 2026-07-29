@@ -90,7 +90,7 @@ function recCardHtml(c) {
   return `
     <div class="sd-rec">
       <div class="sd-rec__body">
-        <h4 class="sd-rec__title">${title}${Number(c.includedInPlus) ? ' <span class="sd-rec__plus"><i class="fas fa-crown"></i> LITALK+</span>' : ''}</h4>
+        <h4 class="sd-rec__title">${title}${Number(c.includedInPlus) ? ' <span class="sd-rec__plus">LITALK+</span>' : ''}</h4>
         ${desc ? `<p class="sd-rec__desc">${desc}</p>` : ''}
         <div class="sd-rec__meta">${Number(c.itemCount) || 0} บทเรียน · ${recPriceHtml(c)}</div>
       </div>
