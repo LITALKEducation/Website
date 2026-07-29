@@ -39,6 +39,23 @@ function priceLabel(priceSatang) {
   return n <= 0 ? 'ฟรี' : '฿' + (n / 100).toLocaleString('en-US');
 }
 
+// A course is on sale when its discount price is below the list price.
+function recOnSale(c) {
+  const p = Number(c.priceSatang) || 0;
+  const d = c.discountSatang;
+  return d != null && Number(d) < p;
+}
+// Price for a recommended course: struck-through original + sale when on sale.
+function recPriceHtml(c) {
+  if (recOnSale(c)) {
+    const pct = Number(c.priceSatang) > 0
+      ? Math.round((1 - (Number(c.discountSatang) || 0) / Number(c.priceSatang)) * 100)
+      : 0;
+    return `<span class="sd-rec__was">${priceLabel(c.priceSatang)}</span> <strong>${priceLabel(c.discountSatang)}</strong> <span class="sd-rec__off">-${pct}%</span>`;
+  }
+  return priceLabel(c.priceSatang);
+}
+
 function avatarHtml(name, hasAvatar) {
   if (hasAvatar) {
     return `<img class="sd-avatar" src="${dataApiUrl}/portal/${encodeURIComponent(sdStudentId)}/avatar?v=${Date.now()}" alt="">`;
@@ -73,9 +90,9 @@ function recCardHtml(c) {
   return `
     <div class="sd-rec">
       <div class="sd-rec__body">
-        <h4 class="sd-rec__title">${title}</h4>
+        <h4 class="sd-rec__title">${title}${Number(c.includedInPlus) ? ' <span class="sd-rec__plus"><i class="fas fa-crown"></i> LITALK+</span>' : ''}</h4>
         ${desc ? `<p class="sd-rec__desc">${desc}</p>` : ''}
-        <div class="sd-rec__meta">${Number(c.itemCount) || 0} บทเรียน · ${priceLabel(c.priceSatang)}</div>
+        <div class="sd-rec__meta">${Number(c.itemCount) || 0} บทเรียน · ${recPriceHtml(c)}</div>
       </div>
       <a class="sd-btn sd-btn--ghost" href="learn?course=${Number(c.id)}">ดูคอร์ส</a>
     </div>`;

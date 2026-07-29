@@ -58,6 +58,41 @@ window.LitalkCourses = (function () {
     return '฿' + (n / 100).toLocaleString('en-US');
   }
 
+  // A course is "on sale" when it carries a discount price below its list price.
+  function onSale(course) {
+    const p = Number(course.priceSatang) || 0;
+    const d = course.discountSatang;
+    return d != null && Number(d) < p;
+  }
+
+  function discountPct(course) {
+    const p = Number(course.priceSatang) || 0;
+    if (!onSale(course) || p <= 0) return 0;
+    return Math.round((1 - (Number(course.discountSatang) || 0) / p) * 100);
+  }
+
+  // Price block: struck-through original + sale price when on sale, otherwise a
+  // single price. `lg` scales it for the detail hero.
+  function priceHtml(course, lg) {
+    const cls = lg ? ' course-price--lg' : '';
+    if (onSale(course)) {
+      const sale = Number(course.discountSatang) || 0;
+      return (
+        `<span class="course-price course-price--was">${priceLabel(course.priceSatang)}</span>` +
+        `<span class="course-price${cls}${sale <= 0 ? ' course-price--free' : ''}">${priceLabel(sale)}</span>` +
+        `<span class="course-sale-badge">-${discountPct(course)}%</span>`
+      );
+    }
+    const free = (Number(course.priceSatang) || 0) <= 0;
+    return `<span class="course-price${cls}${free ? ' course-price--free' : ''}">${priceLabel(course.priceSatang)}</span>`;
+  }
+
+  function plusBadge(course) {
+    return Number(course.includedInPlus)
+      ? `<span class="course-plus-badge"><i class="fas fa-crown"></i> LITALK+</span>`
+      : '';
+  }
+
   // Where "register / start" sends the visitor: the portal learn page, opening
   // this course straight away (after login).
   function enrolUrl(id) {
@@ -66,6 +101,9 @@ window.LitalkCourses = (function () {
 
   function md(text) {
     if (!text) return '';
+    if (window.marked) {
+      try { return window.marked.parse ? window.marked.parse(text) : window.marked(text); } catch (e) { /* fall through */ }
+    }
     return typeof window.litalkMarkdown === 'function' ? window.litalkMarkdown(text) : escapeHtml(text);
   }
 
@@ -75,25 +113,26 @@ window.LitalkCourses = (function () {
     const title = escapeHtml(pick(course, 'title')) || t('Course', 'คอร์ส');
     const desc = escapeHtml(pick(course, 'description'));
     const cat = course.category ? escapeHtml(course.category) : t('Course', 'คอร์ส');
-    const free = (Number(course.priceSatang) || 0) <= 0;
+    const free = onSale(course) ? (Number(course.discountSatang) || 0) <= 0 : (Number(course.priceSatang) || 0) <= 0;
     const meta = [];
     if (Number(course.itemCount) > 0) meta.push(`<i class="fas fa-book-open"></i> ${course.itemCount} ${t('lessons', 'บทเรียน')}`);
     const cover = Number(course.hasCover)
       ? `<div class="course-card__img"><img src="${API}/courses/public/${Number(course.id)}/cover" alt="" loading="lazy"></div>`
       : '';
+    const saleFlag = onSale(course) ? `<span class="course-card__sale">-${discountPct(course)}%</span>` : '';
     return `
       <article class="blog-card course-card">
         <a class="course-card__link" href="courses?id=${Number(course.id)}" aria-label="${title}">
-          ${cover}
+          ${cover}${saleFlag}
           <div class="blog-card__body">
-            <span class="blog-card__tag">${cat}</span>
+            <span class="blog-card__tag">${cat}</span>${plusBadge(course)}
             <h3 class="blog-card__title">${title}</h3>
             ${desc ? `<p class="course-card__desc">${desc}</p>` : ''}
             <div class="course-card__meta">${meta.join('')}</div>
           </div>
         </a>
         <div class="course-card__foot">
-          <span class="course-price${free ? ' course-price--free' : ''}">${priceLabel(course.priceSatang)}</span>
+          <span class="course-price-wrap">${priceHtml(course)}</span>
           <a class="btn btn--primary btn--sm" href="${enrolUrl(course.id)}">
             ${free ? t('Enroll free', 'ลงทะเบียนฟรี') : t('Register', 'ลงทะเบียนเรียน')}
           </a>
@@ -134,18 +173,22 @@ window.LitalkCourses = (function () {
     const title = escapeHtml(pick(course, 'title'));
     const desc = escapeHtml(pick(course, 'description'));
     const overview = pick(course, 'overview');
-    const free = (Number(course.priceSatang) || 0) <= 0;
+    const free = onSale(course) ? (Number(course.discountSatang) || 0) <= 0 : (Number(course.priceSatang) || 0) <= 0;
     const cover = Number(course.hasCover)
       ? `<div class="course-detail__cover"><img src="${API}/courses/public/${Number(course.id)}/cover" alt=""></div>`
+      : '';
+    const saleNote = onSale(course)
+      ? `<p class="course-detail__sale"><i class="fas fa-tags"></i> ${t('Limited-time offer', 'ราคาโปรโมชันช่วงเวลาจำกัด')} · ${t('save', 'ลด')} ${discountPct(course)}%</p>`
       : '';
     return `
       <a class="course-back" href="courses"><i class="fas fa-arrow-left"></i> ${t('All courses', 'คอร์สทั้งหมด')}</a>
       ${cover}
-      <span class="page-hero__label">${course.category ? escapeHtml(course.category) : t('On-demand course', 'คอร์สเรียน On Demand')}</span>
+      <span class="page-hero__label">${course.category ? escapeHtml(course.category) : t('On-demand course', 'คอร์สเรียน On Demand')}</span>${Number(course.includedInPlus) ? ` ${plusBadge(course)}` : ''}
       <h1 class="page-hero__title course-detail__title">${title}</h1>
       ${desc ? `<p class="page-hero__sub">${desc}</p>` : ''}
+      ${saleNote}
       <div class="course-buy">
-        <span class="course-price course-price--lg${free ? ' course-price--free' : ''}">${priceLabel(course.priceSatang)}</span>
+        <span class="course-price-wrap course-price-wrap--lg">${priceHtml(course, true)}</span>
         <a class="btn btn--primary" href="${enrolUrl(course.id)}">
           <i class="fas fa-graduation-cap"></i> ${free ? t('Enroll free', 'ลงทะเบียนฟรี') : t('Register &amp; start', 'ลงทะเบียนเรียน')}
         </a>
@@ -160,5 +203,8 @@ window.LitalkCourses = (function () {
       </div>`;
   }
 
-  return { API, lang, fetchCourses, fetchCourse, cardHtml, detailHtml, escapeHtml, pick, priceLabel };
+  return {
+    API, lang, t, fetchCourses, fetchCourse, cardHtml, detailHtml, escapeHtml, pick,
+    priceLabel, priceHtml, onSale, discountPct, plusBadge, enrolUrl,
+  };
 })();

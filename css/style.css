@@ -1461,6 +1461,61 @@ textarea {
 .blog-card__link:hover { gap: 8px; }
 
 /* ============================================================
+   HOME: on-demand course promo + LITALK+ teaser
+   The course cards reuse .blog-card; these rules add the price / sale /
+   subscription bits so the home page matches the /courses catalogue (whose
+   own copy lives inline in courses.html).
+   ============================================================ */
+.course-card { position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+.course-card__link { display: block; color: inherit; text-decoration: none; }
+.course-card__desc {
+  font-size: 14px; color: var(--clr-muted); line-height: 1.6; margin: 10px 0 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.course-card__meta { margin-top: 14px; color: var(--clr-muted); font-size: 13px; }
+.course-card__meta i { margin-right: 5px; }
+.course-card__foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 24px 22px; border-top: 1px solid var(--clr-border);
+}
+.course-price { font-weight: 700; font-size: 1.05rem; color: var(--clr-black); font-variant-numeric: tabular-nums; }
+.course-price--free { color: #16a34a; }
+.course-price-wrap { display: inline-flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.course-price--was { font-weight: 500; font-size: .95em; color: var(--clr-muted); text-decoration: line-through; }
+.course-sale-badge {
+  font-size: .72rem; font-weight: 800; letter-spacing: .02em; color: #fff;
+  background: #e0245e; padding: 3px 8px; border-radius: 999px; line-height: 1;
+}
+.course-card__sale {
+  position: absolute; top: 12px; left: 12px; z-index: 2; font-size: .78rem; font-weight: 800;
+  color: #fff; background: #e0245e; padding: 5px 11px; border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(224,36,94,.35);
+}
+.course-plus-badge {
+  display: inline-flex; align-items: center; gap: 5px; font-size: .68rem; font-weight: 800;
+  color: #8a5a00; background: linear-gradient(120deg,#ffe9a8,#ffd564);
+  padding: 3px 9px; border-radius: 999px; margin-left: 8px; vertical-align: middle;
+}
+
+/* LITALK+ subscription teaser */
+.plus-teaser {
+  margin-top: 56px; border-radius: var(--radius-lg); padding: 44px 40px;
+  background: linear-gradient(135deg, #1b1b2e 0%, #3a2b5f 55%, #5b3fa0 100%);
+  color: #fff; text-align: center; position: relative; overflow: hidden;
+}
+.plus-teaser__badge {
+  display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 800;
+  letter-spacing: .04em; color: #2a1c50; background: linear-gradient(120deg,#ffe9a8,#ffcf4d);
+  padding: 6px 14px; border-radius: 999px; margin-bottom: 18px;
+}
+.plus-teaser__title { font-size: clamp(22px, 3vw, 30px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 12px; }
+.plus-teaser__sub { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,.82); max-width: 560px; margin: 0 auto 22px; }
+.plus-teaser__soon {
+  display: inline-block; font-size: 13px; font-weight: 700; color: #fff;
+  border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 8px 20px;
+}
+
+/* ============================================================
    FAQ
    ============================================================ */
 .faq__list {

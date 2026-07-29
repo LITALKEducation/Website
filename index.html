@@ -667,6 +667,40 @@
 
 
     <!-- ============================================================
+         7.5 ON-DEMAND COURSES PROMO (+ LITALK+ teaser)
+         Populated by js/home-courses.js from the public course API. Hidden
+         until at least one published course loads, so a fresh site never
+         shows an empty promo strip.
+         ============================================================ -->
+    <section class="section" id="courses-promo" aria-labelledby="courses-promo-heading" hidden>
+      <div class="container">
+        <div class="text-center animate">
+          <span class="section-label" data-en="On-demand courses" data-th="คอร์สเรียนออนไลน์">On-demand courses</span>
+          <h2 class="section-heading" id="courses-promo-heading" data-en="Learn at your own pace." data-th="เรียนได้ทุกที่ ทุกเวลา">Learn at your own pace.</h2>
+          <p class="section-sub" data-en="Self-paced video courses with quizzes — buy once, learn anytime. Grab this month's featured deals below." data-th="คอร์สวิดีโอเรียนด้วยตนเองพร้อมแบบทดสอบ ซื้อครั้งเดียวเรียนได้ตลอด ดูโปรโมชันเด่นประจำเดือนด้านล่าง">
+            Self-paced video courses with quizzes — buy once, learn anytime. Grab this month's featured deals below.
+          </p>
+        </div>
+
+        <div class="blog__grid" id="home-courses-grid"></div>
+
+        <div class="text-center" style="margin-top: 48px;">
+          <a href="courses" class="btn btn--outline" data-en="Browse all courses" data-th="ดูคอร์สทั้งหมด">Browse all courses</a>
+        </div>
+
+        <!-- LITALK+ subscription — coming soon -->
+        <div class="plus-teaser animate">
+          <span class="plus-teaser__badge"><i class="fas fa-crown"></i> LITALK+</span>
+          <h3 class="plus-teaser__title" data-en="One subscription. Every course." data-th="สมัครสมาชิกเดียว เรียนได้ทุกคอร์ส">One subscription. Every course.</h3>
+          <p class="plus-teaser__sub" data-en="LITALK+ is coming soon — unlimited access to our on-demand courses for one simple monthly price." data-th="LITALK+ กำลังจะมาเร็ว ๆ นี้ — เข้าถึงคอร์สออนไลน์ได้ไม่จำกัดในราคาเดียวต่อเดือน">
+            LITALK+ is coming soon — unlimited access to our on-demand courses for one simple monthly price.
+          </p>
+          <span class="plus-teaser__soon" data-en="Coming soon" data-th="เร็ว ๆ นี้">Coming soon</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
          8. BLOG / RESOURCES
          ============================================================ -->
     <section class="section section--alt" id="blog" aria-labelledby="blog-heading">
@@ -1052,6 +1086,8 @@
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
   <script src="js/blog.js?v=20260727a" defer></script>
+  <script src="js/courses.js?v=20260729a" defer></script>
+  <script src="js/home-courses.js?v=20260729a" defer></script>
 
   <!-- AI chat assistant (general — not tied to a specific student account) -->
   <button class="ai-chat-fab" id="ai-chat-fab" onclick="toggleAIChat()" aria-label="Nong Lilly" title="Nong Lilly"><i class="fas fa-message"></i></button>
