@@ -57,13 +57,23 @@
 window.litalkVideo = (function () {
   const EMBED_HOST = 'https://www.youtube-nocookie.com';
   const API_SRC = 'https://www.youtube.com/iframe_api';
-  const API_TIMEOUT_MS = 6000;
+  // A safety net, NOT a performance budget. `iframe_api` is a small bootstrap
+  // that then fetches www-widgetapi.js, so readiness costs two sequential
+  // round trips plus execution — on mobile data that regularly passes six
+  // seconds, and a phone that merely loaded slowly used to be handed the
+  // fallback embed with YouTube's full UI on it. The script's own onerror is
+  // the real failure signal; this only covers "loaded but never called back".
+  const API_TIMEOUT_MS = 20000;
   // How far before the end to stop, so the suggested-video grid never draws.
   const END_GUARD_S = 0.4;
 
   let apiPromise = null;
 
   function loadApi() {
+    // Note the absence of caching on the rejected path below: a memoised
+    // rejection meant one slow lesson poisoned the whole session, and every
+    // lesson opened afterwards fell back instantly even though window.YT had
+    // long since arrived.
     if (apiPromise) return apiPromise;
     apiPromise = new Promise((resolve, reject) => {
       if (window.YT && window.YT.Player) {
@@ -89,7 +99,15 @@ window.litalkVideo = (function () {
       s.onerror = () => fail(new Error('YouTube API failed to load'));
       document.head.appendChild(s);
     });
+    apiPromise.catch(() => { apiPromise = null; });
     return apiPromise;
+  }
+
+  // Last look before giving up on a player. The API can turn up between the
+  // timeout firing and this running, and an embed with YouTube's own chrome on
+  // it is a bad enough outcome to be worth re-checking for.
+  function readyApi() {
+    return window.YT && window.YT.Player ? window.YT : null;
   }
 
   // The file URL reaches us through a DOM attribute, so it is escaped again
@@ -401,7 +419,7 @@ window.litalkVideo = (function () {
     if (!id) {
       player = filePlayer(mount, src, { onReady, onStateChange, onError: () => fallback(root, null, src) });
     } else {
-      loadApi().then((YT) => {
+      const build = (YT) => {
         player = new YT.Player(mount, {
           host: EMBED_HOST,
           videoId: id,
@@ -417,7 +435,14 @@ window.litalkVideo = (function () {
           },
           events: { onReady, onStateChange, onError: () => fallback(root, id) },
         });
-      }, () => fallback(root, id));
+      };
+      loadApi().then(build, () => {
+        // Timed out, but the API may have landed in the meantime — that is a
+        // far better outcome than an embed carrying YouTube's own chrome.
+        const late = readyApi();
+        if (late) build(late);
+        else fallback(root, id);
+      });
     }
 
     /* ---- wiring ---- */
