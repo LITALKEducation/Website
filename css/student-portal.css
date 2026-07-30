@@ -3977,6 +3977,34 @@ body.svc-locked { overflow: hidden; }
 
 .lv.is-fullscreen { border-radius: 0; aspect-ratio: auto; height: 100%; }
 
+/* iPhone Safari has no Fullscreen API on an ordinary element — only on a
+   <video>, which would hand the screen to the OS player and take our controls
+   and watermark with it (and cannot work at all for a YouTube iframe). So
+   where there is no API the player fills the viewport itself. See the
+   fullscreen block in js/video-player.js. */
+.lv--fs-fill {
+    position: fixed;
+    inset: 0;
+    /* The --z-modal rung: over the page and the portal's header, under the
+       service notice's 4000, which must be able to close a page that has a
+       video open on it. The ladder lives in css/style.css, which the portal
+       pages do not load — same reason .svc-layer writes its number out. */
+    z-index: 2000;
+    width: 100vw;
+    /* dvh follows Safari's collapsing toolbars, so the player does not sit
+       under them; vh first for anything without dvh. */
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    border-radius: 0;
+    aspect-ratio: auto;
+}
+
+/* Both elements are needed — on iOS, overflow on <body> alone does not always
+   stop the page moving. Same as the service notice's lock above. */
+html:has(body.lv-fs-locked),
+body.lv-fs-locked { overflow: hidden; }
+
 /* The fallback embed keeps YouTube's own controls, so none of the above
    applies to it. */
 .lv--fallback .lv__frame,

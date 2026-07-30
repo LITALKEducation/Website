@@ -503,18 +503,52 @@ window.litalkVideo = (function () {
       muteBtn.setAttribute('aria-label', muted ? 'ปิดเสียง' : 'เปิดเสียง');
     });
 
-    fsBtn.addEventListener('click', () => {
-      // Fullscreen the wrapper, not the iframe, so our controls come along
-      // instead of handing the screen back to YouTube's.
-      if (document.fullscreenElement) document.exitFullscreen();
-      else if (root.requestFullscreen) root.requestFullscreen();
-      else if (root.webkitRequestFullscreen) root.webkitRequestFullscreen();
-    });
-    document.addEventListener('fullscreenchange', () => {
-      const on = document.fullscreenElement === root;
+    /* ---- fullscreen ----
+       Fullscreen the wrapper, not the iframe or the video, so our controls
+       come along instead of handing the screen back to YouTube's — or, for a
+       file, to the OS player.
+
+       On a phone that is not always possible. **iPhone Safari implements the
+       Fullscreen API on <video> only** (`webkitEnterFullscreen`); neither
+       `requestFullscreen` nor the webkit-prefixed spelling exists on an
+       ordinary element, so the button used to do nothing at all there.
+
+       Handing over to `webkitEnterFullscreen` would work for a file and not
+       for a YouTube iframe, and would drop our controls and the watermark in
+       both cases. So where there is no API, the player fills the viewport
+       itself and keeps its own chrome. One behaviour, both sources. */
+    const nativeFs = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+    const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+
+    function setFsUi(on) {
       root.classList.toggle('is-fullscreen', on);
       icon(fsBtn, on ? 'compress' : 'expand');
-    });
+      fsBtn.setAttribute('aria-label', on ? 'ออกจากเต็มจอ' : 'เต็มจอ');
+    }
+
+    // The no-API path. Locks the page behind it, as a real fullscreen would.
+    function fillViewport(on) {
+      root.classList.toggle('lv--fs-fill', on);
+      document.body.classList.toggle('lv-fs-locked', on);
+      setFsUi(on);
+    }
+
+    function toggleFullscreen() {
+      if (nativeFs) {
+        if (fsElement()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        else (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+        return;
+      }
+      fillViewport(!root.classList.contains('lv--fs-fill'));
+    }
+
+    fsBtn.addEventListener('click', toggleFullscreen);
+
+    // webkitfullscreenchange as well: older Safari and iPadOS only fire that
+    // one, so without it the icon never returns from "exit fullscreen".
+    const onFsChange = () => setFsUi(fsElement() === root);
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
 
     // Space and K on the player itself, since native keys are off.
     root.addEventListener('keydown', (e) => {
@@ -523,6 +557,12 @@ window.litalkVideo = (function () {
         e.preventDefault();
         toggle();
       }
+    });
+
+    // Nothing else will close the filled-viewport state — the browser only
+    // handles Escape for a fullscreen it granted itself.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && root.classList.contains('lv--fs-fill')) fillViewport(false);
     });
   }
 
