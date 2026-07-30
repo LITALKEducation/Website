@@ -457,12 +457,36 @@ function renderCourse(data) {
       path += '<p class="learn-hint-lock"><i class="fas fa-lock"></i> ทำ Pretest ให้เสร็จก่อน จึงจะเริ่มเรียนบทเรียนได้</p>';
     }
   }
+  // Exams need LITALK+, so a lock here has two possible causes and they need
+  // different sentences: "finish the lessons" is useless advice to someone
+  // whose real blocker is the membership.
+  const examLock = !gates.examsUnlocked;
+  if (data.midterm) {
+    const locked = lockAll || !!data.midterm.locked;
+    path += `<h2 class="learn-section-title" style="margin-top:20px;"><i class="fas fa-pen-ruler"></i> สอบกลางภาค</h2>
+      <div class="learn-course-items">${courseItemRow(data.midterm, '<i class="fas fa-pen-ruler"></i>', course.id, locked, 'เริ่มสอบกลางภาค')}</div>`;
+    if (!lockAll && locked) {
+      path += examLock
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบกลางภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="courses#litalk-plus">ดูรายละเอียด</a></p>'
+        : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนบทเรียนก่อนหน้าให้ครบก่อน จึงจะสอบกลางภาคได้</p>';
+    }
+  }
   if (data.posttest) {
     const locked = lockAll || !!data.posttest.locked;
     path += `<h2 class="learn-section-title" style="margin-top:20px;"><i class="fas fa-trophy"></i> แบบทดสอบหลังเรียน (Posttest)</h2>
       <div class="learn-course-items">${courseItemRow(data.posttest, '<i class="fas fa-trophy"></i>', course.id, locked, 'ทำ Posttest')}</div>`;
     if (!lockAll && locked) {
       path += '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนและผ่านทุกบทเรียนให้ครบก่อน จึงจะทำ Posttest ได้</p>';
+    }
+  }
+  if (data.final) {
+    const locked = lockAll || !!data.final.locked;
+    path += `<h2 class="learn-section-title" style="margin-top:20px;"><i class="fas fa-graduation-cap"></i> สอบปลายภาค</h2>
+      <div class="learn-course-items">${courseItemRow(data.final, '<i class="fas fa-graduation-cap"></i>', course.id, locked, 'เริ่มสอบปลายภาค')}</div>`;
+    if (!lockAll && locked) {
+      path += examLock
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบปลายภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="courses#litalk-plus">ดูรายละเอียด</a></p>'
+        : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนและผ่านทุกบทเรียนให้ครบก่อน จึงจะสอบปลายภาคได้</p>';
     }
   }
 
@@ -788,7 +812,9 @@ async function openQuiz(quizId, fromCourseId) {
       // Locked by the course sequence (not enrolled, or Pretest/Lessons not yet
       // done). Explain why for out-of-sequence cases, then show the course.
       if (data.courseId) {
-        if (data.reason === 'pretest' || data.reason === 'lessons') window.alert(data.message || 'ยังเปิดบทเรียนนี้ไม่ได้');
+        if (data.reason === 'pretest' || data.reason === 'lessons' || data.reason === 'plus') {
+          window.alert(data.message || 'ยังเปิดบทเรียนนี้ไม่ได้');
+        }
         openCourse(data.courseId);
         return;
       }
