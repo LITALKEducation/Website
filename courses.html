@@ -258,6 +258,79 @@
           </div>
         </div>
       </section>
+
+      <!-- ============================================================
+           LITALK+ — the membership.
+           Uses the .plus-* block that has been in css/style.css since the
+           feature was first sketched and that no page rendered until now.
+           The "เร็ว ๆ นี้" badge and the disabled call to action are the
+           DEFAULT: js/courses.js swaps them for a real one only once
+           GET /plus/public reports a configured plan, so launching is a
+           Stripe dashboard edit rather than an HTML change.
+           ============================================================ -->
+      <section class="section" id="litalk-plus" aria-labelledby="plus-heading" style="padding-top: 8px;">
+        <div class="container">
+          <div class="plus-card animate">
+            <span class="plus-card__glow" aria-hidden="true"></span>
+            <div class="plus-card__inner">
+              <div class="plus-card__lead">
+                <span class="plus-badge">LITALK+</span>
+                <span class="plus-soon" id="plus-soon" data-en="Coming soon" data-th="เร็ว ๆ นี้">เร็ว ๆ นี้</span>
+              </div>
+              <h2 class="plus-card__title" id="plus-heading"
+                  data-en="Everything you need to keep improving — one membership"
+                  data-th="ทุกอย่างที่ช่วยให้เก่งขึ้นต่อเนื่อง ในสมาชิกเดียว">ทุกอย่างที่ช่วยให้เก่งขึ้นต่อเนื่อง ในสมาชิกเดียว</h2>
+              <p class="plus-card__sub"
+                 data-en="Blog lessons and end-of-lesson exercises stay free for everyone. LITALK+ adds the things that turn practice into progress."
+                 data-th="บทเรียนในบล็อกและแบบฝึกหัดท้ายบทยังฟรีสำหรับทุกคน LITALK+ เพิ่มสิ่งที่ทำให้การฝึกกลายเป็นความก้าวหน้าจริง">บทเรียนในบล็อกและแบบฝึกหัดท้ายบทยังฟรีสำหรับทุกคน LITALK+ เพิ่มสิ่งที่ทำให้การฝึกกลายเป็นความก้าวหน้าจริง</p>
+
+              <ul class="plus-benefits">
+                <li class="plus-benefit">
+                  <span class="plus-benefit__ic" aria-hidden="true"><i class="fas fa-file-pdf"></i></span>
+                  <span class="plus-benefit__txt">
+                    <strong data-en="Downloadable lesson slides" data-th="คลังสไลด์บทเรียน">คลังสไลด์บทเรียน</strong>
+                    <span data-en="Every lesson's deck as a PDF, yours to keep and revise from offline."
+                          data-th="สไลด์ของทุกบทเรียนเป็นไฟล์ PDF เก็บไว้ทบทวนได้แม้ไม่มีเน็ต">สไลด์ของทุกบทเรียนเป็นไฟล์ PDF เก็บไว้ทบทวนได้แม้ไม่มีเน็ต</span>
+                  </span>
+                </li>
+                <li class="plus-benefit">
+                  <span class="plus-benefit__ic" aria-hidden="true"><i class="fas fa-list-check"></i></span>
+                  <span class="plus-benefit__txt">
+                    <strong data-en="Full worked answers" data-th="เฉลยละเอียด">เฉลยละเอียด</strong>
+                    <span data-en="Not just what was wrong — why, explained question by question."
+                          data-th="ไม่ใช่แค่บอกว่าผิดข้อไหน แต่อธิบายว่าทำไม ทีละข้อ">ไม่ใช่แค่บอกว่าผิดข้อไหน แต่อธิบายว่าทำไม ทีละข้อ</span>
+                  </span>
+                </li>
+                <li class="plus-benefit">
+                  <span class="plus-benefit__ic" aria-hidden="true"><i class="fas fa-graduation-cap"></i></span>
+                  <span class="plus-benefit__txt">
+                    <strong data-en="Graded midterm and final exams" data-th="ข้อสอบกลางภาคและปลายภาค">ข้อสอบกลางภาคและปลายภาค</strong>
+                    <span data-en="Real checkpoints in every course, marked and kept in your record."
+                          data-th="จุดวัดผลจริงในทุกคอร์ส ตรวจอัตโนมัติและเก็บคะแนนไว้ในประวัติ">จุดวัดผลจริงในทุกคอร์ส ตรวจอัตโนมัติและเก็บคะแนนไว้ในประวัติ</span>
+                  </span>
+                </li>
+                <li class="plus-benefit">
+                  <span class="plus-benefit__ic" aria-hidden="true"><i class="fas fa-comments"></i></span>
+                  <span class="plus-benefit__txt">
+                    <strong data-en="Unlimited น้องลิลลี่, plus exam-prep mode" data-th="ถามน้องลิลลี่ไม่จำกัด พร้อมโหมดติวสอบ">ถามน้องลิลลี่ไม่จำกัด พร้อมโหมดติวสอบ</strong>
+                    <span data-en="Ask as much as you like, and have Lilly write you a practice exam on any topic."
+                          data-th="ถามได้ไม่จำกัด และให้ลิลลี่ออกข้อสอบให้ทำเองได้ทุกหัวข้อ">ถามได้ไม่จำกัด และให้ลิลลี่ออกข้อสอบให้ทำเองได้ทุกหัวข้อ</span>
+                  </span>
+                </li>
+              </ul>
+
+              <div class="plus-card__foot">
+                <p class="plus-card__note" id="plus-note"
+                   data-en="We're putting the finishing touches on it. Free members keep everything they have today."
+                   data-th="กำลังเก็บรายละเอียดขั้นสุดท้าย ผู้ใช้ฟรียังได้ทุกอย่างที่มีอยู่วันนี้เหมือนเดิม">กำลังเก็บรายละเอียดขั้นสุดท้าย ผู้ใช้ฟรียังได้ทุกอย่างที่มีอยู่วันนี้เหมือนเดิม</p>
+                <a class="btn btn--primary" id="plus-cta" href="learn"
+                   data-en="Coming soon" data-th="เร็ว ๆ นี้"
+                   aria-disabled="true" tabindex="-1" style="pointer-events: none; opacity: .55;">เร็ว ๆ นี้</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- ============================================================
@@ -340,7 +413,7 @@
   <script src="js/service-notice.js?v=20260727h" defer></script>
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
-  <script src="js/courses.js?v=20260729d" defer></script>
+  <script src="js/courses.js?v=20260730a" defer></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', async () => {
       const catalog = document.getElementById('course-catalog');
@@ -352,9 +425,55 @@
       const isTh = () => LitalkCourses.lang() === 'th';
 
       // Re-apply the site's data-en/data-th text swap after we inject markup.
+      // NOTE: main.js keeps applyLang inside its own closure and never puts it
+      // on window, so this is currently a no-op. It is harmless for the
+      // catalogue, which renders already-localised strings through
+      // LitalkCourses.t() rather than through data-en/data-th — but do not
+      // rely on it to localise markup injected later.
       const applyLang = () => {
         if (typeof window.litalkApplyLang === 'function') window.litalkApplyLang();
       };
+
+      // LITALK+ goes live the moment a plan exists in Stripe — nothing here
+      // has to be edited. The markup ships in the coming-soon state and this
+      // only ever upgrades it, so a failed or slow call leaves the safe
+      // version on screen rather than a button that cannot work.
+      const revealPlus = async () => {
+        const soon = document.getElementById('plus-soon');
+        const cta = document.getElementById('plus-cta');
+        const note = document.getElementById('plus-note');
+        if (!soon || !cta) return;
+        let available = false;
+        try {
+          const res = await fetch(`${LitalkCourses.API}/plus/public`);
+          available = res.ok && (await res.json()).available === true;
+        } catch (err) {
+          console.warn('plus: availability check failed', err);
+        }
+        if (!available) return;
+        soon.hidden = true;
+        cta.removeAttribute('aria-disabled');
+        cta.removeAttribute('tabindex');
+        cta.style.pointerEvents = '';
+        cta.style.opacity = '';
+        // Set the attributes AND the visible text. main.js's applyLang runs on
+        // load and on the language switch; it does not watch for attributes
+        // changed afterwards, and it is not reachable from here anyway (see
+        // the note on applyLang above). Writing both keeps this correct now
+        // and correct again after the visitor switches language.
+        const say = (el, en, th) => {
+          el.setAttribute('data-en', en);
+          el.setAttribute('data-th', th);
+          el.textContent = isTh() ? th : en;
+        };
+        say(cta, 'Start LITALK+', 'สมัคร LITALK+');
+        say(
+          note,
+          'Sign in to start — cancel any time, and you keep access to the end of the period you paid for.',
+          'เข้าสู่ระบบเพื่อเริ่มใช้งาน · ยกเลิกได้ทุกเมื่อ และยังใช้ได้จนจบรอบที่ชำระไว้แล้ว',
+        );
+      };
+      revealPlus();
 
       if (id) {
         catalog.hidden = true;
