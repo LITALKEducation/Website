@@ -3750,11 +3750,21 @@ body.svc-locked { overflow: hidden; }
 }
 .lv:not(.is-playing) .lv__top { opacity: 1; }
 
-/* The LITALK mark, always on. White because it only ever sits on video. */
+/* The LITALK mark, always on. White because it only ever sits on video.
+
+   These are the pre-measurement defaults: correct whenever the picture fills
+   the player, which is the ordinary 16/9 case. js/video-player.js overwrites
+   top/right with the letterbox offset added, so the mark stays ON the picture
+   when the two aspects differ — filling a portrait phone leaves black bands
+   most of the viewport tall, and the mark used to sit up in one of them,
+   nowhere near the video. --lv-wm-inset keeps the breakpoint here in the CSS
+   rather than teaching the script about widths. */
+.lv { --lv-wm-inset: 12px; }
+
 .lv__wm {
     position: absolute;
-    top: 12px;
-    right: 14px;
+    top: var(--lv-wm-inset);
+    right: var(--lv-wm-inset);
     z-index: 2;   /* over the mask */
     height: 16px;
     width: auto;
@@ -4024,7 +4034,8 @@ body.lv-fs-locked { overflow: hidden; }
 
 @media (max-width: 640px) {
     .lv__big { width: 56px; height: 56px; font-size: 18px; }
-    .lv__wm { height: 13px; top: 10px; right: 11px; }
+    .lv { --lv-wm-inset: 10px; }
+    .lv__wm { height: 13px; }
     .lv__top { height: 68px; }
     .lv__hint { padding: 11px 14px; font-size: 12px; }
     .lv__time { font-size: 11px; }
