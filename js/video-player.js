@@ -607,8 +607,10 @@ window.litalkVideo = (function () {
       // rotation, the gestures people already know.
       //
       // Note this loses our overlay, watermark included, for as long as it
-      // lasts. Apple's player draws nothing of ours. Branding that has to
-      // survive here belongs in the file itself.
+      // lasts — Apple's player draws nothing of ours, and no CSS reaches it.
+      // The only way to mark the video here would be to burn the logo into
+      // the file; the school has decided against that, so fullscreen on an
+      // iPhone is deliberately unwatermarked. Settled, not an oversight.
       //
       // webkitSupportsFullscreen only reads true once metadata has loaded, so
       // a tap before then still gets the filled viewport rather than nothing.
