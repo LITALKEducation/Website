@@ -21,6 +21,9 @@ const learnState = {
   // When a quiz is opened from inside a course, "back" returns to that course
   // instead of the home list.
   returnCourseId: null,
+  // LITALK+ membership + the free Lilly quota, from /portal/:id/plus. Null
+  // until that call answers, which is why the hero's tier row starts hidden.
+  plus: null,
 };
 
 const TF_LABEL = { true: 'จริง (True)', false: 'เท็จ (False)' };
@@ -275,6 +278,37 @@ function courseCardHtml(c) {
     </article>`;
 }
 
+// The membership row under the hero eyebrow: a badge for members, the
+// remaining free Lilly questions plus a way to upgrade for everyone else.
+// Stays hidden until the call answers so a member never sees the free line
+// flash first.
+function renderTier() {
+  const el = document.getElementById('learn-tier');
+  if (!el) return;
+  const plus = learnState.plus;
+  if (!plus) {
+    el.hidden = true;
+    return;
+  }
+  if (plus.member) {
+    el.innerHTML = '<span class="learn-tier__badge"><i class="fas fa-star"></i> สมาชิก LITALK+</span>';
+    el.hidden = false;
+    return;
+  }
+  const chat = plus.chat || {};
+  const remaining = Number(chat.remaining);
+  const quota = Number.isFinite(remaining)
+    ? `<span class="learn-tier__free">ถามน้องลิลลี่ได้อีก ${remaining} จาก ${Number(chat.dailyLimit) || 0} คำถามวันนี้</span>`
+    : '';
+  // No upgrade button until a plan is actually configured in Stripe —
+  // otherwise the button leads to a 503.
+  const cta = plus.available
+    ? '<a class="learn-tier__cta" href="courses#litalk-plus"><i class="fas fa-star"></i> อัปเกรดเป็น LITALK+</a>'
+    : '';
+  el.innerHTML = quota + cta;
+  el.hidden = !(quota || cta);
+}
+
 // Show the hero on the home feed; hide it while viewing a course/quiz detail.
 function showHero(visible) {
   const h = document.getElementById('learn-hero');
@@ -323,12 +357,17 @@ async function loadHome() {
   view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span></div>';
   try {
     const sid = encodeURIComponent(learnStudentId);
-    const [coursesRes, quizzesRes] = await Promise.all([
+    const [coursesRes, quizzesRes, plusRes] = await Promise.all([
       authedFetch(`/portal/${sid}/courses`).then((r) => r.json().catch(() => ({}))),
       authedFetch(`/portal/${sid}/quizzes`).then((r) => r.json().catch(() => ({}))),
+      // Membership is presentation, not permission — the server enforces every
+      // benefit itself. So a failure here costs the badge, never the lessons.
+      authedFetch(`/portal/${sid}/plus`).then((r) => r.json().catch(() => ({}))).catch(() => ({})),
     ]);
     learnState.courses = coursesRes.courses || [];
     learnState.quizzes = quizzesRes.quizzes || [];
+    learnState.plus = plusRes && plusRes.status === 'success' ? plusRes : null;
+    renderTier();
     renderHome();
   } catch (err) {
     console.error('loadHome:', err);
@@ -789,23 +828,40 @@ function showResult(result) {
     byId[b.id] = b;
   });
 
-  // Annotate each question in place with correct/incorrect + explanation.
-  if (result.showAnswers) {
-    questions.forEach((q) => {
-      const b = byId[q.id];
-      const wrap = document.getElementById(`qwrap_${q.id}`);
-      const fb = document.getElementById(`fb_${q.id}`);
-      if (!wrap || !b) return;
-      wrap.classList.add(b.correct ? 'is-correct' : 'is-wrong');
-      let msg = b.correct
-        ? '<i class="fas fa-circle-check"></i> ถูกต้อง'
-        : '<i class="fas fa-circle-xmark"></i> ยังไม่ถูก';
-      if (!b.correct && b.correctAnswer != null) {
-        msg += ` · เฉลย: ${escapeHtml(formatCorrect(q, b.correctAnswer))}`;
-      }
-      if (b.explanation) msg += `<div class="learn-explain">${mdToHtml(b.explanation)}</div>`;
-      if (fb) fb.innerHTML = msg;
-    });
+  // Which questions were right is FREE — an exercise you cannot mark is not
+  // much of an exercise. The model answer and the explanation are the LITALK+
+  // part, and the server only sends those to a member (see quizzes.ts), so
+  // this renders whatever it was given rather than deciding entitlement here.
+  questions.forEach((q) => {
+    const b = byId[q.id];
+    const wrap = document.getElementById(`qwrap_${q.id}`);
+    const fb = document.getElementById(`fb_${q.id}`);
+    if (!wrap || !b) return;
+    wrap.classList.add(b.correct ? 'is-correct' : 'is-wrong');
+    let msg = b.correct
+      ? '<i class="fas fa-circle-check"></i> ถูกต้อง'
+      : '<i class="fas fa-circle-xmark"></i> ยังไม่ถูก';
+    if (!b.correct && b.correctAnswer != null) {
+      msg += ` · เฉลย: ${escapeHtml(formatCorrect(q, b.correctAnswer))}`;
+    }
+    if (b.explanation) msg += `<div class="learn-explain">${mdToHtml(b.explanation)}</div>`;
+    if (fb) fb.innerHTML = msg;
+  });
+
+  // Offered at the moment it is worth something: this quiz HAS explanations
+  // and they were withheld. detailedLocked distinguishes that from a quiz whose
+  // author never turned answers on, which no membership would unlock.
+  if (result.detailedLocked) {
+    const box = document.getElementById('learn-result');
+    if (box) {
+      box.insertAdjacentHTML(
+        'beforebegin',
+        `<div class="learn-note learn-note--plus">
+           <i class="fas fa-star"></i> เฉลยละเอียดพร้อมคำอธิบายทีละข้อ เป็นสิทธิ์ของสมาชิก LITALK+
+           <a href="courses#litalk-plus">ดูรายละเอียด</a>
+         </div>`,
+      );
+    }
   }
 
   // Lock the form after submitting.
