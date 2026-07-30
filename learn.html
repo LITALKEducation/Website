@@ -212,10 +212,16 @@
             letter-spacing: .02em; color: #2a1c50; background: linear-gradient(120deg, #ffe9a8, #ffcf4d);
             padding: 6px 14px; border-radius: 999px; box-shadow: 0 6px 18px rgba(255,193,63,.28); }
         .learn-tier__free { font-size: .86rem; color: rgba(255,255,255,.92); }
+        /* Both an <a> (the coming-soon link) and a <button> (subscribe /
+           manage) wear this, so it has to reset the things a button does not
+           inherit: font, and the default border and cursor. */
         .learn-tier__cta { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; font-weight: 700;
             color: #fff; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
-            padding: 6px 14px; border-radius: 999px; text-decoration: none; transition: background .15s; }
-        .learn-tier__cta:hover { background: rgba(255,255,255,.3); }
+            padding: 6px 14px; border-radius: 999px; text-decoration: none; transition: background .15s;
+            font-family: inherit; cursor: pointer; }
+        .learn-tier__cta:hover:not(:disabled) { background: rgba(255,255,255,.3); }
+        .learn-tier__cta:disabled { opacity: .6; cursor: default; }
+        .learn-tier__cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
         @media (max-width: 640px) {
           .learn-hero { padding: 40px 22px; }
           .learn-hero__title { font-size: 1.7rem; }
@@ -373,7 +379,7 @@
     <script src="js/markdown.js?v=20260727g"></script>
     <script src="js/student-portal.js?v=20260727g"></script>
     <script src="js/video-player.js?v=20260729n"></script>
-    <script src="js/learn.js?v=20260730c"></script>
+    <script src="js/learn.js?v=20260730d"></script>
 </body>
 
 </html>

@@ -291,7 +291,17 @@ function renderTier() {
     return;
   }
   if (plus.member) {
-    el.innerHTML = '<span class="learn-tier__badge"><i class="fas fa-star"></i> สมาชิก LITALK+</span>';
+    const sub = plus.subscription || {};
+    // Someone who has cancelled keeps access to the end of the period, so the
+    // badge stays — but offering "cancel" again would be wrong, and Stripe's
+    // portal is where resuming happens too.
+    const until = sub.cancelAtPeriodEnd && sub.currentPeriodEnd
+      ? `<span class="learn-tier__free">ใช้ได้ถึง ${new Date(sub.currentPeriodEnd).toLocaleDateString('th-TH')}</span>`
+      : '';
+    el.innerHTML =
+      '<span class="learn-tier__badge"><i class="fas fa-star"></i> สมาชิก LITALK+</span>' +
+      until +
+      '<button type="button" class="learn-tier__cta" onclick="openPlusBilling()"><i class="fas fa-gear"></i> จัดการสมาชิก</button>';
     el.hidden = false;
     return;
   }
@@ -300,13 +310,109 @@ function renderTier() {
   const quota = Number.isFinite(remaining)
     ? `<span class="learn-tier__free">ถามน้องลิลลี่ได้อีก ${remaining} จาก ${Number(chat.dailyLimit) || 0} คำถามวันนี้</span>`
     : '';
-  // No upgrade button until a plan is actually configured in Stripe —
-  // otherwise the button leads to a 503.
-  const cta = plus.available
-    ? '<a class="learn-tier__cta" href="courses#litalk-plus"><i class="fas fa-star"></i> อัปเกรดเป็น LITALK+</a>'
-    : '';
+
+  // Nothing to click until a plan actually exists in Stripe — otherwise the
+  // button leads to a 503. Until then the marketing page carries the pitch.
+  let cta = '';
+  if (plus.available) {
+    const plans = plus.plans || {};
+    // Both plans configured: offer both rather than hiding one behind a
+    // dialog. One plan: one button, and no choice to make.
+    const btn = (plan, label) =>
+      `<button type="button" class="learn-tier__cta" onclick="startPlusCheckout('${plan}')"><i class="fas fa-star"></i> ${label}</button>`;
+    if (plans.monthly) cta += btn('monthly', 'สมัคร LITALK+ รายเดือน');
+    if (plans.yearly) cta += btn('yearly', plans.monthly ? 'รายปี' : 'สมัคร LITALK+ รายปี');
+  } else {
+    cta = '<a class="learn-tier__cta" href="courses#litalk-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
+  }
   el.innerHTML = quota + cta;
   el.hidden = !(quota || cta);
+}
+
+// Hand off to Stripe Checkout. Nothing is granted here — the webhook does
+// that once Stripe confirms the payment, which is also why the return path
+// below has to cope with the row not existing yet.
+async function startPlusCheckout(plan) {
+  const el = document.getElementById('learn-tier');
+  if (el) el.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/plus/checkout`, {
+      method: 'POST',
+      // Come back to the page they left, not to a fixed one.
+      body: JSON.stringify({ plan, returnUrl: window.location.href.split('?')[0] }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    if (data.member) {
+      // Already subscribed on another device or tab.
+      await refreshPlus();
+      return;
+    }
+    window.alert(data.message || 'เปิดหน้าสมัครสมาชิกไม่สำเร็จ');
+  } catch (err) {
+    console.error('startPlusCheckout:', err);
+    window.alert('เปิดหน้าสมัครสมาชิกไม่สำเร็จ');
+  } finally {
+    if (el) el.querySelectorAll('button').forEach((b) => { b.disabled = false; });
+  }
+}
+
+// Change card, switch plan, cancel, resume — all of it lives in Stripe's
+// hosted portal rather than being rebuilt here.
+async function openPlusBilling() {
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/plus/manage`, {
+      method: 'POST',
+      body: JSON.stringify({ returnUrl: window.location.href.split('?')[0] }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    window.alert(data.message || 'เปิดหน้าจัดการสมาชิกไม่สำเร็จ');
+  } catch (err) {
+    console.error('openPlusBilling:', err);
+    window.alert('เปิดหน้าจัดการสมาชิกไม่สำเร็จ');
+  }
+}
+
+async function refreshPlus() {
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/plus`);
+    const data = await res.json().catch(() => ({}));
+    if (data.status === 'success') {
+      learnState.plus = data;
+      renderTier();
+      return data.member === true;
+    }
+  } catch (err) {
+    console.warn('refreshPlus:', err);
+  }
+  return false;
+}
+
+// Coming back from a successful Stripe checkout. The membership is written by
+// the webhook, which is a separate delivery from this redirect and can land
+// after it — so poll briefly rather than telling a paying member they are not
+// one. Gives up quietly: the badge appears on the next page load either way.
+async function settleAfterCheckout() {
+  const el = document.getElementById('learn-tier');
+  if (el) {
+    el.hidden = false;
+    el.innerHTML = '<span class="learn-tier__free"><i class="fas fa-spinner fa-spin"></i> กำลังยืนยันการสมัครสมาชิก...</span>';
+  }
+  for (let i = 0; i < 6; i += 1) {
+    if (await refreshPlus()) {
+      window.alert('ยินดีต้อนรับสู่ LITALK+ ');
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  renderTier();
 }
 
 // Show the hero on the home feed; hide it while viewing a course/quiz detail.
@@ -367,7 +473,11 @@ async function loadHome() {
     learnState.courses = coursesRes.courses || [];
     learnState.quizzes = quizzesRes.quizzes || [];
     learnState.plus = plusRes && plusRes.status === 'success' ? plusRes : null;
-    renderTier();
+    if (new URLSearchParams(window.location.search).get('plus') === '1' && !(learnState.plus && learnState.plus.member)) {
+      settleAfterCheckout();
+    } else {
+      renderTier();
+    }
     renderHome();
   } catch (err) {
     console.error('loadHome:', err);
