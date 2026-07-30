@@ -57,13 +57,23 @@
 window.litalkVideo = (function () {
   const EMBED_HOST = 'https://www.youtube-nocookie.com';
   const API_SRC = 'https://www.youtube.com/iframe_api';
-  const API_TIMEOUT_MS = 6000;
+  // A safety net, NOT a performance budget. `iframe_api` is a small bootstrap
+  // that then fetches www-widgetapi.js, so readiness costs two sequential
+  // round trips plus execution — on mobile data that regularly passes six
+  // seconds, and a phone that merely loaded slowly used to be handed the
+  // fallback embed with YouTube's full UI on it. The script's own onerror is
+  // the real failure signal; this only covers "loaded but never called back".
+  const API_TIMEOUT_MS = 20000;
   // How far before the end to stop, so the suggested-video grid never draws.
   const END_GUARD_S = 0.4;
 
   let apiPromise = null;
 
   function loadApi() {
+    // Note the absence of caching on the rejected path below: a memoised
+    // rejection meant one slow lesson poisoned the whole session, and every
+    // lesson opened afterwards fell back instantly even though window.YT had
+    // long since arrived.
     if (apiPromise) return apiPromise;
     apiPromise = new Promise((resolve, reject) => {
       if (window.YT && window.YT.Player) {
@@ -89,7 +99,15 @@ window.litalkVideo = (function () {
       s.onerror = () => fail(new Error('YouTube API failed to load'));
       document.head.appendChild(s);
     });
+    apiPromise.catch(() => { apiPromise = null; });
     return apiPromise;
+  }
+
+  // Last look before giving up on a player. The API can turn up between the
+  // timeout firing and this running, and an embed with YouTube's own chrome on
+  // it is a bad enough outcome to be worth re-checking for.
+  function readyApi() {
+    return window.YT && window.YT.Player ? window.YT : null;
   }
 
   // The file URL reaches us through a DOM attribute, so it is escaped again
@@ -244,11 +262,42 @@ window.litalkVideo = (function () {
     const qMenu = q('.lv__qmenu');
     const hintBack = q('.lv__hint--back');
     const hintFwd = q('.lv__hint--fwd');
+    const wm = q('.lv__wm');
 
     let player = null;
     let duration = 0;
     let ticking = null;
     let ended = false;
+
+    // Keep the watermark ON the picture rather than in a corner of the player.
+    // The two are the same box only while the aspects match; fill a portrait
+    // phone and the 16/9 picture becomes a band with black above and below,
+    // and a mark pinned to the player floats in the black, nowhere near the
+    // video. Measured rather than assumed, because a lesson recording is not
+    // always 16/9.
+    function placeWatermark() {
+      if (!wm) return;
+      // learn.js rebuilds the lesson view on every quiz opened, so a player's
+      // listeners outlive its markup. Detached is the signal to let go —
+      // otherwise they pile up one set per lesson for the whole session.
+      if (!root.isConnected) {
+        window.removeEventListener('resize', placeWatermark);
+        window.removeEventListener('orientationchange', placeWatermark);
+        return;
+      }
+      const box = root.getBoundingClientRect();
+      if (!box.width || !box.height) return;
+      const v = root.querySelector('.lv__frame video');
+      // A YouTube embed reports nothing about its source, and presents itself
+      // as 16/9, so that is the honest assumption for it.
+      const ar = v && v.videoWidth && v.videoHeight ? v.videoWidth / v.videoHeight : 16 / 9;
+      const picture = box.width / box.height > ar
+        ? { w: box.height * ar, h: box.height }
+        : { w: box.width, h: box.width / ar };
+      const inset = parseFloat(getComputedStyle(root).getPropertyValue('--lv-wm-inset')) || 12;
+      wm.style.top = (box.height - picture.h) / 2 + inset + 'px';
+      wm.style.right = (box.width - picture.w) / 2 + inset + 'px';
+    }
 
     const icon = (btn, name) => {
       const i = btn.querySelector('i');
@@ -378,8 +427,13 @@ window.litalkVideo = (function () {
       duration = player.getDuration() || 0;
       root.classList.add('is-ready');
       buildQuality();
+      placeWatermark();
       paint();
     };
+    // The player box changes shape on rotation, on a resize, and on entering
+    // or leaving the filled state — all of which move the letterbox.
+    window.addEventListener('resize', placeWatermark);
+    window.addEventListener('orientationchange', placeWatermark);
     const onStateChange = (e) => {
       // 1 playing, 2 paused, 0 ended, 3 buffering
       if (!duration) duration = player.getDuration() || 0;
@@ -401,7 +455,7 @@ window.litalkVideo = (function () {
     if (!id) {
       player = filePlayer(mount, src, { onReady, onStateChange, onError: () => fallback(root, null, src) });
     } else {
-      loadApi().then((YT) => {
+      const build = (YT) => {
         player = new YT.Player(mount, {
           host: EMBED_HOST,
           videoId: id,
@@ -417,7 +471,14 @@ window.litalkVideo = (function () {
           },
           events: { onReady, onStateChange, onError: () => fallback(root, id) },
         });
-      }, () => fallback(root, id));
+      };
+      loadApi().then(build, () => {
+        // Timed out, but the API may have landed in the meantime — that is a
+        // far better outcome than an embed carrying YouTube's own chrome.
+        const late = readyApi();
+        if (late) build(late);
+        else fallback(root, id);
+      });
     }
 
     /* ---- wiring ---- */
@@ -524,6 +585,7 @@ window.litalkVideo = (function () {
       root.classList.toggle('is-fullscreen', on);
       icon(fsBtn, on ? 'compress' : 'expand');
       fsBtn.setAttribute('aria-label', on ? 'ออกจากเต็มจอ' : 'เต็มจอ');
+      placeWatermark();
     }
 
     // The no-API path. Locks the page behind it, as a real fullscreen would.
@@ -539,6 +601,26 @@ window.litalkVideo = (function () {
         else (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
         return;
       }
+      // No element-level API — an iPhone. There IS a video-level one for a
+      // file we host, and the school has accepted Apple's player UI for
+      // fullscreen on a phone, so hand the screen over: real fullscreen, real
+      // rotation, the gestures people already know.
+      //
+      // Note this loses our overlay, watermark included, for as long as it
+      // lasts — Apple's player draws nothing of ours, and no CSS reaches it.
+      // The only way to mark the video here would be to burn the logo into
+      // the file; the school has decided against that, so fullscreen on an
+      // iPhone is deliberately unwatermarked. Settled, not an oversight.
+      //
+      // webkitSupportsFullscreen only reads true once metadata has loaded, so
+      // a tap before then still gets the filled viewport rather than nothing.
+      const v = root.querySelector('.lv__frame video');
+      if (v && v.webkitSupportsFullscreen && typeof v.webkitEnterFullscreen === 'function') {
+        v.webkitEnterFullscreen();
+        return;
+      }
+      // A YouTube embed has no video element to hand over, so it keeps the
+      // filled viewport — and now with the watermark on the picture.
       fillViewport(!root.classList.contains('lv--fs-fill'));
     }
 
