@@ -21,6 +21,9 @@ const learnState = {
   // When a quiz is opened from inside a course, "back" returns to that course
   // instead of the home list.
   returnCourseId: null,
+  // LITALK+ membership + the free Lilly quota, from /portal/:id/plus. Null
+  // until that call answers, which is why the hero's tier row starts hidden.
+  plus: null,
 };
 
 const TF_LABEL = { true: 'จริง (True)', false: 'เท็จ (False)' };
@@ -275,6 +278,143 @@ function courseCardHtml(c) {
     </article>`;
 }
 
+// The membership row under the hero eyebrow: a badge for members, the
+// remaining free Lilly questions plus a way to upgrade for everyone else.
+// Stays hidden until the call answers so a member never sees the free line
+// flash first.
+function renderTier() {
+  const el = document.getElementById('learn-tier');
+  if (!el) return;
+  const plus = learnState.plus;
+  if (!plus) {
+    el.hidden = true;
+    return;
+  }
+  if (plus.member) {
+    const sub = plus.subscription || {};
+    // Someone who has cancelled keeps access to the end of the period, so the
+    // badge stays — but offering "cancel" again would be wrong, and Stripe's
+    // portal is where resuming happens too.
+    const until = sub.cancelAtPeriodEnd && sub.currentPeriodEnd
+      ? `<span class="learn-tier__free">ใช้ได้ถึง ${new Date(sub.currentPeriodEnd).toLocaleDateString('th-TH')}</span>`
+      : '';
+    el.innerHTML =
+      '<span class="learn-tier__badge"><i class="fas fa-star"></i> สมาชิก LITALK+</span>' +
+      until +
+      '<button type="button" class="learn-tier__cta" onclick="openPlusBilling()"><i class="fas fa-gear"></i> จัดการสมาชิก</button>';
+    el.hidden = false;
+    return;
+  }
+  const chat = plus.chat || {};
+  const remaining = Number(chat.remaining);
+  const quota = Number.isFinite(remaining)
+    ? `<span class="learn-tier__free">ถามน้องลิลลี่ได้อีก ${remaining} จาก ${Number(chat.dailyLimit) || 0} คำถามวันนี้</span>`
+    : '';
+
+  // Nothing to click until a plan actually exists in Stripe — otherwise the
+  // button leads to a 503. Until then the marketing page carries the pitch.
+  let cta = '';
+  if (plus.available) {
+    const plans = plus.plans || {};
+    // Both plans configured: offer both rather than hiding one behind a
+    // dialog. One plan: one button, and no choice to make.
+    const btn = (plan, label) =>
+      `<button type="button" class="learn-tier__cta" onclick="startPlusCheckout('${plan}')"><i class="fas fa-star"></i> ${label}</button>`;
+    if (plans.monthly) cta += btn('monthly', 'สมัคร LITALK+ รายเดือน');
+    if (plans.yearly) cta += btn('yearly', plans.monthly ? 'รายปี' : 'สมัคร LITALK+ รายปี');
+  } else {
+    cta = '<a class="learn-tier__cta" href="courses#litalk-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
+  }
+  el.innerHTML = quota + cta;
+  el.hidden = !(quota || cta);
+}
+
+// Hand off to Stripe Checkout. Nothing is granted here — the webhook does
+// that once Stripe confirms the payment, which is also why the return path
+// below has to cope with the row not existing yet.
+async function startPlusCheckout(plan) {
+  const el = document.getElementById('learn-tier');
+  if (el) el.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/plus/checkout`, {
+      method: 'POST',
+      // Come back to the page they left, not to a fixed one.
+      body: JSON.stringify({ plan, returnUrl: window.location.href.split('?')[0] }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    if (data.member) {
+      // Already subscribed on another device or tab.
+      await refreshPlus();
+      return;
+    }
+    window.alert(data.message || 'เปิดหน้าสมัครสมาชิกไม่สำเร็จ');
+  } catch (err) {
+    console.error('startPlusCheckout:', err);
+    window.alert('เปิดหน้าสมัครสมาชิกไม่สำเร็จ');
+  } finally {
+    if (el) el.querySelectorAll('button').forEach((b) => { b.disabled = false; });
+  }
+}
+
+// Change card, switch plan, cancel, resume — all of it lives in Stripe's
+// hosted portal rather than being rebuilt here.
+async function openPlusBilling() {
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/plus/manage`, {
+      method: 'POST',
+      body: JSON.stringify({ returnUrl: window.location.href.split('?')[0] }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    window.alert(data.message || 'เปิดหน้าจัดการสมาชิกไม่สำเร็จ');
+  } catch (err) {
+    console.error('openPlusBilling:', err);
+    window.alert('เปิดหน้าจัดการสมาชิกไม่สำเร็จ');
+  }
+}
+
+async function refreshPlus() {
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/plus`);
+    const data = await res.json().catch(() => ({}));
+    if (data.status === 'success') {
+      learnState.plus = data;
+      renderTier();
+      return data.member === true;
+    }
+  } catch (err) {
+    console.warn('refreshPlus:', err);
+  }
+  return false;
+}
+
+// Coming back from a successful Stripe checkout. The membership is written by
+// the webhook, which is a separate delivery from this redirect and can land
+// after it — so poll briefly rather than telling a paying member they are not
+// one. Gives up quietly: the badge appears on the next page load either way.
+async function settleAfterCheckout() {
+  const el = document.getElementById('learn-tier');
+  if (el) {
+    el.hidden = false;
+    el.innerHTML = '<span class="learn-tier__free"><i class="fas fa-spinner fa-spin"></i> กำลังยืนยันการสมัครสมาชิก...</span>';
+  }
+  for (let i = 0; i < 6; i += 1) {
+    if (await refreshPlus()) {
+      window.alert('ยินดีต้อนรับสู่ LITALK+ ');
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  renderTier();
+}
+
 // Show the hero on the home feed; hide it while viewing a course/quiz detail.
 function showHero(visible) {
   const h = document.getElementById('learn-hero');
@@ -323,12 +463,21 @@ async function loadHome() {
   view.innerHTML = '<div class="skeleton-card"><span class="skeleton-loader skeleton-row short"></span><span class="skeleton-loader skeleton-row"></span></div>';
   try {
     const sid = encodeURIComponent(learnStudentId);
-    const [coursesRes, quizzesRes] = await Promise.all([
+    const [coursesRes, quizzesRes, plusRes] = await Promise.all([
       authedFetch(`/portal/${sid}/courses`).then((r) => r.json().catch(() => ({}))),
       authedFetch(`/portal/${sid}/quizzes`).then((r) => r.json().catch(() => ({}))),
+      // Membership is presentation, not permission — the server enforces every
+      // benefit itself. So a failure here costs the badge, never the lessons.
+      authedFetch(`/portal/${sid}/plus`).then((r) => r.json().catch(() => ({}))).catch(() => ({})),
     ]);
     learnState.courses = coursesRes.courses || [];
     learnState.quizzes = quizzesRes.quizzes || [];
+    learnState.plus = plusRes && plusRes.status === 'success' ? plusRes : null;
+    if (new URLSearchParams(window.location.search).get('plus') === '1' && !(learnState.plus && learnState.plus.member)) {
+      settleAfterCheckout();
+    } else {
+      renderTier();
+    }
     renderHome();
   } catch (err) {
     console.error('loadHome:', err);
@@ -418,12 +567,36 @@ function renderCourse(data) {
       path += '<p class="learn-hint-lock"><i class="fas fa-lock"></i> ทำ Pretest ให้เสร็จก่อน จึงจะเริ่มเรียนบทเรียนได้</p>';
     }
   }
+  // Exams need LITALK+, so a lock here has two possible causes and they need
+  // different sentences: "finish the lessons" is useless advice to someone
+  // whose real blocker is the membership.
+  const examLock = !gates.examsUnlocked;
+  if (data.midterm) {
+    const locked = lockAll || !!data.midterm.locked;
+    path += `<h2 class="learn-section-title" style="margin-top:20px;"><i class="fas fa-pen-ruler"></i> สอบกลางภาค</h2>
+      <div class="learn-course-items">${courseItemRow(data.midterm, '<i class="fas fa-pen-ruler"></i>', course.id, locked, 'เริ่มสอบกลางภาค')}</div>`;
+    if (!lockAll && locked) {
+      path += examLock
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบกลางภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="courses#litalk-plus">ดูรายละเอียด</a></p>'
+        : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนบทเรียนก่อนหน้าให้ครบก่อน จึงจะสอบกลางภาคได้</p>';
+    }
+  }
   if (data.posttest) {
     const locked = lockAll || !!data.posttest.locked;
     path += `<h2 class="learn-section-title" style="margin-top:20px;"><i class="fas fa-trophy"></i> แบบทดสอบหลังเรียน (Posttest)</h2>
       <div class="learn-course-items">${courseItemRow(data.posttest, '<i class="fas fa-trophy"></i>', course.id, locked, 'ทำ Posttest')}</div>`;
     if (!lockAll && locked) {
       path += '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนและผ่านทุกบทเรียนให้ครบก่อน จึงจะทำ Posttest ได้</p>';
+    }
+  }
+  if (data.final) {
+    const locked = lockAll || !!data.final.locked;
+    path += `<h2 class="learn-section-title" style="margin-top:20px;"><i class="fas fa-graduation-cap"></i> สอบปลายภาค</h2>
+      <div class="learn-course-items">${courseItemRow(data.final, '<i class="fas fa-graduation-cap"></i>', course.id, locked, 'เริ่มสอบปลายภาค')}</div>`;
+    if (!lockAll && locked) {
+      path += examLock
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบปลายภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="courses#litalk-plus">ดูรายละเอียด</a></p>'
+        : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนและผ่านทุกบทเรียนให้ครบก่อน จึงจะสอบปลายภาคได้</p>';
     }
   }
 
@@ -479,6 +652,40 @@ async function videoTicketUrl(quizId) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.token) throw new Error(data.message || 'video ticket failed');
   return `${dataApiUrl}/portal/${encodeURIComponent(learnStudentId)}/quizzes/${encodeURIComponent(quizId)}/video?t=${encodeURIComponent(data.token)}`;
+}
+
+// The slide deck is behind an authenticated endpoint, so a plain <a href>
+// cannot reach it — fetch it and hand the browser a blob to save. The server
+// re-checks membership and the course gate; this only reports what it says.
+async function downloadSlides(quizId) {
+  const btn = document.getElementById('learn-slides-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/quizzes/${encodeURIComponent(quizId)}/slides`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      // 402 is specifically "needs a membership", as opposed to a course the
+      // learner has not unlocked yet — different message, different next step.
+      window.alert(data.message || (res.status === 402 ? 'สไลด์บทเรียนเป็นสิทธิ์ของสมาชิก LITALK+' : 'ดาวน์โหลดสไลด์ไม่สำเร็จ'));
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // The server also sends Content-Disposition; this is the local hint for
+    // browsers that prefer the anchor's own download attribute.
+    a.download = (learnState.current && learnState.current.quiz.slideName) || 'slides.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('downloadSlides:', err);
+    window.alert('ดาวน์โหลดสไลด์ไม่สำเร็จ');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 // Reveals the test after the student confirms they've watched the video.
@@ -606,6 +813,26 @@ function renderQuiz() {
        </section>`
     : '';
 
+  // Slides: a member gets the download, everyone else gets told what it is.
+  // Shown only when this lesson actually HAS a deck — otherwise the pitch
+  // would advertise something that does not exist for this lesson.
+  const isMember = !!(learnState.plus && learnState.plus.member);
+  const slideSize = Number(quiz.slideSize) || 0;
+  const slidesHtml = Number(quiz.hasSlides)
+    ? `<section class="learn-slides">
+         ${
+           isMember
+             ? `<button type="button" id="learn-slides-btn" class="btn-learn-ghost" onclick="downloadSlides(${Number(quiz.id)})">
+                  <i class="fas fa-file-pdf"></i> ดาวน์โหลดสไลด์บทเรียน (PDF${slideSize ? ` · ${Math.max(1, Math.round(slideSize / 1024 / 1024))} MB` : ''})
+                </button>`
+             : `<div class="learn-note learn-note--plus">
+                  <i class="fas fa-file-pdf"></i> บทเรียนนี้มีสไลด์ให้ดาวน์โหลดเป็น PDF สำหรับสมาชิก LITALK+
+                  <a href="courses#litalk-plus">ดูรายละเอียด</a>
+                </div>`
+         }
+       </section>`
+    : '';
+
   const testInner = `
     <form id="learn-form">${questions.map(questionFieldHtml).join('')}</form>
     <div class="learn-submit-bar">
@@ -647,6 +874,7 @@ function renderQuiz() {
       <h1 class="learn-detail__title">${title}</h1>
       ${quiz.descriptionTh || quiz.description ? `<p class="learn-detail__desc">${escapeHtml(quiz.descriptionTh || quiz.description)}</p>` : ''}
       ${videoHtml}
+      ${slidesHtml}
       ${lessonHtml}
       ${quizHtml}
     </div>`;
@@ -694,7 +922,9 @@ async function openQuiz(quizId, fromCourseId) {
       // Locked by the course sequence (not enrolled, or Pretest/Lessons not yet
       // done). Explain why for out-of-sequence cases, then show the course.
       if (data.courseId) {
-        if (data.reason === 'pretest' || data.reason === 'lessons') window.alert(data.message || 'ยังเปิดบทเรียนนี้ไม่ได้');
+        if (data.reason === 'pretest' || data.reason === 'lessons' || data.reason === 'plus') {
+          window.alert(data.message || 'ยังเปิดบทเรียนนี้ไม่ได้');
+        }
         openCourse(data.courseId);
         return;
       }
@@ -789,23 +1019,40 @@ function showResult(result) {
     byId[b.id] = b;
   });
 
-  // Annotate each question in place with correct/incorrect + explanation.
-  if (result.showAnswers) {
-    questions.forEach((q) => {
-      const b = byId[q.id];
-      const wrap = document.getElementById(`qwrap_${q.id}`);
-      const fb = document.getElementById(`fb_${q.id}`);
-      if (!wrap || !b) return;
-      wrap.classList.add(b.correct ? 'is-correct' : 'is-wrong');
-      let msg = b.correct
-        ? '<i class="fas fa-circle-check"></i> ถูกต้อง'
-        : '<i class="fas fa-circle-xmark"></i> ยังไม่ถูก';
-      if (!b.correct && b.correctAnswer != null) {
-        msg += ` · เฉลย: ${escapeHtml(formatCorrect(q, b.correctAnswer))}`;
-      }
-      if (b.explanation) msg += `<div class="learn-explain">${mdToHtml(b.explanation)}</div>`;
-      if (fb) fb.innerHTML = msg;
-    });
+  // Which questions were right is FREE — an exercise you cannot mark is not
+  // much of an exercise. The model answer and the explanation are the LITALK+
+  // part, and the server only sends those to a member (see quizzes.ts), so
+  // this renders whatever it was given rather than deciding entitlement here.
+  questions.forEach((q) => {
+    const b = byId[q.id];
+    const wrap = document.getElementById(`qwrap_${q.id}`);
+    const fb = document.getElementById(`fb_${q.id}`);
+    if (!wrap || !b) return;
+    wrap.classList.add(b.correct ? 'is-correct' : 'is-wrong');
+    let msg = b.correct
+      ? '<i class="fas fa-circle-check"></i> ถูกต้อง'
+      : '<i class="fas fa-circle-xmark"></i> ยังไม่ถูก';
+    if (!b.correct && b.correctAnswer != null) {
+      msg += ` · เฉลย: ${escapeHtml(formatCorrect(q, b.correctAnswer))}`;
+    }
+    if (b.explanation) msg += `<div class="learn-explain">${mdToHtml(b.explanation)}</div>`;
+    if (fb) fb.innerHTML = msg;
+  });
+
+  // Offered at the moment it is worth something: this quiz HAS explanations
+  // and they were withheld. detailedLocked distinguishes that from a quiz whose
+  // author never turned answers on, which no membership would unlock.
+  if (result.detailedLocked) {
+    const box = document.getElementById('learn-result');
+    if (box) {
+      box.insertAdjacentHTML(
+        'beforebegin',
+        `<div class="learn-note learn-note--plus">
+           <i class="fas fa-star"></i> เฉลยละเอียดพร้อมคำอธิบายทีละข้อ เป็นสิทธิ์ของสมาชิก LITALK+
+           <a href="courses#litalk-plus">ดูรายละเอียด</a>
+         </div>`,
+      );
+    }
   }
 
   // Lock the form after submitting.
