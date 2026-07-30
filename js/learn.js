@@ -520,6 +520,40 @@ async function videoTicketUrl(quizId) {
   return `${dataApiUrl}/portal/${encodeURIComponent(learnStudentId)}/quizzes/${encodeURIComponent(quizId)}/video?t=${encodeURIComponent(data.token)}`;
 }
 
+// The slide deck is behind an authenticated endpoint, so a plain <a href>
+// cannot reach it — fetch it and hand the browser a blob to save. The server
+// re-checks membership and the course gate; this only reports what it says.
+async function downloadSlides(quizId) {
+  const btn = document.getElementById('learn-slides-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/quizzes/${encodeURIComponent(quizId)}/slides`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      // 402 is specifically "needs a membership", as opposed to a course the
+      // learner has not unlocked yet — different message, different next step.
+      window.alert(data.message || (res.status === 402 ? 'สไลด์บทเรียนเป็นสิทธิ์ของสมาชิก LITALK+' : 'ดาวน์โหลดสไลด์ไม่สำเร็จ'));
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // The server also sends Content-Disposition; this is the local hint for
+    // browsers that prefer the anchor's own download attribute.
+    a.download = (learnState.current && learnState.current.quiz.slideName) || 'slides.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('downloadSlides:', err);
+    window.alert('ดาวน์โหลดสไลด์ไม่สำเร็จ');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 // Reveals the test after the student confirms they've watched the video.
 function startTest() {
   const gate = document.getElementById('learn-test-gate');
@@ -645,6 +679,26 @@ function renderQuiz() {
        </section>`
     : '';
 
+  // Slides: a member gets the download, everyone else gets told what it is.
+  // Shown only when this lesson actually HAS a deck — otherwise the pitch
+  // would advertise something that does not exist for this lesson.
+  const isMember = !!(learnState.plus && learnState.plus.member);
+  const slideSize = Number(quiz.slideSize) || 0;
+  const slidesHtml = Number(quiz.hasSlides)
+    ? `<section class="learn-slides">
+         ${
+           isMember
+             ? `<button type="button" id="learn-slides-btn" class="btn-learn-ghost" onclick="downloadSlides(${Number(quiz.id)})">
+                  <i class="fas fa-file-pdf"></i> ดาวน์โหลดสไลด์บทเรียน (PDF${slideSize ? ` · ${Math.max(1, Math.round(slideSize / 1024 / 1024))} MB` : ''})
+                </button>`
+             : `<div class="learn-note learn-note--plus">
+                  <i class="fas fa-file-pdf"></i> บทเรียนนี้มีสไลด์ให้ดาวน์โหลดเป็น PDF สำหรับสมาชิก LITALK+
+                  <a href="courses#litalk-plus">ดูรายละเอียด</a>
+                </div>`
+         }
+       </section>`
+    : '';
+
   const testInner = `
     <form id="learn-form">${questions.map(questionFieldHtml).join('')}</form>
     <div class="learn-submit-bar">
@@ -686,6 +740,7 @@ function renderQuiz() {
       <h1 class="learn-detail__title">${title}</h1>
       ${quiz.descriptionTh || quiz.description ? `<p class="learn-detail__desc">${escapeHtml(quiz.descriptionTh || quiz.description)}</p>` : ''}
       ${videoHtml}
+      ${slidesHtml}
       ${lessonHtml}
       ${quizHtml}
     </div>`;
