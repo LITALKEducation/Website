@@ -333,7 +333,7 @@ function renderTier() {
     if (plans.term) cta += btn('term', label('รายเทอม (5 เดือน)'));
     if (plans.yearly) cta += btn('yearly', label('รายปี'));
   } else {
-    cta = '<a class="learn-tier__cta" href="courses#litalk-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
+    cta = '<a class="learn-tier__cta" href="litalk-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
   }
   el.innerHTML = quota + cta;
   el.hidden = !(quota || cta);
@@ -587,7 +587,7 @@ function renderCourse(data) {
       <div class="learn-course-items">${courseItemRow(data.midterm, '<i class="fas fa-pen-ruler"></i>', course.id, locked, 'เริ่มสอบกลางภาค')}</div>`;
     if (!lockAll && locked) {
       path += examLock
-        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบกลางภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="courses#litalk-plus">ดูรายละเอียด</a></p>'
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบกลางภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="litalk-plus">ดูรายละเอียด</a></p>'
         : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนบทเรียนก่อนหน้าให้ครบก่อน จึงจะสอบกลางภาคได้</p>';
     }
   }
@@ -605,7 +605,7 @@ function renderCourse(data) {
       <div class="learn-course-items">${courseItemRow(data.final, '<i class="fas fa-graduation-cap"></i>', course.id, locked, 'เริ่มสอบปลายภาค')}</div>`;
     if (!lockAll && locked) {
       path += examLock
-        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบปลายภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="courses#litalk-plus">ดูรายละเอียด</a></p>'
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบปลายภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="litalk-plus">ดูรายละเอียด</a></p>'
         : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนและผ่านทุกบทเรียนให้ครบก่อน จึงจะสอบปลายภาคได้</p>';
     }
   }
@@ -837,7 +837,7 @@ function renderQuiz() {
                 </button>`
              : `<div class="learn-note learn-note--plus">
                   <i class="fas fa-file-pdf"></i> บทเรียนนี้มีสไลด์ให้ดาวน์โหลดเป็น PDF สำหรับสมาชิก LITALK+
-                  <a href="courses#litalk-plus">ดูรายละเอียด</a>
+                  <a href="litalk-plus">ดูรายละเอียด</a>
                 </div>`
          }
        </section>`
@@ -1059,7 +1059,7 @@ function showResult(result) {
         'beforebegin',
         `<div class="learn-note learn-note--plus">
            <i class="fas fa-star"></i> เฉลยละเอียดพร้อมคำอธิบายทีละข้อ เป็นสิทธิ์ของสมาชิก LITALK+
-           <a href="courses#litalk-plus">ดูรายละเอียด</a>
+           <a href="litalk-plus">ดูรายละเอียด</a>
          </div>`,
       );
     }
