@@ -123,11 +123,11 @@
 
           <ul class="nav__links" role="list">
             <li><a href="courses" class="nav__link nav__link--active" data-en="Online Learning" data-th="เรียนออนไลน์">Online Learning</a></li>
+            <li><a href="litalk-plus" class="nav__link" data-en="LITALK+" data-th="LITALK+">LITALK+</a></li>
             <li><a href="programs" class="nav__link" data-en="1-on-1 Tutoring" data-th="เรียนตัวต่อตัว">1-on-1 Tutoring</a></li>
             <li><a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a></li>
             <li><a href="ask" class="nav__link" data-en="Ask" data-th="ถามคำศัพท์">Ask</a></li>
             <li><a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a></li>
-            <li><a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a></li>
           </ul>
 
           <div class="nav__actions">
@@ -171,11 +171,11 @@
 
       <div class="nav__drawer" id="mobile-drawer" role="navigation" aria-label="Mobile navigation">
         <a href="courses" class="nav__link nav__link--active" data-en="Online Learning" data-th="เรียนออนไลน์">Online Learning</a>
+        <a href="litalk-plus" class="nav__link" data-en="LITALK+" data-th="LITALK+">LITALK+</a>
         <a href="programs" class="nav__link" data-en="1-on-1 Tutoring" data-th="เรียนตัวต่อตัว">1-on-1 Tutoring</a>
         <a href="about" class="nav__link" data-en="About" data-th="เกี่ยวกับเรา">About</a>
         <a href="ask" class="nav__link" data-en="Ask" data-th="ถามคำศัพท์">Ask</a>
         <a href="blog" class="nav__link" data-en="Blog" data-th="บทความ">Blog</a>
-        <a href="/#contact" class="nav__link" data-en="Contact" data-th="ติดต่อ">Contact</a>
         <div class="nav__actions">
           <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
               <span class="lang-toggle__thumb" aria-hidden="true"></span>
@@ -414,6 +414,7 @@
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
   <script src="js/courses.js?v=20260730b" defer></script>
+  <script src="js/plus-teaser.js?v=20260731a" defer></script>
   <script defer>
     document.addEventListener('DOMContentLoaded', async () => {
       const catalog = document.getElementById('course-catalog');
@@ -434,46 +435,8 @@
         if (typeof window.litalkApplyLang === 'function') window.litalkApplyLang();
       };
 
-      // LITALK+ goes live the moment a plan exists in Stripe — nothing here
-      // has to be edited. The markup ships in the coming-soon state and this
-      // only ever upgrades it, so a failed or slow call leaves the safe
-      // version on screen rather than a button that cannot work.
-      const revealPlus = async () => {
-        const soon = document.getElementById('plus-soon');
-        const cta = document.getElementById('plus-cta');
-        const note = document.getElementById('plus-note');
-        if (!soon || !cta) return;
-        let available = false;
-        try {
-          const res = await fetch(`${LitalkCourses.API}/plus/public`);
-          available = res.ok && (await res.json()).available === true;
-        } catch (err) {
-          console.warn('plus: availability check failed', err);
-        }
-        if (!available) return;
-        soon.hidden = true;
-        cta.removeAttribute('aria-disabled');
-        cta.removeAttribute('tabindex');
-        cta.style.pointerEvents = '';
-        cta.style.opacity = '';
-        // Set the attributes AND the visible text. main.js's applyLang runs on
-        // load and on the language switch; it does not watch for attributes
-        // changed afterwards, and it is not reachable from here anyway (see
-        // the note on applyLang above). Writing both keeps this correct now
-        // and correct again after the visitor switches language.
-        const say = (el, en, th) => {
-          el.setAttribute('data-en', en);
-          el.setAttribute('data-th', th);
-          el.textContent = isTh() ? th : en;
-        };
-        say(cta, 'See plans and pricing', 'ดูแพ็กเกจและราคา');
-        say(
-          note,
-          'Three plans — monthly, per term or yearly. Cancel any time.',
-          'มีสามแพ็กเกจ — รายเดือน รายเทอม และรายปี · ยกเลิกได้ทุกเมื่อ',
-        );
-      };
-      revealPlus();
+      // The LITALK+ card's coming-soon → live reveal lives in
+      // js/plus-teaser.js, which the home page renders the same card with.
 
       if (id) {
         catalog.hidden = true;

@@ -88,11 +88,22 @@ JS change.
 ## The two menus must match
 
 The header bar and the mobile drawer are separate markup. When you add, remove
-or rename a nav item, **do it in both, on all 12 pages.** They currently carry
-the same five links, the same two login options and the same call to action.
+or rename a nav item, **do it in both, on all 14 pages.** They currently carry
+the same six links — Online Learning, LITALK+, 1-on-1 Tutoring, About, Ask,
+Blog — the same two login options and the same call to action.
 
 A drawer that quietly lacks something the bar has is invisible on desktop,
 where you are probably testing.
+
+**The bar is full.** At 1200px — the narrowest width where it renders at all,
+below that `.nav__links` is `display: none` — the logo, the language toggle,
+the login menu and the CTA take 601px of the 1152px container, leaving 551px
+for the links. In English they need 517px, so there are **33px spare**. Thai
+is roomier (66px). A seventh item does not fit, and tightening the gaps far
+enough to force one in leaves zero slack, which the next label edit breaks;
+that is already why the gap went 36px → 28px. Contact left the bar to make
+room for LITALK+ — it was a `/#contact` jump the footer carries on every page.
+Measure before adding anything here.
 
 ## Motion
 

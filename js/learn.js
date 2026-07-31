@@ -311,30 +311,14 @@ function renderTier() {
     ? `<span class="learn-tier__free">ถามน้องลิลลี่ได้อีก ${remaining} จาก ${Number(chat.dailyLimit) || 0} คำถามวันนี้</span>`
     : '';
 
-  // Nothing to click until a plan actually exists in Stripe — otherwise the
-  // button leads to a 503. Until then the marketing page carries the pitch.
-  let cta = '';
-  if (plus.available) {
-    const plans = plus.plans || {};
-    // Both plans configured: offer both rather than hiding one behind a
-    // dialog. One plan: one button, and no choice to make.
-    const btn = (plan, label) =>
-      `<button type="button" class="learn-tier__cta" onclick="startPlusCheckout('${plan}')"><i class="fas fa-star"></i> ${label}</button>`;
-    // The first button configured carries the full "สมัคร LITALK+" label and
-    // the rest are just the period, so the row reads as one offer with a
-    // choice rather than three separate products.
-    let first = true;
-    const label = (text) => {
-      const full = first ? `สมัคร LITALK+ ${text}` : text;
-      first = false;
-      return full;
-    };
-    if (plans.monthly) cta += btn('monthly', label('รายเดือน'));
-    if (plans.term) cta += btn('term', label('รายเทอม (5 เดือน)'));
-    if (plans.yearly) cta += btn('yearly', label('รายปี'));
-  } else {
-    cta = '<a class="learn-tier__cta" href="litalk-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
-  }
+  // ONE call to action, never three. This row sits in the hero next to the
+  // "เรียนได้ทุกที่ ทุกเวลา" badge and the quota line; a button per plan
+  // wrapped it onto three lines and put a pricing decision in front of
+  // someone who had not been shown a single price. /litalk-plus is the page
+  // built for that choice, and its cards come back here with ?subscribe=.
+  const cta = plus.available
+    ? '<a class="learn-tier__cta" href="litalk-plus"><i class="fas fa-star"></i> สมัคร LITALK+</a>'
+    : '<a class="learn-tier__cta" href="litalk-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
   el.innerHTML = quota + cta;
   el.hidden = !(quota || cta);
 }
@@ -344,7 +328,15 @@ function renderTier() {
 // below has to cope with the row not existing yet.
 async function startPlusCheckout(plan) {
   const el = document.getElementById('learn-tier');
-  if (el) el.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+  const buttons = el ? [...el.querySelectorAll('button')] : [];
+  buttons.forEach((b) => { b.disabled = true; });
+  // Arriving from a plan card on /litalk-plus there is no button to grey out,
+  // and minting the Checkout session takes a moment — without this the page
+  // just sits there looking like the click did nothing.
+  if (el && !buttons.length) {
+    el.hidden = false;
+    el.innerHTML = '<span class="learn-tier__free"><i class="fas fa-spinner fa-spin"></i> กำลังเปิดหน้าชำระเงิน...</span>';
+  }
   try {
     const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/plus/checkout`, {
       method: 'POST',
@@ -366,7 +358,10 @@ async function startPlusCheckout(plan) {
     console.error('startPlusCheckout:', err);
     window.alert('เปิดหน้าสมัครสมาชิกไม่สำเร็จ');
   } finally {
-    if (el) el.querySelectorAll('button').forEach((b) => { b.disabled = false; });
+    buttons.forEach((b) => { b.disabled = false; });
+    // Put the row back if we got here without navigating away — the spinner
+    // above replaced it, and leaving it spinning forever would read as hung.
+    if (el && !buttons.length) renderTier();
   }
 }
 
@@ -483,8 +478,24 @@ async function loadHome() {
     learnState.courses = coursesRes.courses || [];
     learnState.quizzes = quizzesRes.quizzes || [];
     learnState.plus = plusRes && plusRes.status === 'success' ? plusRes : null;
-    if (new URLSearchParams(window.location.search).get('plus') === '1' && !(learnState.plus && learnState.plus.member)) {
+    const params = new URLSearchParams(window.location.search);
+    const member = !!(learnState.plus && learnState.plus.member);
+    // ?subscribe=<plan> — a plan card on /litalk-plus sending someone back to
+    // buy it. Plan choice happens there, where the prices are; checkout has to
+    // happen here, because a subscription attaches to a student id and this is
+    // the only page that has one. Ignored for an existing member, and the plan
+    // is still validated server-side.
+    const wanted = params.get('subscribe');
+    if (params.get('plus') === '1' && !member) {
       settleAfterCheckout();
+    } else if (wanted && !member && learnState.plus && learnState.plus.available) {
+      // Drop the param before doing anything with it, so a refresh after a
+      // failed or abandoned checkout does not silently start another one.
+      params.delete('subscribe');
+      const qs = params.toString();
+      window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''));
+      renderTier();
+      startPlusCheckout(wanted);
     } else {
       renderTier();
     }
