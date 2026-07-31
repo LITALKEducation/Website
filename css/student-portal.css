@@ -760,7 +760,13 @@ body::before {
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     align-items: center;
-    max-width: 560px;
+    /* Hug the tabs rather than capping the row. A fixed 560px cap could not
+       hold five tabs — the labels are nowrap, so flex could not shrink them
+       and the last pill hung 107px outside the rounded container. fit-content
+       sizes the row to whatever the tabs need; max-width keeps it inside the
+       content column if a label ever grows past it. */
+    width: fit-content;
+    max-width: 100%;
 }
 
 .portal-tab {
@@ -4045,4 +4051,172 @@ body.lv-fs-locked { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
     .lv__bar, .lv__big, .lv__btn, .lv__knob, .lv__top, .lv__hint, .lv__qitem { transition: none; }
     .lv__big:hover { transform: none; }
+}
+
+/* ============ LITALK+ (student-plus.html) ============
+   Its own prefix rather than the marketing site's .plus-* block: that one is
+   written against css/style.css's tokens and would not follow the portal's
+   dark mode. Same shapes, this stylesheet's variables. */
+.pp-card {
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 22px 24px;
+    background-color: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.pp-card--member {
+    border-color: var(--brand-soft-strong);
+}
+
+.pp-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: var(--brand-gradient);
+    color: var(--brand-btn-text);
+}
+
+.pp-card__badge--free {
+    background: var(--brand-soft);
+    color: var(--text-secondary);
+}
+
+.pp-card__plan {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.pp-card__note {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pp-card__fine {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.pp-plans {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+}
+
+.pp-plan {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background-color: var(--bg-secondary);
+}
+
+.pp-plan--best {
+    border-color: var(--brand-soft-strong);
+}
+
+.pp-plan__flag {
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--brand-gradient);
+    color: var(--brand-btn-text);
+}
+
+.pp-plan__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.pp-plan__price {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+.pp-plan__period {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+}
+
+/* Reserves its line whether or not there is an average to show, so the
+   subscribe buttons stay on one row across the three cards. */
+.pp-plan__note {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    min-height: 1.2em;
+}
+
+.pp-plan__cta {
+    margin-top: 14px;
+    width: 100%;
+}
+
+.pp-benefits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.pp-benefit {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.pp-benefit__ic {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--brand-soft);
+    color: var(--text-primary);
+}
+
+.pp-benefit__txt {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pp-benefit__txt strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.pp-benefit__txt span {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
 }

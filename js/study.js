@@ -26,14 +26,6 @@ function todoLabel() {
   }
 }
 
-async function authedFetch(path, options = {}) {
-  const token = await getPortalToken();
-  if (!token) throw new Error('unauthenticated');
-  const headers = Object.assign({ Authorization: `Bearer ${token}` }, options.headers || {});
-  if (options.body && !(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
-  return fetch(`${dataApiUrl}${path}`, Object.assign({}, options, { headers }));
-}
-
 function priceLabel(priceSatang) {
   const n = Number(priceSatang) || 0;
   return n <= 0 ? 'ฟรี' : '฿' + (n / 100).toLocaleString('en-US');
