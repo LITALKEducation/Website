@@ -320,8 +320,18 @@ function renderTier() {
     // dialog. One plan: one button, and no choice to make.
     const btn = (plan, label) =>
       `<button type="button" class="learn-tier__cta" onclick="startPlusCheckout('${plan}')"><i class="fas fa-star"></i> ${label}</button>`;
-    if (plans.monthly) cta += btn('monthly', 'สมัคร LITALK+ รายเดือน');
-    if (plans.yearly) cta += btn('yearly', plans.monthly ? 'รายปี' : 'สมัคร LITALK+ รายปี');
+    // The first button configured carries the full "สมัคร LITALK+" label and
+    // the rest are just the period, so the row reads as one offer with a
+    // choice rather than three separate products.
+    let first = true;
+    const label = (text) => {
+      const full = first ? `สมัคร LITALK+ ${text}` : text;
+      first = false;
+      return full;
+    };
+    if (plans.monthly) cta += btn('monthly', label('รายเดือน'));
+    if (plans.term) cta += btn('term', label('รายเทอม (5 เดือน)'));
+    if (plans.yearly) cta += btn('yearly', label('รายปี'));
   } else {
     cta = '<a class="learn-tier__cta" href="courses#litalk-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
   }
