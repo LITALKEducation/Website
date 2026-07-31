@@ -4171,6 +4171,50 @@ body.lv-fs-locked { overflow: hidden; }
     min-height: 1.2em;
 }
 
+/* The in-card action button, following .btn-pay-now rather than .btn: on this
+   stylesheet .btn-primary carries ONLY colour — every bit of geometry lives on
+   .btn, and .btn is `width: 100%` for the login form. Using .btn-primary alone
+   renders an unpadded black box; adding .btn stretches it across the card. */
+.pp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 11px 22px;
+    border: none;
+    border-radius: 24px;
+    background: var(--brand-gradient);
+    color: var(--brand-btn-text);
+    box-shadow: var(--brand-btn-shadow);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: var(--transition-all);
+}
+
+.pp-btn:hover:not(:disabled) {
+    background: var(--brand-gradient-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--brand-btn-shadow-hover);
+}
+
+.pp-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.pp-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.pp-btn:focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+}
+
 .pp-plan__cta {
     margin-top: 14px;
     width: 100%;
