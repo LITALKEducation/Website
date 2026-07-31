@@ -202,26 +202,6 @@
         .learn-hero__btn { display: inline-flex; align-items: center; gap: 9px; background: #fff; color: #ff5a1f;
             font-weight: 700; padding: 13px 24px; border-radius: 12px; text-decoration: none; transition: transform .12s, box-shadow .12s; }
         .learn-hero__btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.18); }
-        /* Membership state under the hero eyebrow. The member badge and the
-           free-tier line share a row so the hero's height does not jump when
-           the two swap. */
-        .learn-tier { display: flex; justify-content: center; flex-wrap: wrap; align-items: center;
-            gap: 10px; margin-top: 12px; }
-        .learn-tier[hidden] { display: none; }
-        .learn-tier__badge { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 800;
-            letter-spacing: .02em; color: #2a1c50; background: linear-gradient(120deg, #ffe9a8, #ffcf4d);
-            padding: 6px 14px; border-radius: 999px; box-shadow: 0 6px 18px rgba(255,193,63,.28); }
-        .learn-tier__free { font-size: .86rem; color: rgba(255,255,255,.92); }
-        /* Both an <a> (the coming-soon link) and a <button> (subscribe /
-           manage) wear this, so it has to reset the things a button does not
-           inherit: font, and the default border and cursor. */
-        .learn-tier__cta { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; font-weight: 700;
-            color: #fff; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
-            padding: 6px 14px; border-radius: 999px; text-decoration: none; transition: background .15s;
-            font-family: inherit; cursor: pointer; }
-        .learn-tier__cta:hover:not(:disabled) { background: rgba(255,255,255,.3); }
-        .learn-tier__cta:disabled { opacity: .6; cursor: default; }
-        .learn-tier__cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
         @media (max-width: 640px) {
           .learn-hero { padding: 40px 22px; }
           .learn-hero__title { font-size: 1.7rem; }
@@ -284,6 +264,7 @@
                 <a href="student-study-log" class="drawer-link"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
                 <a href="learn" class="drawer-link active"><i class="fas fa-clipboard-question"></i> บทเรียน & แบบทดสอบ</a>
                 <a href="student-payments" class="drawer-link"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                <a href="litalk-plus" class="drawer-link"><i class="fas fa-star"></i> LITALK+</a>
                 <div class="drawer-divider"></div>
                 <a href="/" class="drawer-link"><i class="fas fa-home"></i> หน้าหลัก</a>
                 <a href="programs" class="drawer-link"><i class="fas fa-book"></i> หลักสูตรทั้งหมด</a>
@@ -310,16 +291,13 @@
                 <a href="student-study-log" class="portal-tab"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
                 <a href="learn" class="portal-tab active" aria-current="page"><i class="fas fa-clipboard-question"></i> บทเรียน & แบบทดสอบ</a>
                 <a href="student-payments" class="portal-tab"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                <a href="litalk-plus" class="portal-tab"><i class="fas fa-star"></i> LITALK+</a>
             </nav>
 
             <!-- Full-width hero (hidden by learn.js while viewing a course/quiz) -->
             <section class="learn-hero" id="learn-hero">
                 <div class="learn-hero__inner">
                     <span class="learn-hero__eyebrow"><i class="fas fa-bolt"></i> เรียนได้ทุกที่ ทุกเวลา</span>
-                    <!-- Membership state, filled by js/learn.js once
-                         /portal/:id/plus answers. Empty until then so the hero
-                         never flashes the wrong tier at someone who pays. -->
-                    <div class="learn-tier" id="learn-tier" hidden></div>
                     <h1 class="learn-hero__title">บทเรียน &amp; แบบทดสอบออนไลน์</h1>
                     <p class="learn-hero__sub">ดูวีดีโอบทเรียน ทำแบบทดสอบตรวจคะแนนอัตโนมัติ และติดตามความคืบหน้าของคุณได้ในที่เดียว</p>
                     <div class="learn-hero__actions">
@@ -366,6 +344,10 @@
                 <i class="fas fa-receipt"></i>
                 <span>ชำระเงิน</span>
             </a>
+            <a href="litalk-plus" class="bottom-nav-item">
+                <i class="fas fa-star"></i>
+                <span>LITALK+</span>
+            </a>
         </nav>
 
         <!-- Mobile floating action button -->
@@ -379,7 +361,7 @@
     <script src="js/markdown.js?v=20260727g"></script>
     <script src="js/student-portal.js?v=20260727g"></script>
     <script src="js/video-player.js?v=20260729n"></script>
-    <script src="js/learn.js?v=20260730f"></script>
+    <script src="js/learn.js?v=20260730g"></script>
 </body>
 
 </html>
