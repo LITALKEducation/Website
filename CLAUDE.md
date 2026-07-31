@@ -105,6 +105,22 @@ that is already why the gap went 36px → 28px. Contact left the bar to make
 room for LITALK+ — it was a `/#contact` jump the footer carries on every page.
 Measure before adding anything here.
 
+## The portal has three nav surfaces, not two
+
+Signed-in pages (`student*`, `study`, `learn`) carry the pill tab row
+(`.portal-tabs`), the phone bottom bar (`.bottom-nav`), and — on `study` — a
+drawer as well. **A nav change means all of them, on all the portal pages**,
+the same way the marketing bar and drawer go together.
+
+`.portal-tabs` sizes to its content (`width: fit-content`). It used to be
+capped at `max-width: 560px`, which held four tabs and could not hold five:
+the labels are `nowrap`, so flex could not shrink them and the last pill hung
+**107px outside the rounded container**. Do not put the cap back.
+
+The tabs are `display: none` at ≤768px, where the bottom bar takes over — so
+the narrowest width the row ever renders at is 769px, and that is where to
+measure it.
+
 ## Motion
 
 - 150ms for a control reacting to a press or hover, 250ms for most things,

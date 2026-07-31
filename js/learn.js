@@ -113,14 +113,6 @@ function mdToHtml(text) {
   return typeof window.litalkMarkdown === 'function' ? window.litalkMarkdown(text) : escapeHtml(text);
 }
 
-async function authedFetch(path, options = {}) {
-  const token = await getPortalToken();
-  if (!token) throw new Error('unauthenticated');
-  const headers = Object.assign({ Authorization: `Bearer ${token}` }, options.headers || {});
-  if (options.body) headers['Content-Type'] = 'application/json';
-  return fetch(`${dataApiUrl}${path}`, Object.assign({}, options, { headers }));
-}
-
 /* ---------------- List view ---------------- */
 
 function quizCardHtml(q) {
@@ -314,55 +306,13 @@ function renderTier() {
   // ONE call to action, never three. This row sits in the hero next to the
   // "เรียนได้ทุกที่ ทุกเวลา" badge and the quota line; a button per plan
   // wrapped it onto three lines and put a pricing decision in front of
-  // someone who had not been shown a single price. /litalk-plus is the page
-  // built for that choice, and its cards come back here with ?subscribe=.
+  // someone who had not been shown a single price. /student-plus is the page
+  // that owns the membership — status, plans, prices and checkout.
   const cta = plus.available
-    ? '<a class="learn-tier__cta" href="litalk-plus"><i class="fas fa-star"></i> สมัคร LITALK+</a>'
-    : '<a class="learn-tier__cta" href="litalk-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
+    ? '<a class="learn-tier__cta" href="student-plus"><i class="fas fa-star"></i> สมัคร LITALK+</a>'
+    : '<a class="learn-tier__cta" href="student-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
   el.innerHTML = quota + cta;
   el.hidden = !(quota || cta);
-}
-
-// Hand off to Stripe Checkout. Nothing is granted here — the webhook does
-// that once Stripe confirms the payment, which is also why the return path
-// below has to cope with the row not existing yet.
-async function startPlusCheckout(plan) {
-  const el = document.getElementById('learn-tier');
-  const buttons = el ? [...el.querySelectorAll('button')] : [];
-  buttons.forEach((b) => { b.disabled = true; });
-  // Arriving from a plan card on /litalk-plus there is no button to grey out,
-  // and minting the Checkout session takes a moment — without this the page
-  // just sits there looking like the click did nothing.
-  if (el && !buttons.length) {
-    el.hidden = false;
-    el.innerHTML = '<span class="learn-tier__free"><i class="fas fa-spinner fa-spin"></i> กำลังเปิดหน้าชำระเงิน...</span>';
-  }
-  try {
-    const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/plus/checkout`, {
-      method: 'POST',
-      // Come back to the page they left, not to a fixed one.
-      body: JSON.stringify({ plan, returnUrl: window.location.href.split('?')[0] }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (data.url) {
-      window.location.href = data.url;
-      return;
-    }
-    if (data.member) {
-      // Already subscribed on another device or tab.
-      await refreshPlus();
-      return;
-    }
-    window.alert(data.message || 'เปิดหน้าสมัครสมาชิกไม่สำเร็จ');
-  } catch (err) {
-    console.error('startPlusCheckout:', err);
-    window.alert('เปิดหน้าสมัครสมาชิกไม่สำเร็จ');
-  } finally {
-    buttons.forEach((b) => { b.disabled = false; });
-    // Put the row back if we got here without navigating away — the spinner
-    // above replaced it, and leaving it spinning forever would read as hung.
-    if (el && !buttons.length) renderTier();
-  }
 }
 
 // Change card, switch plan, cancel, resume — all of it lives in Stripe's
@@ -478,24 +428,11 @@ async function loadHome() {
     learnState.courses = coursesRes.courses || [];
     learnState.quizzes = quizzesRes.quizzes || [];
     learnState.plus = plusRes && plusRes.status === 'success' ? plusRes : null;
-    const params = new URLSearchParams(window.location.search);
-    const member = !!(learnState.plus && learnState.plus.member);
-    // ?subscribe=<plan> — a plan card on /litalk-plus sending someone back to
-    // buy it. Plan choice happens there, where the prices are; checkout has to
-    // happen here, because a subscription attaches to a student id and this is
-    // the only page that has one. Ignored for an existing member, and the plan
-    // is still validated server-side.
-    const wanted = params.get('subscribe');
-    if (params.get('plus') === '1' && !member) {
+    // Subscribing happens on /student-plus, which owns the membership. This
+    // page still handles the return from checkout, because a member who
+    // subscribed from a lesson comes back to the lesson they left.
+    if (new URLSearchParams(window.location.search).get('plus') === '1' && !(learnState.plus && learnState.plus.member)) {
       settleAfterCheckout();
-    } else if (wanted && !member && learnState.plus && learnState.plus.available) {
-      // Drop the param before doing anything with it, so a refresh after a
-      // failed or abandoned checkout does not silently start another one.
-      params.delete('subscribe');
-      const qs = params.toString();
-      window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''));
-      renderTier();
-      startPlusCheckout(wanted);
     } else {
       renderTier();
     }
@@ -598,7 +535,7 @@ function renderCourse(data) {
       <div class="learn-course-items">${courseItemRow(data.midterm, '<i class="fas fa-pen-ruler"></i>', course.id, locked, 'เริ่มสอบกลางภาค')}</div>`;
     if (!lockAll && locked) {
       path += examLock
-        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบกลางภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="litalk-plus">ดูรายละเอียด</a></p>'
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบกลางภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="student-plus">ดูรายละเอียด</a></p>'
         : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนบทเรียนก่อนหน้าให้ครบก่อน จึงจะสอบกลางภาคได้</p>';
     }
   }
@@ -616,7 +553,7 @@ function renderCourse(data) {
       <div class="learn-course-items">${courseItemRow(data.final, '<i class="fas fa-graduation-cap"></i>', course.id, locked, 'เริ่มสอบปลายภาค')}</div>`;
     if (!lockAll && locked) {
       path += examLock
-        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบปลายภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="litalk-plus">ดูรายละเอียด</a></p>'
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบปลายภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="student-plus">ดูรายละเอียด</a></p>'
         : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนและผ่านทุกบทเรียนให้ครบก่อน จึงจะสอบปลายภาคได้</p>';
     }
   }
@@ -848,7 +785,7 @@ function renderQuiz() {
                 </button>`
              : `<div class="learn-note learn-note--plus">
                   <i class="fas fa-file-pdf"></i> บทเรียนนี้มีสไลด์ให้ดาวน์โหลดเป็น PDF สำหรับสมาชิก LITALK+
-                  <a href="litalk-plus">ดูรายละเอียด</a>
+                  <a href="student-plus">ดูรายละเอียด</a>
                 </div>`
          }
        </section>`
@@ -1070,7 +1007,7 @@ function showResult(result) {
         'beforebegin',
         `<div class="learn-note learn-note--plus">
            <i class="fas fa-star"></i> เฉลยละเอียดพร้อมคำอธิบายทีละข้อ เป็นสิทธิ์ของสมาชิก LITALK+
-           <a href="litalk-plus">ดูรายละเอียด</a>
+           <a href="student-plus">ดูรายละเอียด</a>
          </div>`,
       );
     }

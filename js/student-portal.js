@@ -88,6 +88,20 @@ async function getPortalToken() {
     }
 }
 
+// Authenticated call to the portal API. Lives here, next to getPortalToken and
+// dataApiUrl, because every signed-in page needs it. There were three copies —
+// learn.js's, study.js's, and none for student-plus.html, which loaded
+// student-portal.js and then called a function that was not there. This is
+// study.js's variant: the FormData guard matters, since setting a JSON
+// Content-Type on a multipart body destroys the boundary.
+async function authedFetch(path, options = {}) {
+  const token = await getPortalToken();
+  if (!token) throw new Error('unauthenticated');
+  const headers = Object.assign({ Authorization: `Bearer ${token}` }, options.headers || {});
+  if (options.body && !(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
+  return fetch(`${dataApiUrl}${path}`, Object.assign({}, options, { headers }));
+}
+
 // Asks the Worker which student this Auth0 token belongs to. The old
 // client-side guess (login email's local part) silently broke for accounts
 // whose email doesn't follow the <id>@domain convention — the server
