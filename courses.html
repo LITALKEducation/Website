@@ -17,7 +17,7 @@
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-  <link rel="stylesheet" href="css/style.css?v=20260729h">
+  <link rel="stylesheet" href="css/style.css?v=20260730a">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     /* On-demand course catalogue — reuses the marketing tokens so it tracks
@@ -323,7 +323,7 @@
                 <p class="plus-card__note" id="plus-note"
                    data-en="We're putting the finishing touches on it. Free members keep everything they have today."
                    data-th="กำลังเก็บรายละเอียดขั้นสุดท้าย ผู้ใช้ฟรียังได้ทุกอย่างที่มีอยู่วันนี้เหมือนเดิม">กำลังเก็บรายละเอียดขั้นสุดท้าย ผู้ใช้ฟรียังได้ทุกอย่างที่มีอยู่วันนี้เหมือนเดิม</p>
-                <a class="btn btn--primary" id="plus-cta" href="learn"
+                <a class="btn btn--primary" id="plus-cta" href="litalk-plus"
                    data-en="Coming soon" data-th="เร็ว ๆ นี้"
                    aria-disabled="true" tabindex="-1" style="pointer-events: none; opacity: .55;">เร็ว ๆ นี้</a>
               </div>
@@ -466,11 +466,11 @@
           el.setAttribute('data-th', th);
           el.textContent = isTh() ? th : en;
         };
-        say(cta, 'Start LITALK+', 'สมัคร LITALK+');
+        say(cta, 'See plans and pricing', 'ดูแพ็กเกจและราคา');
         say(
           note,
-          'Sign in to start — cancel any time, and you keep access to the end of the period you paid for.',
-          'เข้าสู่ระบบเพื่อเริ่มใช้งาน · ยกเลิกได้ทุกเมื่อ และยังใช้ได้จนจบรอบที่ชำระไว้แล้ว',
+          'Three plans — monthly, per term or yearly. Cancel any time.',
+          'มีสามแพ็กเกจ — รายเดือน รายเทอม และรายปี · ยกเลิกได้ทุกเมื่อ',
         );
       };
       revealPlus();
