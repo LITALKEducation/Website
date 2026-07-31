@@ -14,7 +14,10 @@
  *
  * Buying happens in the student portal, which is where the learner's identity
  * is — this page hands off to /learn rather than starting a checkout of its
- * own, since a subscription has to be attached to a student id.
+ * own, since a subscription has to be attached to a student id. The chosen
+ * plan rides along as ?subscribe=<plan> and /learn starts that checkout on
+ * arrival, so choosing a plan and paying for it stay one motion even though
+ * they happen on two pages.
  */
 
 'use strict';
@@ -87,7 +90,7 @@
         <span class="plus-plan__price">${money(price.amount, price.currency)}</span>
         <span class="plus-plan__period">${periodText(price)}</span>
         ${perMonthLine}
-        <a class="btn btn--primary plus-plan__cta" href="learn">${t('Start LITALK+', 'สมัคร LITALK+')}</a>
+        <a class="btn btn--primary plus-plan__cta" href="learn?subscribe=${encodeURIComponent(price.plan)}">${t('Start LITALK+', 'สมัคร LITALK+')}</a>
       </article>`;
   }
 
