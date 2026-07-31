@@ -89,7 +89,7 @@ function renderPlusStatus() {
         <span class="pp-card__badge"><i class="fas fa-star"></i> สมาชิก LITALK+</span>
         ${plan ? `<p class="pp-card__plan">แพ็กเกจ${escapeHtml(plan)}</p>` : ''}
         ${line}
-        <button type="button" class="btn-primary" onclick="openPlusPortal()"><i class="fas fa-gear"></i> จัดการสมาชิก</button>
+        <button type="button" class="pp-btn" onclick="openPlusPortal()"><i class="fas fa-gear"></i> จัดการสมาชิก</button>
         <p class="pp-card__fine">เปลี่ยนบัตร ดูใบเสร็จ และยกเลิก ทำได้ในหน้าจัดการของ Stripe</p>
       </div>`;
     // A member is not shown the plan cards — there is nothing to buy, and
@@ -152,7 +152,7 @@ function renderPlusPlans(show) {
           <span class="pp-plan__price">${plusMoney(p.amount, p.currency)}</span>
           <span class="pp-plan__period">${escapeHtml(plusPeriodText(p))}</span>
           ${avg}
-          <button type="button" class="btn-primary pp-plan__cta" onclick="startPlusSubscription('${escapeHtml(p.plan)}')">สมัคร</button>
+          <button type="button" class="pp-btn pp-plan__cta" onclick="startPlusSubscription('${escapeHtml(p.plan)}')">สมัคร</button>
         </article>`;
     })
     .join('');
