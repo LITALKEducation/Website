@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>เข้าสู่ระบบ LITALK</title>
+    
+    <!-- เชื่อมโยง CSS ที่มีอยู่ในระบบ -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/student-portal.css">
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #ffffff;
+        }
+        .liff-loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: 'Kanit', sans-serif;
+            padding: 0 20px;
+        }
+        .line-spinner {
+            border: 3px solid #f3f3f3;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border-top-color: #00B900;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 24px;
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        .message {
+            color: #333333;
+            font-size: 1.1rem;
+            font-weight: 400;
+            text-align: center;
+            /* ตั้งค่าเพื่อรักษารูปแบบคำให้อ่านง่ายและป้องกันการตัดคำแบบผิดตำแหน่ง */
+            word-break: keep-all;
+            overflow-wrap: normal;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="liff-loading-container">
+        <div class="line-spinner"></div>
+        <h2 class="message" id="liff-status">กำลังเชื่อมต่อระบบ กรุณารอสักครู่...</h2>
+    </div>
+
+    <!-- โหลด LINE LIFF SDK เวอร์ชันล่าสุด -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        async function initializeMiniApp() {
+            try {
+                // TODO: แทนที่ "YOUR_LIFF_ID" ด้วย LIFF ID ของคุณ
+                await liff.init({ 
+                    liffId: "YOUR_LIFF_ID",
+                    withLoginOnExternalBrowser: true 
+                });
+
+                if (liff.isLoggedIn()) {
+                    document.getElementById('liff-status').innerText = "เข้าสู่ระบบสำเร็จ กำลังนำท่านเข้าสู่บทเรียน...";
+                    
+                    // ดึงข้อมูลผู้ใช้งาน
+                    const profile = await liff.getProfile();
+                    
+                    // บันทึกข้อมูลลง localStorage
+                    localStorage.setItem('student_line_uid', profile.userId);
+                    localStorage.setItem('student_line_name', profile.displayName);
+                    localStorage.setItem('student_line_pic', profile.pictureUrl);
+
+                    // ใช้ replace เพื่อไม่ให้ผู้ใช้กดย้อนกลับมาหน้าโหลดดิ้งได้
+                    window.location.replace("student.html");
+                } else {
+                    // ป้องกันกรณี withLoginOnExternalBrowser ไม่ทำงาน
+                    document.getElementById('liff-status').innerText = "กำลังเข้าสู่ระบบของ LINE...";
+                    liff.login();
+                }
+            } catch (err) {
+                console.error("LIFF Init Error: ", err);
+                document.getElementById('liff-status').innerText = "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองเข้าใหม่อีกครั้ง";
+            }
+        }
+
+        // เริ่มต้นการทำงานทันทีเมื่อโหลดหน้าเสร็จ
+        document.addEventListener("DOMContentLoaded", function() {
+            initializeMiniApp();
+        });
+    </script>
+</body>
+</html>
