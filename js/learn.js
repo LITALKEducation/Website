@@ -1138,7 +1138,7 @@ window.onload = async () => {
   const studentId = await resolveAuthedStudentId();
   if (!studentId) {
     // Not signed in — the portal entry page handles login.
-    window.location.replace('student/');
+    window.location.replace('/portal/student/');
     return;
   }
   learnStudentId = studentId;

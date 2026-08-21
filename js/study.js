@@ -396,12 +396,12 @@ window.onload = async () => {
 
   const studentId = await resolveAuthedStudentId();
   if (!studentId) {
-    window.location.replace('student/');
+    window.location.replace('/portal/student/');
     return;
   }
   // Tutored students belong on the classic portal, not here.
   if (window.litalkAccountType && window.litalkAccountType !== 'on_demand') {
-    window.location.replace('student/');
+    window.location.replace('/portal/student/');
     return;
   }
   sdStudentId = studentId;
