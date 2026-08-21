@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>เข้าสู่ระบบ LITALK</title>
+    <meta name="description" content="เข้าสู่ระบบ LITALK Education Student Portal">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="../img/LITALK-Icon.png" type="image/png">
+
+    <!-- Theme: match portal pages so the loading screen doesn't flash white/dark -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', savedTheme || (systemPrefersDark ? 'dark' : 'light'));
+        })();
+    </script>
+
+    <!-- Project fonts + portal design tokens -->
+    <link rel="stylesheet" href="../css/fonts.css?v=20260714h">
+    <link rel="stylesheet" href="../css/student-portal.css?v=20260821a">
+
+    <style>
+        /* ---------- Login method selector ---------- */
+        .login-select-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .login-select-card {
+            width: 100%;
+            max-width: 380px;
+            opacity: 0;
+            animation: liff-fade-in 0.5s ease forwards;
+        }
+
+        .login-select-logo {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+        }
+
+        .login-select-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 8px;
+        }
+
+        .login-select-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0 0 32px;
+        }
+
+        .login-select-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .login-option {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            padding: 16px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+            text-decoration: none;
+        }
+
+        .login-option:hover {
+            border-color: var(--text-muted);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .login-option:active {
+            transform: translateY(0);
+        }
+
+        .login-option--line {
+            border-color: #06C755;
+            background: #06C755;
+            color: #fff;
+        }
+
+        .login-option--line:hover {
+            border-color: #05b34c;
+            background: #05b34c;
+            box-shadow: 0 4px 16px rgba(6, 199, 85, 0.25);
+        }
+
+        .login-option__icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+
+        .login-option__icon svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .login-option__text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .login-option__label {
+            display: block;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .login-option__desc {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 400;
+            opacity: 0.75;
+            margin-top: 2px;
+        }
+
+        .login-option__arrow {
+            font-size: 0.85rem;
+            opacity: 0.5;
+        }
+
+        .login-option--line .login-option__arrow,
+        .login-option--line .login-option__desc {
+            opacity: 0.85;
+        }
+
+        /* ---------- LIFF loading screen (shown after choosing LINE) ---------- */
+        .liff-page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 0 24px;
+            text-align: center;
+            gap: 0;
+        }
+
+        .liff-page.is-active {
+            display: flex;
+        }
+
+        .liff-logo {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 32px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            animation: liff-fade-in 0.5s ease forwards;
+        }
+
+        .liff-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-color);
+            border-top-color: #06C755;
+            border-radius: 50%;
+            animation: liff-spin 0.85s linear infinite, liff-fade-in 0.4s ease forwards;
+            margin-bottom: 28px;
+        }
+
+        @keyframes liff-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes liff-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .liff-status {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.6;
+            word-break: keep-all;
+            overflow-wrap: normal;
+            opacity: 0;
+            animation: liff-fade-in 0.5s 0.15s ease forwards;
+        }
+
+        .liff-sub {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            opacity: 0;
+            animation: liff-fade-in 0.5s 0.25s ease forwards;
+        }
+
+        .liff-retry {
+            display: none;
+            margin-top: 24px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--brand-gradient);
+            color: var(--brand-btn-text);
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--brand-btn-shadow);
+            transition: box-shadow 0.25s, transform 0.25s;
+        }
+
+        .liff-retry:hover {
+            box-shadow: var(--brand-btn-shadow-hover);
+            transform: translateY(-1px);
+        }
+
+        .liff-retry:active {
+            transform: translateY(0);
+        }
+
+        .liff-status.is-success { color: var(--accent-success); }
+        .liff-status.is-error { color: var(--accent-danger); }
+
+        .liff-spinner.is-done {
+            border-color: var(--accent-success);
+            border-top-color: var(--accent-success);
+            animation: none;
+        }
+
+        .liff-spinner.is-error {
+            border-color: var(--accent-danger);
+            border-top-color: var(--accent-danger);
+            animation: none;
+        }
+
+        /* Back link from loading screen */
+        .liff-back {
+            display: none;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .liff-back:hover { color: var(--text-primary); }
+    </style>
+</head>
+
+<body>
+    <!-- ===== Login method selector ===== -->
+    <div class="login-select-page" id="login-select">
+        <div class="login-select-card">
+            <img src="../img/LITALK-Icon.png" alt="LITALK" class="login-select-logo">
+            <h1 class="login-select-title">เข้าสู่ระบบ</h1>
+            <p class="login-select-sub">เลือกวิธีเข้าสู่ระบบ LITALK Education</p>
+
+            <div class="login-select-options">
+                <button class="login-option login-option--line" id="btn-login-line" type="button">
+                    <span class="login-option__icon">
+                        <!-- LINE icon -->
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 5.83 2 10.43c0 4.07 3.42 7.49 8.05 8.14.31.07.74.21.85.48.1.25.06.63.03.88l-.14.82c-.04.25-.2.97.85.53s5.6-3.3 7.64-5.64C21.28 13.41 22 11.99 22 10.43 22 5.83 17.52 2 12 2zm-3.2 11.15h-1.6a.45.45 0 0 1-.45-.45V8.55a.45.45 0 0 1 .9 0v3.7h1.15a.45.45 0 0 1 0 .9zm1.75-.45a.45.45 0 0 1-.9 0V8.55a.45.45 0 0 1 .9 0v4.15zm3.65 0a.45.45 0 0 1-.32.43.45.45 0 0 1-.51-.17L11.8 10.7v2a.45.45 0 0 1-.9 0V8.55a.45.45 0 0 1 .83-.26l1.57 2.27V8.55a.45.45 0 0 1 .9 0v4.15zm3.25-2.8a.45.45 0 0 1 0 .9H16.3v.95h1.15a.45.45 0 0 1 0 .9h-1.6a.45.45 0 0 1-.45-.45V8.55a.45.45 0 0 1 .45-.45h1.6a.45.45 0 0 1 0 .9H16.3v.9h1.15z"/></svg>
+                    </span>
+                    <span class="login-option__text">
+                        <span class="login-option__label">เข้าสู่ระบบด้วย LINE</span>
+                        <span class="login-option__desc">สำหรับนักเรียนที่ลงทะเบียนผ่าน LINE</span>
+                    </span>
+                    <span class="login-option__arrow">›</span>
+                </button>
+
+                <a class="login-option" href="student" id="btn-login-litalk">
+                    <span class="login-option__icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v2h20v-2c0-3.33-6.67-5-10-5z" fill="currentColor"/></svg>
+                    </span>
+                    <span class="login-option__text">
+                        <span class="login-option__label">เข้าสู่ระบบด้วยบัญชี LITALK</span>
+                        <span class="login-option__desc">อีเมลและรหัสผ่าน</span>
+                    </span>
+                    <span class="login-option__arrow">›</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LIFF loading screen (shown after choosing LINE) ===== -->
+    <div class="liff-page" id="liff-loading">
+        <img src="../img/LITALK-Icon.png" alt="LITALK" class="liff-logo">
+        <div class="liff-spinner" id="liff-spinner"></div>
+        <h1 class="liff-status" id="liff-status">กำลังเชื่อมต่อระบบ กรุณารอสักครู่...</h1>
+        <p class="liff-sub" id="liff-sub">กำลังยืนยันตัวตนผ่าน LINE</p>
+        <button class="liff-retry" id="liff-retry" onclick="location.reload()">
+            ลองอีกครั้ง
+        </button>
+        <button class="liff-back" id="liff-back" onclick="showSelectScreen()">
+            ← กลับไปเลือกวิธีเข้าสู่ระบบ
+        </button>
+    </div>
+
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        function showSelectScreen() {
+            document.getElementById('login-select').style.display = '';
+            document.getElementById('liff-loading').classList.remove('is-active');
+        }
+
+        function showLoadingScreen() {
+            document.getElementById('login-select').style.display = 'none';
+            document.getElementById('liff-loading').classList.add('is-active');
+        }
+
+        async function initializeLINELogin() {
+            showLoadingScreen();
+
+            const statusEl  = document.getElementById('liff-status');
+            const subEl     = document.getElementById('liff-sub');
+            const spinnerEl = document.getElementById('liff-spinner');
+            const retryEl   = document.getElementById('liff-retry');
+            const backEl    = document.getElementById('liff-back');
+
+            function showError(msg) {
+                statusEl.textContent = msg;
+                statusEl.classList.add('is-error');
+                spinnerEl.classList.add('is-error');
+                subEl.textContent = 'หากปัญหายังคงอยู่ กรุณาติดต่อแอดมินทาง LINE OA';
+                retryEl.style.display = 'inline-block';
+                backEl.style.display = 'inline-block';
+            }
+
+            try {
+                await liff.init({
+                    liffId: "2010140183",
+                    withLoginOnExternalBrowser: true
+                });
+
+                if (liff.isLoggedIn()) {
+                    statusEl.textContent = 'เข้าสู่ระบบสำเร็จ กำลังนำท่านเข้าสู่ระบบ...';
+                    statusEl.classList.add('is-success');
+                    spinnerEl.classList.add('is-done');
+                    subEl.textContent = '';
+
+                    // ดึงข้อมูลผู้ใช้งาน LINE
+                    const profile = await liff.getProfile();
+
+                    // บันทึกข้อมูลลง localStorage ให้ portal/student อ่านได้
+                    localStorage.setItem('student_line_uid', profile.userId);
+                    localStorage.setItem('student_line_name', profile.displayName);
+                    localStorage.setItem('student_line_pic', profile.pictureUrl || '');
+
+                    // ใช้ replace เพื่อไม่ให้ผู้ใช้กดย้อนกลับมาหน้าโหลดดิ้งได้
+                    window.location.replace('student');
+                } else {
+                    // withLoginOnExternalBrowser ควรเปิดหน้า LINE Login อัตโนมัติ
+                    // กรณี fallback ให้เรียก liff.login() ตรง ๆ
+                    statusEl.textContent = 'กำลังเข้าสู่ระบบผ่าน LINE...';
+                    subEl.textContent = 'ระบบกำลังพาคุณไปหน้าเข้าสู่ระบบ';
+                    liff.login();
+                }
+            } catch (err) {
+                console.error('LIFF Init Error:', err);
+                showError('ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองเข้าใหม่อีกครั้ง');
+            }
+        }
+
+        // If arriving from LINE (LIFF context / returning from LINE Login),
+        // skip the selector and go straight to loading.
+        document.addEventListener('DOMContentLoaded', function () {
+            const search = window.location.search;
+            const isLIFFCallback = search.includes('liff.state') || search.includes('code=') || search.includes('liffClientId');
+            if (isLIFFCallback) {
+                initializeLINELogin();
+            }
+        });
+
+        document.getElementById('btn-login-line').addEventListener('click', function () {
+            initializeLINELogin();
+        });
+    </script>
+</body>
+
+</html>
