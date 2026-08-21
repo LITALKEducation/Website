@@ -181,7 +181,7 @@ const login = async () => { await auth0Client.loginWithRedirect(); };
 
 const logout = async () => {
     deleteCookie('student_id'); // clears any leftover cookie from the retired ?id= shortcut
-    const returnTo = window.location.origin + '/student';
+    const returnTo = window.location.origin + '/portal/student';
     const isAuthenticated = auth0Client ? await auth0Client.isAuthenticated() : false;
     if (isAuthenticated) {
         auth0Client.logout({ logoutParams: { returnTo } });
@@ -1070,7 +1070,7 @@ function openProfileModal() {
 
     avatar.src = currentPortalInfo.hasAvatar
         ? `${dataApiUrl}/portal/${encodeURIComponent(currentPortalInfo.studentId)}/avatar?v=${Date.now()}`
-        : 'img/LITALK-Icon.png';
+        : '/img/LITALK-Icon.png';
     idEl.textContent = currentPortalInfo.studentId;
     nicknameInput.value = currentPortalInfo.nickname || '';
 
@@ -1324,7 +1324,7 @@ function removeProfileImage() {
     profileAvatarRemoved = true;
     const avatar = document.getElementById('profileModalAvatar');
     const fileInput = document.getElementById('profileUploadInput');
-    if (avatar) avatar.src = 'img/LITALK-Icon.png';
+    if (avatar) avatar.src = '/img/LITALK-Icon.png';
     if (fileInput) fileInput.value = '';
 }
 

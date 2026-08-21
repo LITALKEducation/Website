@@ -15,12 +15,14 @@ the hosting serves static files and a build step would have to be run and
 committed by hand on every change.
 
 ```
-*.html            one file per page, hand-written
-css/style.css     the marketing site
-css/student-portal.css   the signed-in student pages + /checkin
-css/fonts.css     @font-face only
-js/*.js           one file per concern, plain scripts, no modules
-img/              static assets
+*.html                marketing & public pages (index, about, courses, programs, plus, ask, blog, etc.)
+portal/*.html         learning & utilities (study, learn, checkin, line-app)
+portal/student/*.html student portal (index, study-log, payments, plus)
+css/style.css         the marketing site
+css/student-portal.css the signed-in student pages + /portal/checkin
+css/fonts.css         @font-face only
+js/*.js               one file per concern, plain scripts, no modules
+img/                  static assets
 ```
 
 Reuse happens by **copying a block between pages and keeping it identical**.

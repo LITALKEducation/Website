@@ -309,8 +309,8 @@ function renderTier() {
   // someone who had not been shown a single price. /student-plus is the page
   // that owns the membership — status, plans, prices and checkout.
   const cta = plus.available
-    ? '<a class="learn-tier__cta" href="student-plus"><i class="fas fa-star"></i> สมัคร LITALK+</a>'
-    : '<a class="learn-tier__cta" href="student-plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
+    ? '<a class="learn-tier__cta" href="student/plus"><i class="fas fa-star"></i> สมัคร LITALK+</a>'
+    : '<a class="learn-tier__cta" href="student/plus"><i class="fas fa-star"></i> LITALK+ เร็ว ๆ นี้</a>';
   el.innerHTML = quota + cta;
   el.hidden = !(quota || cta);
 }
@@ -535,7 +535,7 @@ function renderCourse(data) {
       <div class="learn-course-items">${courseItemRow(data.midterm, '<i class="fas fa-pen-ruler"></i>', course.id, locked, 'เริ่มสอบกลางภาค')}</div>`;
     if (!lockAll && locked) {
       path += examLock
-        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบกลางภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="student-plus">ดูรายละเอียด</a></p>'
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบกลางภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="student/plus">ดูรายละเอียด</a></p>'
         : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนบทเรียนก่อนหน้าให้ครบก่อน จึงจะสอบกลางภาคได้</p>';
     }
   }
@@ -553,7 +553,7 @@ function renderCourse(data) {
       <div class="learn-course-items">${courseItemRow(data.final, '<i class="fas fa-graduation-cap"></i>', course.id, locked, 'เริ่มสอบปลายภาค')}</div>`;
     if (!lockAll && locked) {
       path += examLock
-        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบปลายภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="student-plus">ดูรายละเอียด</a></p>'
+        ? '<p class="learn-hint-lock"><i class="fas fa-star"></i> ข้อสอบปลายภาคเป็นสิทธิ์ของสมาชิก LITALK+ <a href="student/plus">ดูรายละเอียด</a></p>'
         : '<p class="learn-hint-lock"><i class="fas fa-lock"></i> เรียนและผ่านทุกบทเรียนให้ครบก่อน จึงจะสอบปลายภาคได้</p>';
     }
   }
@@ -666,7 +666,7 @@ async function buyCourse(courseId) {
   try {
     const res = await authedFetch(`/portal/${encodeURIComponent(learnStudentId)}/courses/${encodeURIComponent(courseId)}/checkout`, {
       method: 'POST',
-      body: JSON.stringify({ returnUrl: window.location.origin + '/learn?paid=1' }),
+      body: JSON.stringify({ returnUrl: window.location.origin + '/portal/learn?paid=1' }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || 'ไม่สามารถดำเนินการได้');
@@ -785,7 +785,7 @@ function renderQuiz() {
                 </button>`
              : `<div class="learn-note learn-note--plus">
                   <i class="fas fa-file-pdf"></i> บทเรียนนี้มีสไลด์ให้ดาวน์โหลดเป็น PDF สำหรับสมาชิก LITALK+
-                  <a href="student-plus">ดูรายละเอียด</a>
+                  <a href="student/plus">ดูรายละเอียด</a>
                 </div>`
          }
        </section>`
@@ -1007,7 +1007,7 @@ function showResult(result) {
         'beforebegin',
         `<div class="learn-note learn-note--plus">
            <i class="fas fa-star"></i> เฉลยละเอียดพร้อมคำอธิบายทีละข้อ เป็นสิทธิ์ของสมาชิก LITALK+
-           <a href="student-plus">ดูรายละเอียด</a>
+           <a href="student/plus">ดูรายละเอียด</a>
          </div>`,
       );
     }
@@ -1098,10 +1098,10 @@ window.startTest = startTest;
 function applyOnDemandNav() {
   const map = {
     student: { href: 'study', icon: 'fa-gauge-high', label: 'หน้าหลัก' },
-    'student-study-log': { href: 'study?tab=todo', icon: 'fa-list-check', label: 'สิ่งที่ต้องทำ' },
-    'student-payments': { href: 'study?tab=me', icon: 'fa-circle-user', label: 'บัญชี' },
+    'student/study-log': { href: 'study?tab=todo', icon: 'fa-list-check', label: 'สิ่งที่ต้องทำ' },
+    'student/payments': { href: 'study?tab=me', icon: 'fa-circle-user', label: 'บัญชี' },
     learn: { href: 'learn', icon: 'fa-book-open', label: 'บทเรียน' },
-    programs: { href: 'courses', icon: 'fa-graduation-cap', label: 'คอร์สทั้งหมด' },
+    '../programs': { href: '../courses', icon: 'fa-graduation-cap', label: 'คอร์สทั้งหมด' },
   };
   document.querySelectorAll('.portal-tab, .bottom-nav-item, .drawer-link').forEach((a) => {
     const m = map[a.getAttribute('href')];

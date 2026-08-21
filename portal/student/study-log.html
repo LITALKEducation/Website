@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>LITALK Education - บันทึกการเรียน</title>
     <meta name="description" content="LITALK Education Student Portal - บันทึกผลการเรียนทั้งหมดของคุณ">
-    <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
+    <link rel="icon" href="../../img/LITALK-Icon.png" type="image/png">
     <script>
         // Init theme before first paint to prevent flickering
         (function () {
@@ -19,8 +19,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-    <link rel="stylesheet" href="css/student-portal.css?v=20260731b">
+    <link rel="stylesheet" href="../../css/fonts.css?v=20260714h">
+    <link rel="stylesheet" href="../../css/student-portal.css?v=20260731b">
 </head>
 
 <body data-service-surface="portal">
@@ -33,7 +33,7 @@
         <nav class="navbar">
             <div class="nav-container">
                 <a href="/" class="nav-brand">
-                    <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
+                    <img src="../../img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
                     <span class="nav-brand-text">Student Portal</span>
                 </a>
                 <div class="nav-actions">
@@ -61,14 +61,15 @@
 
             <!-- Mobile Drawer -->
             <div class="nav-drawer t-panel-slide" id="student-mobile-drawer" data-open="false" role="navigation" aria-label="Mobile navigation">
-                <a href="student" class="drawer-link"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
-                <a href="student-study-log" class="drawer-link active"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
-                <a href="learn" class="drawer-link"><i class="fas fa-clipboard-question"></i> บทเรียน & แบบทดสอบ</a>
-                <a href="student-payments" class="drawer-link"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                <a href="./" class="drawer-link"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
+                <a href="study-log" class="drawer-link active"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
+                <a href="../learn" class="drawer-link"><i class="fas fa-clipboard-question"></i> บทเรียน & แบบทดสอบ</a>
+                <a href="plus" class="drawer-link"><i class="fas fa-star"></i> LITALK+</a>
+                <a href="payments" class="drawer-link"><i class="fas fa-receipt"></i> การชำระเงิน</a>
                 <div class="drawer-divider"></div>
                 <a href="/" class="drawer-link"><i class="fas fa-home"></i> หน้าหลัก</a>
-                <a href="programs" class="drawer-link"><i class="fas fa-book"></i> หลักสูตรทั้งหมด</a>
-                <a href="about" class="drawer-link"><i class="fas fa-info-circle"></i> เกี่ยวกับเรา</a>
+                <a href="../../programs" class="drawer-link"><i class="fas fa-book"></i> หลักสูตรทั้งหมด</a>
+                <a href="../../about" class="drawer-link"><i class="fas fa-info-circle"></i> เกี่ยวกับเรา</a>
                 <div class="drawer-divider"></div>
                 <div class="drawer-actions">
                     <button class="drawer-action-btn btn-edit-profile-header" onclick="openProfileModal()" style="display:none;">
@@ -95,11 +96,11 @@
         <main class="dashboard-content" id="main-content">
             <!-- Portal Tabs -->
             <nav class="portal-tabs" aria-label="Portal navigation">
-                <a href="student" class="portal-tab"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
-                <a href="student-study-log" class="portal-tab active" aria-current="page"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
-                <a href="learn" class="portal-tab"><i class="fas fa-clipboard-question"></i> บทเรียน & แบบทดสอบ</a>
-                <a href="student-plus" class="portal-tab"><i class="fas fa-star"></i> LITALK+</a>
-                <a href="student-payments" class="portal-tab"><i class="fas fa-receipt"></i> การชำระเงิน</a>
+                <a href="./" class="portal-tab"><i class="fas fa-gauge-high"></i> ภาพรวม</a>
+                <a href="study-log" class="portal-tab active" aria-current="page"><i class="fas fa-graduation-cap"></i> บันทึกการเรียน</a>
+                <a href="../learn" class="portal-tab"><i class="fas fa-clipboard-question"></i> บทเรียน & แบบทดสอบ</a>
+                <a href="plus" class="portal-tab"><i class="fas fa-star"></i> LITALK+</a>
+                <a href="payments" class="portal-tab"><i class="fas fa-receipt"></i> การชำระเงิน</a>
             </nav>
 
             <!-- Page Header -->
@@ -115,7 +116,7 @@
                     <span class="page-head-chip"><i class="fas fa-clipboard-list"></i>
                         <span id="display-classes-count"><span class="skeleton-loader" style="width:60px;height:16px;"></span></span>
                     </span>
-                    <a href="student" class="btn-back-overview"><i class="fas fa-arrow-left"></i> กลับหน้าภาพรวม</a>
+                    <a href="./" class="btn-back-overview"><i class="fas fa-arrow-left"></i> กลับหน้าภาพรวม</a>
                 </div>
             </header>
 
@@ -151,19 +152,19 @@
 
         <!-- Mobile bottom navigation -->
         <nav class="bottom-nav" aria-label="เมนูหลัก">
-            <a href="student" class="bottom-nav-item">
+            <a href="./" class="bottom-nav-item">
                 <i class="fas fa-gauge-high"></i>
                 <span>ภาพรวม</span>
             </a>
-            <a href="student-study-log" class="bottom-nav-item active" aria-current="page">
+            <a href="study-log" class="bottom-nav-item active" aria-current="page">
                 <i class="fas fa-graduation-cap"></i>
                 <span>บันทึกการเรียน</span>
             </a>
-            <a href="student-plus" class="bottom-nav-item">
+            <a href="plus" class="bottom-nav-item">
                 <i class="fas fa-star"></i>
                 <span>LITALK+</span>
             </a>
-            <a href="student-payments" class="bottom-nav-item">
+            <a href="payments" class="bottom-nav-item">
                 <i class="fas fa-receipt"></i>
                 <span>การชำระเงิน</span>
             </a>
@@ -180,11 +181,11 @@
         </a>
     </div>
 
-    <script src="js/service-notice.js?v=20260727h" defer></script>
+    <script src="../../js/service-notice.js?v=20260727h" defer></script>
 
-    <script src="js/markdown.js?v=20260727g"></script>
+    <script src="../../js/markdown.js?v=20260727g"></script>
 
-    <script src="js/student-portal.js?v=20260731a"></script>
+    <script src="../../js/student-portal.js?v=20260731a"></script>
     <script>
         window.onload = async () => {
             updateThemeIcons(document.documentElement.getAttribute('data-theme'));
@@ -263,7 +264,7 @@
             <div class="idcard-modal-body">
                 <div class="idcard">
                     <div class="idcard-top">
-                        <img src="img/LITALK-Icon.png" class="idcard-logo" alt="">
+                        <img src="../../img/LITALK-Icon.png" class="idcard-logo" alt="">
                         <span class="idcard-brand">LITALK Education</span>
                     </div>
                     <div class="idcard-main">

@@ -11,7 +11,7 @@
  * courses.html; a second copy on the home page is how the two would end up
  * describing the same membership differently.
  *
- * The card itself does not sell anything — it hands off to /litalk-plus,
+ * The card itself does not sell anything — it hands off to /plus,
  * which is the page that carries the plans and the prices.
  */
 

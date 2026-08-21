@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th" data-theme="light">
 
 <head>
@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>LITALK Education - เรียนออนไลน์</title>
     <meta name="description" content="LITALK Education - แดชบอร์ดผู้เรียนออนไลน์ ติดตามความคืบหน้าและคะแนน">
-    <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
+    <link rel="icon" href="../img/LITALK-Icon.png" type="image/png">
     <script>
         (function () {
             const savedTheme = localStorage.getItem('theme');
@@ -17,8 +17,8 @@
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-    <link rel="stylesheet" href="css/student-portal.css?v=20260731b">
+    <link rel="stylesheet" href="../css/fonts.css?v=20260714h">
+    <link rel="stylesheet" href="../css/student-portal.css?v=20260731b">
     <style>
         /* On-demand dashboard — reuses the portal theme tokens (bg-secondary /
            text-primary / …) so it tracks light & dark automatically. */
@@ -138,7 +138,7 @@
         <nav class="navbar">
             <div class="nav-container">
                 <a href="/" class="nav-brand">
-                    <img src="img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
+                    <img src="../img/LITALK-Black.png" alt="LITALK Logo" class="logo-img">
                     <span class="nav-brand-text">เรียนออนไลน์</span>
                 </a>
                 <div class="nav-actions">
@@ -159,10 +159,10 @@
                 <a href="study" class="drawer-link" data-tab="home" onclick="sdShowTab('home');return false;"><i class="fas fa-gauge-high"></i> หน้าหลัก</a>
                 <a href="study?tab=todo" class="drawer-link" data-tab="todo" onclick="sdShowTab('todo');return false;"><i class="fas fa-list-check"></i> <span data-tab-label="todo">สิ่งที่ต้องทำ</span></a>
                 <a href="learn" class="drawer-link"><i class="fas fa-book-open"></i> บทเรียน</a>
-                <a href="student-plus" class="drawer-link"><i class="fas fa-star"></i> LITALK+</a>
+                <a href="student/plus" class="drawer-link"><i class="fas fa-star"></i> LITALK+</a>
                 <a href="study?tab=me" class="drawer-link" data-tab="me" onclick="sdShowTab('me');return false;"><i class="fas fa-circle-user"></i> บัญชี</a>
                 <div class="drawer-divider"></div>
-                <a href="courses" class="drawer-link"><i class="fas fa-graduation-cap"></i> คอร์สทั้งหมด</a>
+                <a href="../courses" class="drawer-link"><i class="fas fa-graduation-cap"></i> คอร์สทั้งหมด</a>
                 <a href="/" class="drawer-link"><i class="fas fa-home"></i> หน้าหลักเว็บไซต์</a>
                 <div class="drawer-divider"></div>
                 <div class="drawer-actions">
@@ -183,7 +183,7 @@
                 <a href="study" class="portal-tab" data-tab="home" onclick="sdShowTab('home');return false;"><i class="fas fa-gauge-high"></i> หน้าหลัก</a>
                 <a href="study?tab=todo" class="portal-tab" data-tab="todo" onclick="sdShowTab('todo');return false;"><i class="fas fa-list-check"></i> <span data-tab-label="todo">สิ่งที่ต้องทำ</span></a>
                 <a href="learn" class="portal-tab"><i class="fas fa-book-open"></i> บทเรียน</a>
-                <a href="student-plus" class="portal-tab"><i class="fas fa-star"></i> LITALK+</a>
+                <a href="student/plus" class="portal-tab"><i class="fas fa-star"></i> LITALK+</a>
                 <a href="study?tab=me" class="portal-tab" data-tab="me" onclick="sdShowTab('me');return false;"><i class="fas fa-circle-user"></i> บัญชี</a>
             </nav>
 
@@ -208,7 +208,7 @@
             <a href="learn" class="bottom-nav-item">
                 <i class="fas fa-book-open"></i><span>บทเรียน</span>
             </a>
-            <a href="student-plus" class="bottom-nav-item">
+            <a href="student/plus" class="bottom-nav-item">
                 <i class="fas fa-star"></i><span>LITALK+</span>
             </a>
             <a href="study?tab=me" class="bottom-nav-item" data-tab="me" onclick="sdShowTab('me');return false;">
@@ -221,10 +221,10 @@
         </a>
     </div>
 
-    <script src="js/service-notice.js?v=20260727h" defer></script>
-    <script src="js/markdown.js?v=20260727g"></script>
-    <script src="js/student-portal.js?v=20260731a"></script>
-    <script src="js/study.js?v=20260731a"></script>
+    <script src="../js/service-notice.js?v=20260727h" defer></script>
+    <script src="../js/markdown.js?v=20260727g"></script>
+    <script src="../js/student-portal.js?v=20260731a"></script>
+    <script src="../js/study.js?v=20260731a"></script>
 </body>
 
 </html>

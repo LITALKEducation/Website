@@ -1,6 +1,6 @@
 /**
  * LITALK Education — plus.js
- * The LITALK+ membership page (litalk-plus.html).
+ * The LITALK+ membership page (plus.html).
  *
  * Prices are never written into the markup. They come from GET /plus/public,
  * which reads them from Stripe — a number typed into the HTML could advertise
@@ -13,9 +13,9 @@
  * a Stripe dashboard edit: price the plans and the page turns itself on.
  *
  * Buying happens in the student portal, which is where the learner's identity
- * is — this page hands off to /learn rather than starting a checkout of its
+ * is — this page hands off to /portal/student/plus rather than starting a checkout of its
  * own, since a subscription has to be attached to a student id. The chosen
- * plan rides along as ?subscribe=<plan> and /learn starts that checkout on
+ * plan rides along as ?subscribe=<plan> and /portal/student/plus starts that checkout on
  * arrival, so choosing a plan and paying for it stay one motion even though
  * they happen on two pages.
  */
@@ -90,7 +90,7 @@
         <span class="plus-plan__price">${money(price.amount, price.currency)}</span>
         <span class="plus-plan__period">${periodText(price)}</span>
         ${perMonthLine}
-        <a class="btn btn--primary plus-plan__cta" href="student-plus?subscribe=${encodeURIComponent(price.plan)}">${t('Start LITALK+', 'สมัคร LITALK+')}</a>
+        <a class="btn btn--primary plus-plan__cta" href="portal/student/plus?subscribe=${encodeURIComponent(price.plan)}">${t('Start LITALK+', 'สมัคร LITALK+')}</a>
       </article>`;
   }
 

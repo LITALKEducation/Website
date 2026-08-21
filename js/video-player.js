@@ -141,7 +141,7 @@ window.litalkVideo = (function () {
       // so it gets no mask — dimming the top of our own first frame for no
       // reason would just look like a bug.
       (id ? '<div class="lv__top" aria-hidden="true"></div>' : '') +
-      '<img class="lv__wm" src="img/LITALK-White.png" alt="" aria-hidden="true" width="96" height="16">' +
+      '<img class="lv__wm" src="/img/LITALK-White.png" alt="" aria-hidden="true" width="96" height="16">' +
       '<button type="button" class="lv__surface" aria-label="เล่นหรือหยุดวีดีโอ"></button>' +
       '<div class="lv__hint lv__hint--back" aria-hidden="true"><i class="fas fa-backward"></i><span>10</span></div>' +
       '<div class="lv__hint lv__hint--fwd" aria-hidden="true"><i class="fas fa-forward"></i><span>10</span></div>' +
