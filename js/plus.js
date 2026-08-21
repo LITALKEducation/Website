@@ -90,7 +90,7 @@
         <span class="plus-plan__price">${money(price.amount, price.currency)}</span>
         <span class="plus-plan__period">${periodText(price)}</span>
         ${perMonthLine}
-        <a class="btn btn--primary plus-plan__cta" href="portal/student/plus?subscribe=${encodeURIComponent(price.plan)}">${t('Start LITALK+', 'สมัคร LITALK+')}</a>
+        <a class="btn btn--primary plus-plan__cta" href="/portal/student/plus?subscribe=${encodeURIComponent(price.plan)}">${t('Start LITALK+', 'สมัคร LITALK+')}</a>
       </article>`;
   }
 

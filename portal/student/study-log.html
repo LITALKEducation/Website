@@ -193,7 +193,7 @@
             const studentId = await resolveAuthedStudentId();
             if (!studentId) {
                 // Not signed in — send back to the portal entry page for login
-                window.location.replace('student');
+                window.location.replace('/portal/student/');
                 return;
             }
 

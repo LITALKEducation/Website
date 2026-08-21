@@ -181,7 +181,7 @@ const login = async () => { await auth0Client.loginWithRedirect(); };
 
 const logout = async () => {
     deleteCookie('student_id'); // clears any leftover cookie from the retired ?id= shortcut
-    const returnTo = window.location.origin + '/portal/student';
+    const returnTo = window.location.origin + '/portal/student/';
     const isAuthenticated = auth0Client ? await auth0Client.isAuthenticated() : false;
     if (isAuthenticated) {
         auth0Client.logout({ logoutParams: { returnTo } });

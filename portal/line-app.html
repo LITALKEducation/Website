@@ -377,7 +377,7 @@
                     localStorage.setItem('student_line_pic', profile.pictureUrl || '');
 
                     // ใช้ replace เพื่อไม่ให้ผู้ใช้กดย้อนกลับมาหน้าโหลดดิ้งได้
-                    window.location.replace('student');
+                    window.location.replace('student/');
                 } else {
                     // withLoginOnExternalBrowser ควรเปิดหน้า LINE Login อัตโนมัติ
                     // กรณี fallback ให้เรียก liff.login() ตรง ๆ
