@@ -284,6 +284,14 @@
     });
   });
 
+  document.querySelectorAll('[data-ask-prompt]').forEach((item) => {
+    item.addEventListener('click', () => {
+      input.value = item.getAttribute('data-ask-prompt') || '';
+      syncComposer();
+      input.focus();
+    });
+  });
+
   // Markdown rendering lives in js/markdown.js, shared with the /ask page
   // and the student portal so all three render the same subset.
   const renderMarkdown = (text) => window.litalkMarkdown(text);
