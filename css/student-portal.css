@@ -4264,3 +4264,165 @@ body.lv-fs-locked { overflow: hidden; }
     line-height: 1.55;
     color: var(--text-secondary);
 }
+
+/* ============================================================
+   2026 PORTAL — CALM, FOCUSED WORKSPACE
+   A quieter density pass: one visual hierarchy, fewer boxed surfaces and
+   monochrome controls keep the learner's next action easy to find.
+   ============================================================ */
+:root[data-theme="light"] {
+    --portal-surface: rgba(255, 255, 255, 0.78);
+    --portal-surface-strong: rgba(255, 255, 255, 0.94);
+    --portal-line: rgba(0, 0, 0, 0.075);
+    --portal-soft: rgba(0, 0, 0, 0.035);
+    --portal-shadow: 0 18px 55px rgba(0, 0, 0, 0.055);
+}
+
+:root[data-theme="dark"] {
+    --portal-surface: rgba(22, 22, 24, 0.78);
+    --portal-surface-strong: rgba(28, 28, 30, 0.94);
+    --portal-line: rgba(255, 255, 255, 0.09);
+    --portal-soft: rgba(255, 255, 255, 0.045);
+    --portal-shadow: 0 18px 55px rgba(0, 0, 0, 0.32);
+}
+
+.dashboard-page .navbar {
+    width: min(calc(100% - 32px), 1160px);
+    margin: 12px auto 0;
+    padding: 10px 18px;
+    border: 1px solid var(--portal-line);
+    border-radius: 20px;
+    background: var(--portal-surface);
+    box-shadow: var(--shadow-sm);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+}
+
+.dashboard-page .nav-brand .logo-img { height: 29px; }
+.dashboard-page .nav-brand-text { background: transparent; padding-inline: 4px; color: var(--text-muted); }
+.dashboard-page .nav-actions { gap: 8px; }
+.dashboard-page .theme-toggle-btn,
+.dashboard-page .btn-edit-profile-header { width: 36px; height: 36px; background: var(--portal-soft); border-color: transparent; }
+.dashboard-page .btn-logout-header { padding: 8px 13px; border-color: transparent; background: var(--portal-soft); }
+
+.dashboard-content {
+    max-width: 1120px;
+    padding: 30px 24px 64px;
+}
+
+.portal-tabs {
+    margin: 0 auto 24px;
+    padding: 4px;
+    gap: 2px;
+    border-color: var(--portal-line);
+    background: var(--portal-surface);
+    box-shadow: none;
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+}
+
+.portal-tab { padding: 9px 15px; font-size: 13px; }
+.portal-tab.active { box-shadow: none; }
+
+.welcome-hero,
+.page-head {
+    background: var(--text-primary);
+    border-radius: 26px;
+    box-shadow: var(--portal-shadow);
+}
+
+.welcome-hero { padding: 28px 30px; margin-bottom: 18px; gap: 20px; }
+.welcome-hero-decor::before { opacity: .5; }
+.welcome-hero-decor::after { display: none; }
+.hero-text h1 { font-size: 24px; margin-bottom: 9px; }
+.hero-avatar,
+.hero-avatar-fallback { width: 58px; height: 58px; }
+.hero-action-btn { min-height: 40px; padding: 9px 14px; }
+
+.stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    margin-bottom: 22px;
+    padding: 1px;
+    overflow: hidden;
+    border: 1px solid var(--portal-line);
+    border-radius: 20px;
+    background: var(--portal-line);
+    box-shadow: none;
+}
+
+.stat-card {
+    min-height: 112px;
+    padding: 18px;
+    gap: 12px;
+    border: 0;
+    border-radius: 0;
+    background: var(--portal-surface-strong);
+    box-shadow: none;
+}
+
+.stat-card::before { display: none; }
+.stat-card:hover { z-index: 1; transform: none; background: var(--bg-tertiary); box-shadow: none; }
+.stat-icon-wrapper,
+.stat-icon-wrapper.blue,
+.stat-icon-wrapper.green,
+.stat-icon-wrapper.purple,
+.stat-icon-wrapper.orange {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--portal-soft);
+    color: var(--text-primary);
+    font-size: 15px;
+}
+.stat-label { text-transform: none; letter-spacing: 0; font-size: 11px; }
+.stat-value { font-size: 16px; }
+
+.dashboard-main-grid { gap: 16px; }
+.content-section {
+    padding: 24px;
+    border-color: var(--portal-line);
+    border-radius: 22px;
+    background: var(--portal-surface);
+    box-shadow: none;
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+.content-section + .content-section { margin-top: 16px; }
+.section-title { font-size: 16px; gap: 10px; }
+.section-title i { width: 34px; height: 34px; border-radius: 10px; font-size: 14px; }
+.section-sub { margin: 0 0 18px 44px; font-size: 12.5px; }
+.section-footer-link { margin-top: 14px; }
+.section-footer-link a { padding: 10px 16px; background: transparent; }
+
+.page-head { padding: 24px 28px; margin-bottom: 20px; }
+.page-head-icon { width: 46px; height: 46px; font-size: 18px; }
+.page-head-text h1 { font-size: 21px; }
+
+@media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+    .dashboard-page .navbar { width: calc(100% - 24px); margin-top: 8px; padding: 8px 14px; border-radius: 18px; }
+    .dashboard-content { padding-top: 20px; }
+    .welcome-hero { padding: 22px; gap: 14px; }
+    .hero-profile { display: none; }
+    .hero-text h1 { font-size: 21px; }
+    .content-section + .content-section { margin-top: 12px; }
+}
+
+@media (max-width: 520px) {
+    .dashboard-content { padding-inline: 12px; }
+    .stats-grid { gap: 1px; border-radius: 16px; }
+    .stat-card { min-height: 100px; padding: 14px; }
+    .stat-icon-wrapper,
+    .stat-icon-wrapper.blue,
+    .stat-icon-wrapper.green,
+    .stat-icon-wrapper.purple,
+    .stat-icon-wrapper.orange { width: 32px; height: 32px; }
+    .content-section { padding: 20px 16px; border-radius: 18px; }
+    .section-sub { margin-left: 0; }
+    .page-head { padding: 20px; border-radius: 20px; }
+    .page-head-icon { display: none; }
+}
