@@ -1746,6 +1746,14 @@ textarea {
   overflow: hidden;
 }
 
+/* The HTML hidden attribute must win over the component's grid display.
+   Without this rule, WebKit still lays out every closed answer (the text is
+   transparent, but its height remains), leaving large empty bands between
+   questions on phones. */
+.faq-item__body[hidden] { display: none; }
+
+.faq-item__body > * { min-height: 0; }
+
 .faq-item.open .faq-item__body {
   grid-template-rows: 1fr;
   transition: grid-template-rows var(--acc-expand) var(--acc-ease);
@@ -4639,6 +4647,14 @@ body.svc-locked { overflow: hidden; }
 .home-page .faq__list { padding-inline: 24px; border-radius: 30px; overflow: hidden; }
 .home-page .form-input, .home-page .form-textarea, .home-page .newsletter__input { border-radius: 16px; background: rgba(255,255,255,.42); }
 
+/* The glass treatment turns the form itself into a card, so it also needs
+   card insets. Previously the border wrapped the fields while their labels
+   and inputs sat directly against it, which was especially obvious on iOS. */
+.home-page .contact__form {
+  margin-top: 32px;
+  padding: 32px;
+}
+
 @media (prefers-color-scheme: dark) {
   .home-page {
     --home-glass: rgba(24,24,26,0.54);
@@ -4668,6 +4684,8 @@ body.svc-locked { overflow: hidden; }
   .home-page .hero__badge { left: 2%; top: 3%; }
   .home-page .hero__word-chip--one { right: 0; top: 17%; }
   .home-page .hero__word-chip--two { display: none; }
+  .home-page .contact__form { margin-top: 24px; padding: 24px 20px; gap: 24px; }
+  .home-page .faq__list { padding-inline: 12px; }
 }
 
 @media (max-width: 420px) {
