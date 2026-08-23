@@ -17,7 +17,7 @@
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-  <link rel="stylesheet" href="css/style.css?v=20260823b">
+  <link rel="stylesheet" href="css/style.css?v=20260823c">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 </head>
@@ -135,6 +135,34 @@
     <section class="ask-section">
       <div class="container">
         <div class="ask-stage" id="ask-stage">
+
+          <div class="ask-chat-head">
+            <div class="ask-chat-head__identity">
+              <span class="ask-avatar" aria-hidden="true"><i class="fas fa-sparkles"></i></span>
+              <span>
+                <strong data-en="Nong Lilly" data-th="น้องลิลลี่">Nong Lilly</strong>
+                <small><span class="ask-status-dot" aria-hidden="true"></span><span data-en="Your English learning buddy" data-th="เพื่อนคู่คิดภาษาอังกฤษของคุณ">Your English learning buddy</span></small>
+              </span>
+            </div>
+            <span class="ask-chat-head__badge"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i><span>AI</span></span>
+          </div>
+
+          <div class="ask-welcome">
+            <span class="ask-avatar ask-avatar--large" aria-hidden="true"><i class="fas fa-sparkles"></i></span>
+            <h2 data-en="Hi! What can I help you learn?" data-th="สวัสดี! วันนี้อยากเรียนรู้อะไรดี?">Hi! What can I help you learn?</h2>
+            <p data-en="Ask me about a word, compare similar phrases, or check an English sentence." data-th="ถามความหมายคำศัพท์ เปรียบเทียบวลี หรือตรวจประโยคภาษาอังกฤษได้เลย">Ask me about a word, compare similar phrases, or check an English sentence.</p>
+            <div class="ask-starters" aria-label="Suggested questions">
+              <button type="button" class="ask-starter" data-ask-prompt="What does &quot;confident&quot; mean?">
+                <i class="fas fa-book-open" aria-hidden="true"></i><span data-en="Explain a word" data-th="อธิบายคำศัพท์">Explain a word</span>
+              </button>
+              <button type="button" class="ask-starter" data-ask-prompt="What is the difference between &quot;speak&quot; and &quot;talk&quot;?">
+                <i class="fas fa-code-compare" aria-hidden="true"></i><span data-en="Compare words" data-th="เปรียบเทียบคำ">Compare words</span>
+              </button>
+              <button type="button" class="ask-starter" data-ask-prompt="Is this sentence correct: She go to school every day?">
+                <i class="fas fa-spell-check" aria-hidden="true"></i><span data-en="Check a sentence" data-th="ตรวจประโยค">Check a sentence</span>
+              </button>
+            </div>
+          </div>
 
           <div class="ask-account" id="ask-account" hidden>
             <span class="ask-account__text" id="ask-account-text"></span>
@@ -314,7 +342,7 @@
   <script src="js/service-notice.js?v=20260727h" defer></script>
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
-  <script src="js/ask.js?v=20260729h" defer></script>
+  <script src="js/ask.js?v=20260823a" defer></script>
 </body>
 
 </html>
