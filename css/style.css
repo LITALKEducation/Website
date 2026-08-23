@@ -4537,8 +4537,8 @@ body.svc-locked { overflow: hidden; }
 .home-page .section-heading { font-size: clamp(38px, 5vw, 64px); letter-spacing: -.055em; }
 .home-page .about__img { border-radius: 36px; box-shadow: var(--home-soft-shadow); }
 .home-page .about__img img { filter: grayscale(1); }
-.home-page .about__accent { border-radius: 32px; background: var(--home-glass); border: 1px solid var(--home-glass-line); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
-.home-page .about__stats { padding: 8px; border: 1px solid var(--home-glass-line); border-radius: 24px; background: var(--home-glass); box-shadow: var(--home-soft-shadow); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.home-page .about__accent { border-radius: 32px; background: var(--home-glass); border: 1px solid var(--home-glass-line); backdrop-filter: blur(20px); }
+.home-page .about__stats { padding: 8px; border: 1px solid var(--home-glass-line); border-radius: 24px; background: var(--home-glass); box-shadow: var(--home-soft-shadow); backdrop-filter: blur(20px); }
 
 .home-page .program-card,
 .home-page .testimonial-card,
@@ -4554,7 +4554,7 @@ body.svc-locked { overflow: hidden; }
 .home-page .program-card { border-radius: 30px; }
 .home-page .program-card--featured { background: var(--clr-dark-surface); border-color: rgba(255,255,255,.18); }
 .home-page .why__grid { gap: 12px; border: 0; }
-.home-page .why-item { border: 1px solid var(--home-glass-line) !important; border-radius: 24px; background: var(--home-glass); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+.home-page .why-item { border: 1px solid var(--home-glass-line) !important; border-radius: 24px; background: var(--home-glass); backdrop-filter: blur(18px); }
 .home-page .why-item:hover { background: var(--home-glass-strong); transform: translateY(-4px); box-shadow: var(--home-soft-shadow); }
 .home-page .why-item__icon { border-radius: 16px; }
 .home-page .testimonial-card { border-radius: 28px; }
@@ -4580,7 +4580,7 @@ body.svc-locked { overflow: hidden; }
 @media (max-width: 768px) {
   .home-page .nav { top: 8px; border-radius: 26px; }
   .home-page .nav__inner { height: 54px; }
-  .home-page .nav__drawer { top: 62px; margin-inline: -1px; border: 1px solid var(--home-glass-line); border-radius: 24px; background: var(--home-glass-strong); -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
+  .home-page .nav__drawer { top: 62px; margin-inline: -1px; border: 1px solid var(--home-glass-line); border-radius: 24px; background: var(--home-glass-strong); backdrop-filter: blur(28px); }
   .home-page .hero { min-height: auto; padding-top: 78px; }
   .home-page .hero__inner { padding-top: 60px; }
   .home-page .hero__headline { font-size: clamp(50px, 16vw, 72px); }
@@ -4591,13 +4591,6 @@ body.svc-locked { overflow: hidden; }
   .home-page .hero__badge { left: 2%; top: 3%; }
   .home-page .hero__word-chip--one { right: 0; top: 17%; }
   .home-page .hero__word-chip--two { display: none; }
-}
-
-@media (max-width: 420px) {
-  .home-page .hero__visual { min-height: 390px; }
-  .home-page .hero__lesson-card { bottom: 0; width: 176px; }
-  .home-page .hero__badge { top: 0; transform: scale(.9); transform-origin: left top; }
-  .home-page .hero__word-chip--one { top: 20%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
