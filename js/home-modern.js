@@ -58,6 +58,8 @@ document.querySelectorAll('.goal-options button').forEach(button => button.addEv
 
 document.querySelector('.play')?.addEventListener('click', event => {
   const playing = event.currentTarget.classList.toggle('playing');
-  event.currentTarget.textContent = playing ? 'Ⅱ' : '▶';
+  event.currentTarget.innerHTML = playing
+    ? '<i class="fa-solid fa-pause" aria-hidden="true"></i>'
+    : '<i class="fa-solid fa-play" aria-hidden="true"></i>';
   event.currentTarget.setAttribute('aria-label', playing ? 'Pause episode' : 'Play episode');
 });
