@@ -116,6 +116,7 @@ while (walker.nextNode()) {
 const applyLanguage = lang => {
   language = lang;
   document.documentElement.lang = lang === 'th' ? 'th' : 'en';
+  document.documentElement.dataset.lang = lang;
   localStorage.setItem('litalk-lang', lang);
   document.querySelectorAll('[data-en][data-th]').forEach(element => {
     element.textContent = element.dataset[lang];
@@ -136,21 +137,8 @@ const applyLanguage = lang => {
     const field = document.querySelector(selector);
     if (field) field.placeholder = placeholders[index];
   });
+  document.dispatchEvent(new CustomEvent('litalk:langchange', { detail: { lang } }));
 };
+window.litalkGetLang = () => language;
 document.querySelector('.language-button')?.addEventListener('click', () => applyLanguage(language === 'en' ? 'th' : 'en'));
 applyLanguage(language);
-
-const contactForm = document.querySelector('#contact-form');
-contactForm?.addEventListener('submit', event => {
-  event.preventDefault();
-  if (!contactForm.reportValidity()) return;
-  const submit = document.querySelector('#contact-submit');
-  const status = contactForm.querySelector('.form-status');
-  const values = new FormData(contactForm);
-  const subject = language === 'th' ? `สอบถามข้อมูลจาก ${values.get('name')}` : `Inquiry from ${values.get('name')}`;
-  const body = [`Name: ${values.get('name')}`, `Email: ${values.get('email')}`, `Program: ${values.get('program')}`, '', values.get('message')].join('\n');
-  window.location.href = `mailto:support@litalkeducation.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  submit.disabled = true;
-  status.textContent = language === 'th' ? 'กำลังเปิดโปรแกรมอีเมล…' : 'Opening your email app…';
-  setTimeout(() => { submit.disabled = false; status.textContent = ''; }, 3000);
-});
