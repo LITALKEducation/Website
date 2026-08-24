@@ -58,8 +58,34 @@ document.querySelectorAll('.goal-options button').forEach(button => button.addEv
 
 document.querySelector('.play')?.addEventListener('click', event => {
   const playing = event.currentTarget.classList.toggle('playing');
-  event.currentTarget.innerHTML = playing
-    ? '<i class="fa-solid fa-pause" aria-hidden="true"></i>'
-    : '<i class="fa-solid fa-play" aria-hidden="true"></i>';
+  event.currentTarget.textContent = playing ? 'Ⅱ' : '▶';
   event.currentTarget.setAttribute('aria-label', playing ? 'Pause episode' : 'Play episode');
+});
+
+let language = localStorage.getItem('litalk-lang') || 'en';
+const applyLanguage = lang => {
+  language = lang;
+  document.documentElement.lang = lang === 'th' ? 'th' : 'en';
+  localStorage.setItem('litalk-lang', lang);
+  document.querySelectorAll('[data-en][data-th]').forEach(element => {
+    element.textContent = element.dataset[lang];
+  });
+  document.querySelector('.language-button')?.setAttribute('aria-pressed', String(lang === 'th'));
+};
+document.querySelector('.language-button')?.addEventListener('click', () => applyLanguage(language === 'en' ? 'th' : 'en'));
+applyLanguage(language);
+
+const contactForm = document.querySelector('#contact-form');
+contactForm?.addEventListener('submit', event => {
+  event.preventDefault();
+  if (!contactForm.reportValidity()) return;
+  const submit = document.querySelector('#contact-submit');
+  const status = contactForm.querySelector('.form-status');
+  const values = new FormData(contactForm);
+  const subject = language === 'th' ? `สอบถามข้อมูลจาก ${values.get('name')}` : `Inquiry from ${values.get('name')}`;
+  const body = [`Name: ${values.get('name')}`, `Email: ${values.get('email')}`, `Program: ${values.get('program')}`, '', values.get('message')].join('\n');
+  window.location.href = `mailto:support@litalkeducation.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  submit.disabled = true;
+  status.textContent = language === 'th' ? 'กำลังเปิดโปรแกรมอีเมล…' : 'Opening your email app…';
+  setTimeout(() => { submit.disabled = false; status.textContent = ''; }, 3000);
 });
