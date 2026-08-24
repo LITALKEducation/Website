@@ -69,54 +69,10 @@ document.querySelector('.play')?.addEventListener('click', event => {
   event.currentTarget.setAttribute('aria-label', playing ? 'Pause episode' : 'Play episode');
 });
 
-const recordButton = document.querySelector('.record-button');
-recordButton?.addEventListener('click', () => {
-  const recording = recordButton.classList.toggle('recording');
-  recordButton.querySelector('b').textContent = recording ? (language === 'th' ? 'กำลังฟัง… แตะเพื่อหยุด' : 'Listening… tap to stop') : (language === 'th' ? 'แตะเพื่อพูด' : 'Tap to speak');
-  recordButton.setAttribute('aria-label', recording ? 'Stop speaking practice' : 'Start speaking practice');
-});
-
-const speeds = ['1×', '1.25×', '1.5×', '.75×'];
-document.querySelector('.speed-button')?.addEventListener('click', event => {
-  event.currentTarget.textContent = speeds[(speeds.indexOf(event.currentTarget.textContent) + 1) % speeds.length];
-});
-
-const audioDetails = {
-  transcript: ['Transcript', 'People often think small talk is unimportant. But a simple question can be the beginning of a real connection.'],
-  vocabulary: ['Vocabulary', 'small talk · casual conversation  •  connection · a relationship between people  •  natural · relaxed and normal']
-};
-document.querySelectorAll('[data-audio-panel]').forEach(button => button.addEventListener('click', () => {
-  const panel = document.querySelector('#audio-panel');
-  const [title, copy] = audioDetails[button.dataset.audioPanel];
-  document.querySelector('#audio-panel-title').textContent = title;
-  document.querySelector('#audio-panel-copy').textContent = copy;
-  panel.hidden = false;
-}));
-document.querySelector('.audio-panel-head button')?.addEventListener('click', () => {
-  document.querySelector('#audio-panel').hidden = true;
-});
-
 let language = localStorage.getItem('litalk-lang') || 'en';
-const thai = {
-  'Learn':'เรียนรู้','Ways to learn':'รูปแบบการเรียน','Courses':'คอร์ส','Practice':'ฝึกฝน','Resources':'แหล่งเรียนรู้','About':'เกี่ยวกับเรา','Log in':'เข้าสู่ระบบ','Start learning':'เริ่มเรียน',
-  'English for real life':'ภาษาอังกฤษเพื่อชีวิตจริง','English that':'ภาษาอังกฤษที่','works for you.':'ใช่สำหรับคุณ','Real conversations, focused lessons, and practical activities designed for the life you actually live.':'บทสนทนาจริง บทเรียนที่กระชับ และกิจกรรมที่ใช้ได้ในชีวิตประจำวัน','Start learning free':'เริ่มเรียนฟรี','Explore LITALK':'รู้จัก LITALK','from happy learners':'จากผู้เรียนของเรา',
-  'The LITALK method':'วิธีเรียนแบบ LITALK','Learn. Practice.':'เรียน ฝึกฝน','Use it.':'นำไปใช้','One simple system that takes you from knowing the words to confidently saying them.':'ระบบง่าย ๆ ที่พาคุณจากการรู้คำศัพท์ไปสู่การพูดอย่างมั่นใจ','Build your foundation through short, focused lessons that fit your day.':'สร้างพื้นฐานด้วยบทเรียนสั้น กระชับ และเข้ากับวันของคุณ','Turn what you know into communication with instant, helpful feedback.':'เปลี่ยนความรู้เป็นการสื่อสาร พร้อมคำแนะนำทันที','Feel ready for the real moments that matter to you.':'พร้อมใช้ภาษาอังกฤษในทุกช่วงเวลาสำคัญ',
-  'Everything in one place':'ครบทุกอย่างในที่เดียว','Everything you need':'ทุกสิ่งที่คุณต้องการ','to get better.':'เพื่อเก่งขึ้น','A complete learning experience that keeps every lesson useful, clear, and enjoyable.':'ประสบการณ์เรียนรู้ที่ชัดเจน ใช้ได้จริง และสนุก','Speak':'พูด','Listen':'ฟัง','Progress':'ความก้าวหน้า','Explore lessons':'ดูบทเรียน',
-  'Real LITALK services':'บริการจริงจาก LITALK','Online Learning':'เรียนออนไลน์','1-on-1 English':'เรียนสดตัวต่อตัว','Browse courses':'ดูคอร์ส','Explore LITALK+':'ดู LITALK+','View tutoring plans':'ดูแพ็กเกจเรียนสด','Find something':'ค้นหาสิ่งที่','worth learning.':'คุ้มค่าที่จะเรียน','View all courses':'ดูคอร์สทั้งหมด',
-  'Practice until it':'ฝึกจนกระทั่ง','feels natural.':'เป็นธรรมชาติ','Try a challenge':'ลองทำกิจกรรม','Learn English':'เรียนภาษาอังกฤษ','with your ears.':'ผ่านการฟัง','Your progress':'ความก้าวหน้าของคุณ','See yourself':'เห็นตัวเอง','getting better.':'เก่งขึ้นทุกวัน','Made personal':'ออกแบบเพื่อคุณ','Your English.':'ภาษาอังกฤษของคุณ','Your way.':'ในแบบของคุณ','Keep learning.':'เรียนรู้ต่อไป','Explore all resources':'ดูแหล่งเรียนรู้ทั้งหมด','Talk to LITALK':'คุยกับ LITALK','Ready when you are':'พร้อมเมื่อคุณพร้อม','Your English':'ภาษาอังกฤษของคุณ','starts here.':'เริ่มต้นที่นี่','A better way to learn, practice, and actually use English.':'วิธีที่ดีกว่าในการเรียน ฝึกฝน และใช้ภาษาอังกฤษจริง',
-  'Send message':'ส่งข้อความ','Your name':'ชื่อของคุณ','Email address':'อีเมล','I’m interested in':'สนใจบริการ','Your learning goal':'เป้าหมายการเรียน','Learn it. Live it.':'เรียนรู้ แล้วนำไปใช้','Blog':'บทความ','English tips':'เคล็ดลับภาษาอังกฤษ','Ask a word':'ถามคำศัพท์','Study guides':'คู่มือการเรียน','Contact':'ติดต่อ','Teacher portal':'ระบบสำหรับครู','Partners':'พาร์ตเนอร์','Privacy':'ความเป็นส่วนตัว','Terms':'ข้อกำหนด','Cookies':'คุกกี้'
-};
-const translatedNodes = [];
-const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-while (walker.nextNode()) {
-  const node = walker.currentNode;
-  const key = node.nodeValue.trim().replace(/[↗↓→]$/, '').trim();
-  if (thai[key]) translatedNodes.push({ node, english: node.nodeValue, key });
-}
 const applyLanguage = lang => {
   language = lang;
   document.documentElement.lang = lang === 'th' ? 'th' : 'en';
-  document.documentElement.dataset.lang = lang;
   localStorage.setItem('litalk-lang', lang);
   document.querySelectorAll('[data-en][data-th]').forEach(element => {
     element.textContent = element.dataset[lang];

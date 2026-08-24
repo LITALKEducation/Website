@@ -23,7 +23,10 @@
   }
 
   async function init() {
-    const section = document.getElementById('courses-promo');
+    // The modern homepage uses the public-facing `courses` anchor, while
+    // older templates used `courses-promo`. Supporting both keeps this
+    // catalogue renderer reusable across deployed homepage versions.
+    const section = document.getElementById('courses-promo') || document.getElementById('courses');
     const grid = document.getElementById('home-courses-grid');
     if (!section || !grid || !window.LitalkCourses) return;
 
@@ -41,7 +44,7 @@
 
   // Re-render on the language toggle so card copy follows EN/TH.
   document.addEventListener('litalk:langchange', () => {
-    const section = document.getElementById('courses-promo');
+    const section = document.getElementById('courses-promo') || document.getElementById('courses');
     const grid = document.getElementById('home-courses-grid');
     if (section && grid && loaded.length) render(section, grid);
   });
