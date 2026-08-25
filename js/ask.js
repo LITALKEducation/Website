@@ -26,6 +26,11 @@
   const box = document.getElementById('ask-composer-box');
   const thread = document.getElementById('ask-thread');
   const input = document.getElementById('ask-input');
+  // Educational hand-offs (for example TCAS Fortune) may prefill a draft.
+  // The visitor still reviews and explicitly sends it; nothing is submitted
+  // automatically, and the query parameter is not persisted by this page.
+  const handoffPrompt = new URLSearchParams(window.location.search).get('prompt');
+  if (handoffPrompt && handoffPrompt.length <= 500) input.value = handoffPrompt;
   const sendBtn = document.getElementById('ask-send');
   const suggestBtn = document.getElementById('ask-suggest-btn');
   const menu = document.getElementById('ask-menu');
