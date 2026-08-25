@@ -19,9 +19,14 @@
   ];
   const CARDS = CARD_DATA.map(([id, name, numeral]) => ({ id, name, numeral, image: `${IMAGE_ROOT}${id}.webp` }));
   const QUESTIONS = [
-    ['preparation', 'การเตรียมสอบช่วงนี้เป็นอย่างไร', 'How is my preparation going?'], ['focus', 'ตอนนี้ควรโฟกัสอะไร', 'What should I focus on now?'],
-    ['watch', 'สิ่งที่ต้องระวังในการเตรียม TCAS', 'What should I watch in my TCAS preparation?'], ['energy', 'พลังงานก่อนสอบของฉัน', 'My energy before the exam'],
-    ['faculty', 'คณะที่กำลังเล็งไว้ — ฉันควรเตรียมตัวยังไง', 'How should I prepare for my target faculty?'], ['exams', 'TGAT / TPAT / A-Level ช่วงนี้ควรเน้นอะไร', 'What should I prioritise for TGAT / TPAT / A-Level?'],
+    ['current_preparation', 'การเตรียมสอบช่วงนี้เป็นอย่างไร', 'How is my preparation going?'],
+    ['current_focus', 'ตอนนี้ควรโฟกัสอะไร', 'What should I focus on now?'],
+    ['challenge', 'สิ่งที่ต้องระวังในการเตรียม TCAS', 'What should I watch in my TCAS preparation?'],
+    ['exam_energy', 'พลังงานก่อนสอบของฉัน', 'My energy before the exam'],
+    ['faculty_preparation', 'คณะที่กำลังเล็งไว้ — ฉันควรเตรียมตัวยังไง', 'How should I prepare for my target faculty?'],
+    ['tgat', 'TGAT ช่วงนี้ควรเน้นอะไร', 'What should I prioritise for TGAT?'],
+    ['tpat', 'TPAT ช่วงนี้ควรเน้นอะไร', 'What should I prioritise for TPAT?'],
+    ['a_level', 'A-Level ช่วงนี้ควรเน้นอะไร', 'What should I prioritise for A-Level?'],
   ];
   let lang = localStorage.getItem('litalk-lang') === 'en' ? 'en' : 'th';
   let category = '';
@@ -125,8 +130,23 @@
     byId('read-fortune').hidden = revealed.size !== 3;
   }
   function errorCopy(code) {
-    const map = { region_not_supported: ['ฟีเจอร์นี้เปิดให้ใช้งานในประเทศไทยเท่านั้น 🇹🇭', 'TCAS Fortune is currently available in Thailand only.'], rate_limited: ['วันนี้เปิดไพ่ครบจำนวนแล้ว กลับมาใหม่พรุ่งนี้นะ', 'You have reached today’s reading limit. Please return tomorrow.'], feature_disabled: ['TCAS Fortune ปิดให้บริการชั่วคราว', 'TCAS Fortune is temporarily disabled.'], maintenance: ['กำลังปรับปรุงประสบการณ์เปิดไพ่ โปรดลองใหม่ภายหลัง', 'We are polishing the experience. Please try again later.'], invalid_question: ['กรุณาตรวจสอบคำถามแล้วลองใหม่', 'Please check your question and try again.'], invalid_cards: ['ข้อมูลไพ่ไม่ถูกต้อง กรุณาเปิดไพ่ใหม่', 'The card spread is invalid. Please start again.'] };
+    const map = { region_not_supported: ['ฟีเจอร์นี้เปิดให้ใช้งานในประเทศไทยเท่านั้น 🇹🇭', 'TCAS Fortune is currently available in Thailand only.'], rate_limited: ['วันนี้เปิดไพ่ครบจำนวนแล้ว กลับมาใหม่พรุ่งนี้นะ', 'You have reached today’s reading limit. Please return tomorrow.'], feature_disabled: ['TCAS Fortune ปิดให้บริการชั่วคราว', 'TCAS Fortune is temporarily disabled.'], invalid_request: ['ข้อมูลที่ส่งไม่ถูกต้อง กรุณาเลือกหัวข้อและเปิดไพ่ใหม่อีกครั้ง', 'The reading request was invalid. Please choose your topic and cards again.'], invalid_cards: ['ข้อมูลไพ่ไม่ถูกต้อง กรุณาเปิดไพ่ใหม่', 'The card spread is invalid. Please start again.'] };
     return (map[code] || ['ตอนนี้คำแนะนำจาก AI ยังไม่พร้อม ลองใหม่อีกครั้งในอีกสักครู่ ไพ่ของคุณยังอยู่ครบ', 'AI guidance is temporarily unavailable. Please retry; your cards are still here.'])[lang === 'th' ? 0 : 1];
+  }
+  function isValidReading(data) {
+    const isString = (value) => typeof value === 'string';
+    const isRenderableCard = (card) => card && typeof card === 'object'
+      && isString(card.action)
+      && [card.tcas_interpretation, card.meaning, card.interpretation].some(isString);
+    return data && typeof data === 'object'
+      && isString(data.headline)
+      && isString(data.overall_message)
+      && Array.isArray(data.cards)
+      && data.cards.length === 3
+      && data.cards.every(isRenderableCard)
+      && isString(data.focus_today)
+      && isString(data.encouragement)
+      && isString(data.disclaimer);
   }
   async function requestReading() {
     if (selected.length !== 3 || revealed.size !== 3) return;
@@ -137,6 +157,7 @@
       const response = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify(payload) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'network');
+      if (!isValidReading(data)) throw new Error('invalid_response');
       renderResult(data);
     } catch (error) { byId('fortune-loading').hidden = true; byId('fortune-error').hidden = false; text(byId('error-title'), lang === 'th' ? 'ยังอ่านคำแนะนำไม่ได้' : 'Guidance is not available yet'); text(byId('error-copy'), errorCopy(error.message)); } finally { clearTimeout(timeout); }
   }
