@@ -3,27 +3,7 @@
  *
  * Shows the scheduled service notices an admin sets in the admin panel, and
  * enforces the blocking ones on the client. Loaded on every public page.
- *
- * Each page declares what it is with `data-service-surface` on <body> (a
- * comma-separated list, since /ask is both the "ask" surface and part of the
- * website). The server decides which notices are live and what phase each is
- * in; this file only renders the result.
- *
- * Two phases:
- *   announcement — a dismissible card. The page still works.
- *   blocking     — a full overlay with no way past it. The API refuses the
- *                  same surface independently, so this is presentation, not
- *                  the security boundary.
- *
- * Fails open in every direction. If the request fails, times out, or the
- * surface isn't covered, nothing is shown — a maintenance banner that appears
- * because the network blipped would be worse than no banner at all.
- *
- * Admins previewing a blocked page append ?bypass=<token> once; it is kept in
- * sessionStorage so links within the site keep working, and it is verified
- * server-side — the token is never compared here.
  */
-
 'use strict';
 
 window.litalkService = (function initServiceNotices() {
@@ -31,13 +11,8 @@ window.litalkService = (function initServiceNotices() {
   const BYPASS_KEY = 'litalk_service_bypass';
   const DISMISSED_KEY = 'litalk_service_dismissed';
   const TIMEOUT_MS = 5000;
-
   const state = { notices: [], bypass: false, ready: false };
 
-  // The marketing site has a language toggle; the student portal does not and
-  // is Thai throughout. Falling back to <html lang> rather than to 'en' means
-  // a portal visitor gets a Thai notice instead of an English one sitting in
-  // the middle of an otherwise Thai page.
   const lang = () => {
     if (typeof window.litalkGetLang === 'function') return window.litalkGetLang();
     return document.documentElement.lang === 'th' ? 'th' : 'en';
@@ -51,9 +26,7 @@ window.litalkService = (function initServiceNotices() {
       trial_closing_soon: { title: 'Trial ending soon', body: 'The trial period for this is ending shortly.' },
       custom: { title: 'Service notice', body: '' },
       blockedFallback: 'This part of LITALK is temporarily unavailable. Please try again later.',
-      dismiss: 'Got it',
-      until: 'Expected back',
-      from: 'Starts',
+      dismiss: 'Got it', until: 'Expected back', from: 'Starts',
       previewing: 'Admin preview — notices are hidden for you on this browser.',
     },
     th: {
@@ -63,63 +36,38 @@ window.litalkService = (function initServiceNotices() {
       trial_closing_soon: { title: 'ช่วงทดลองใช้งานกำลังจะปิด', body: 'ช่วงทดลองใช้งานของส่วนนี้กำลังจะสิ้นสุดลง' },
       custom: { title: 'ประกาศจากระบบ', body: '' },
       blockedFallback: 'ส่วนนี้ของ LITALK ปิดให้บริการชั่วคราว กรุณาลองใหม่อีกครั้งภายหลัง',
-      dismiss: 'รับทราบ',
-      until: 'คาดว่าจะกลับมา',
-      from: 'เริ่ม',
+      dismiss: 'รับทราบ', until: 'คาดว่าจะกลับมา', from: 'เริ่ม',
       previewing: 'โหมดพรีวิวสำหรับแอดมิน — ประกาศถูกซ่อนไว้เฉพาะเบราว์เซอร์นี้',
     },
   };
 
   const t = () => COPY[lang()] || COPY.en;
-
   function surfaces() {
     const raw = document.body.getAttribute('data-service-surface') || '';
     return raw.split(',').map((s) => s.trim()).filter(Boolean);
   }
 
-  /* ---- bypass ---------------------------------------------------------- */
   function bypassToken() {
     const fromUrl = new URLSearchParams(location.search).get('bypass');
     if (fromUrl) {
-      try {
-        sessionStorage.setItem(BYPASS_KEY, fromUrl);
-      } catch (err) {
-        /* private mode — the token still works for this request */
-      }
+      try { sessionStorage.setItem(BYPASS_KEY, fromUrl); } catch (_) { /* private mode */ }
       return fromUrl;
     }
-    try {
-      return sessionStorage.getItem(BYPASS_KEY) || '';
-    } catch (err) {
-      return '';
-    }
+    try { return sessionStorage.getItem(BYPASS_KEY) || ''; } catch (_) { return ''; }
   }
 
-  /* ---- dismissal ------------------------------------------------------- */
-  // Keyed by notice id and by the times, so editing a live notice re-shows it
-  // to someone who already dismissed the earlier wording.
   const dismissKey = (n) => `${n.id}:${n.announceFrom || ''}:${n.startsAt || ''}:${n.endsAt || ''}`;
-
   function dismissed() {
-    try {
-      return JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]');
-    } catch (err) {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]'); } catch (_) { return []; }
   }
-
   function remember(notice) {
     try {
       const all = dismissed();
       all.push(dismissKey(notice));
-      // Cap it so the list can't grow without bound over years of notices.
       localStorage.setItem(DISMISSED_KEY, JSON.stringify(all.slice(-40)));
-    } catch (err) {
-      /* nothing to do — it will simply show again */
-    }
+    } catch (_) { /* show again next time */ }
   }
 
-  /* ---- rendering ------------------------------------------------------- */
   function copyFor(notice) {
     const th = lang() === 'th';
     const preset = t()[notice.preset] || t().custom;
@@ -128,13 +76,10 @@ window.litalkService = (function initServiceNotices() {
       body: (th ? notice.bodyTh : notice.bodyEn) || preset.body,
     };
   }
-
   function formatTime(value) {
     if (!value) return '';
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return '';
-    // The visitor's own timezone — a Bangkok-fixed string would mislead
-    // anyone reading from elsewhere.
     return d.toLocaleString(lang() === 'th' ? 'th-TH' : 'en-GB', {
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
     });
@@ -153,42 +98,32 @@ window.litalkService = (function initServiceNotices() {
     card.appendChild(icon);
 
     const h = document.createElement('h2');
-    h.className = 'svc-card__title';
-    h.textContent = title;
-    card.appendChild(h);
-
+    h.className = 'svc-card__title'; h.textContent = title; card.appendChild(h);
     if (body) {
       const p = document.createElement('p');
-      p.className = 'svc-card__body';
-      p.textContent = body;
-      card.appendChild(p);
+      p.className = 'svc-card__body'; p.textContent = body; card.appendChild(p);
     }
 
-    // The time that actually helps depends on the phase: while blocked you
-    // want to know when it is back, beforehand you want to know when it goes.
     const when = blocking ? notice.endsAt : notice.startsAt;
-    const label = blocking ? t().until : t().from;
     const formatted = formatTime(when);
     if (formatted) {
       const meta = document.createElement('p');
       meta.className = 'svc-card__meta';
-      meta.textContent = `${label}: ${formatted}`;
+      meta.textContent = `${blocking ? t().until : t().from}: ${formatted}`;
       card.appendChild(meta);
     }
 
     if (!blocking && notice.dismissible) {
       const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'svc-card__btn';
-      btn.textContent = t().dismiss;
+      btn.type = 'button'; btn.className = 'svc-card__btn'; btn.textContent = t().dismiss;
       btn.addEventListener('click', () => {
         remember(notice);
-        card.closest('.svc-layer').remove();
+        const layer = card.closest('.svc-layer');
+        if (layer) layer.remove();
         document.body.classList.remove('svc-locked');
       });
       card.appendChild(btn);
     }
-
     return card;
   }
 
@@ -197,32 +132,24 @@ window.litalkService = (function initServiceNotices() {
     layer.className = `svc-layer${blocking ? ' svc-layer--blocking' : ''}`;
     layer.appendChild(buildCard(notice, blocking));
     document.body.appendChild(layer);
-    // Only a block takes the page over; an announcement must not stop
-    // someone scrolling the page behind it.
     if (blocking) document.body.classList.add('svc-locked');
   }
 
   function apply() {
     const mine = surfaces();
     if (!mine.length) return;
-
-    const relevant = state.notices.filter((n) => n.surfaces.some((s) => mine.includes(s)));
-
-    // A block wins over any announcement — showing both would put a
-    // dismissible card on top of something that cannot be dismissed.
+    const relevant = state.notices.filter((n) => Array.isArray(n.surfaces) && n.surfaces.some((s) => mine.includes(s)));
     const blocking = relevant.find((n) => n.phase === 'blocking');
     if (blocking) {
       show(blocking, true);
       document.dispatchEvent(new CustomEvent('litalk:serviceblocked', { detail: { notice: blocking } }));
       return;
     }
-
     const seen = dismissed();
     const announcement = relevant.find((n) => n.phase === 'announcement' && !seen.includes(dismissKey(n)));
     if (announcement) show(announcement, false);
   }
 
-  /* ---- load ------------------------------------------------------------ */
   async function load() {
     const token = bypassToken();
     const url = `${API}/service-status${token ? `?bypass=${encodeURIComponent(token)}` : ''}`;
@@ -234,8 +161,7 @@ window.litalkService = (function initServiceNotices() {
       const data = await res.json();
       state.notices = Array.isArray(data.notices) ? data.notices : [];
       state.bypass = Boolean(data.bypass);
-    } catch (err) {
-      // Fail open — say nothing rather than claim an outage we can't confirm.
+    } catch (_) {
       state.notices = [];
     }
     state.ready = true;
@@ -247,16 +173,88 @@ window.litalkService = (function initServiceNotices() {
   else load();
 
   return {
-    /** Whether a surface is currently blocked. Returns false until loaded, so
-     *  callers never block on an unknown. */
-    blocked(surface) {
-      return state.notices.some((n) => n.phase === 'blocking' && n.surfaces.includes(surface));
-    },
-    get ready() {
-      return state.ready;
-    },
-    get notices() {
-      return state.notices.slice();
-    },
+    blocked(surface) { return state.notices.some((n) => n.phase === 'blocking' && n.surfaces.includes(surface)); },
+    get ready() { return state.ready; },
+    get notices() { return state.notices.slice(); },
   };
+})();
+
+/* Cross-page fixes kept here because this file is loaded on all public and
+   portal surfaces, including the editorial blog pages that do not load the
+   shared Markdown bundle. */
+(function installCrossPageFixesWhenReady() {
+  function install() {
+    if (typeof window.renderPortalDataError === 'function' && !window.renderPortalDataError.__litalkHardened) {
+      const original = window.renderPortalDataError;
+      const wrapped = function (message) { return original(message, null); };
+      wrapped.__litalkHardened = true;
+      window.renderPortalDataError = wrapped;
+    }
+
+    if (typeof window.resolveAuthedStudentId === 'function' &&
+        typeof window.getPortalToken === 'function' &&
+        typeof window.resolveStudentIdFromToken === 'function' &&
+        !window.resolveAuthedStudentId.__litalkHardened) {
+      const originalResolve = window.resolveAuthedStudentId;
+      const originalWhoami = window.resolveStudentIdFromToken;
+      const hardened = async function () {
+        const token = await window.getPortalToken();
+        if (!token) return null;
+        const id = await originalWhoami(token);
+        if (!id) return null;
+        window.resolveStudentIdFromToken = async () => id;
+        try { return await originalResolve(); }
+        finally { window.resolveStudentIdFromToken = originalWhoami; }
+      };
+      hardened.__litalkHardened = true;
+      window.resolveAuthedStudentId = hardened;
+    }
+
+    const hamburger = document.getElementById('hamburger');
+    const drawer = document.getElementById('mobile-drawer');
+    if (hamburger && drawer && !hamburger.dataset.resizeGuard) {
+      hamburger.dataset.resizeGuard = '1';
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          hamburger.classList.remove('open');
+          drawer.classList.remove('open');
+          hamburger.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        }
+      }, { passive: true });
+    }
+
+    const newsletter = document.getElementById('newsletter-form');
+    if (newsletter && !newsletter.dataset.realSubmitGuard) {
+      newsletter.dataset.realSubmitGuard = '1';
+      newsletter.addEventListener('submit', (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const language = document.documentElement.getAttribute('data-lang') || 'en';
+        let status = newsletter.querySelector('[data-newsletter-status]');
+        if (!status) {
+          status = document.createElement('p');
+          status.setAttribute('data-newsletter-status', '');
+          status.setAttribute('role', 'status');
+          status.style.marginTop = '10px';
+          status.style.fontSize = '13px';
+          status.style.color = 'var(--clr-muted)';
+          newsletter.appendChild(status);
+        }
+        status.textContent = language === 'th'
+          ? 'ระบบสมัครข่าวสารยังไม่เปิดใช้งาน กรุณาติดตาม LITALK ผ่านช่องทางโซเชียลในระหว่างนี้'
+          : 'Newsletter signup is not available yet. Please follow LITALK on social media for updates.';
+      }, true);
+    }
+
+    if (!document.getElementById('litalk-cross-page-fixes-style')) {
+      const style = document.createElement('style');
+      style.id = 'litalk-cross-page-fixes-style';
+      style.textContent = '@media (pointer:coarse){.ask-icon-btn,.ask-send{width:44px;height:44px;}}';
+      document.head.appendChild(style);
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
+  else install();
 })();
