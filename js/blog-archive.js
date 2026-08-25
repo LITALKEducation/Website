@@ -1,4 +1,5 @@
 'use strict';
+(function loadUnifiedNav(){if(document.querySelector('script[data-litalk-site-nav]'))return;const s=document.createElement('script');s.src='/js/site-nav.js?v=20260826a';s.dataset.litalkSiteNav='1';document.head.appendChild(s);}());
 (function(){
   const $=id=>document.getElementById(id);let posts=[],term='',cat='';
   const category=p=>p.category||'Article';
