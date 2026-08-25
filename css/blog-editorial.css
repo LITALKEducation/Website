@@ -16,7 +16,6 @@
 .blog-editorial__section-link { flex:0 0 auto; min-height:44px; display:inline-flex; align-items:center; font-size:14px; font-weight:700; color:var(--clr-muted); transition:color var(--transition-fast),transform var(--transition-fast); }
 .blog-editorial__section-link:hover { color:var(--clr-black); transform:translateX(2px); }
 
-/* Search + filter — intentionally quiet, like a newsroom archive control. */
 .blog-discovery { position:sticky; top:68px; z-index:var(--z-sticky); background:var(--clr-bg); border-bottom:1px solid var(--clr-border); }
 .blog-discovery__bar { min-height:72px; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:16px; }
 .blog-discovery__search { min-width:0; display:flex; align-items:center; gap:12px; }
@@ -37,6 +36,7 @@
 .blog-discovery__chip.active { background:var(--clr-black); border-color:var(--clr-black); color:var(--clr-bg); }
 .blog-discovery-results { background:var(--clr-bg); }
 .blog-discovery-results__list { border-top:1px solid var(--clr-border); }
+.blog-discovery-results__list .blog-more-item:last-child { border-bottom:0; }
 
 .blog-featured-layout { display:grid; grid-template-columns:minmax(0,1.9fr) minmax(260px,.8fr); gap:44px; align-items:start; }
 .blog-featured { min-width:0; }
