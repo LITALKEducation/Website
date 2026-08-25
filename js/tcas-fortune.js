@@ -34,9 +34,28 @@
   let previousOrder = '';
   let selected = [];
   let revealed = new Set();
+  let currentReading = null;
 
   const byId = (id) => document.getElementById(id);
   const text = (node, value) => { node.textContent = value == null ? '' : String(value); };
+
+  async function copyText(value) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try { await navigator.clipboard.writeText(value); return true; } catch (_error) {}
+    }
+    const area = document.createElement('textarea');
+    area.value = value;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    let copied = false;
+    try { copied = document.execCommand('copy'); } catch (_error) { copied = false; }
+    area.remove();
+    return copied;
+  }
+
   function applyLanguage() {
     document.documentElement.lang = lang;
     document.documentElement.dataset.lang = lang;
@@ -46,6 +65,7 @@
     renderQuestions();
     if (deck.length) renderDeck();
     if (!byId('step-reveal').hidden) renderRevealCards();
+    if (currentReading && !byId('fortune-result').hidden) renderResult(currentReading);
   }
   function renderQuestions() {
     const wrap = byId('fortune-questions');
@@ -158,6 +178,7 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'network');
       if (!isValidReading(data)) throw new Error('invalid_response');
+      currentReading = data;
       renderResult(data);
     } catch (error) { byId('fortune-loading').hidden = true; byId('fortune-error').hidden = false; text(byId('error-title'), lang === 'th' ? 'ยังอ่านคำแนะนำไม่ได้' : 'Guidance is not available yet'); text(byId('error-copy'), errorCopy(error.message)); } finally { clearTimeout(timeout); }
   }
@@ -172,13 +193,24 @@
     const plan = lang === 'th' ? `ผล TCAS Fortune แนะนำให้โฟกัส: ${reading.focus_today} ช่วยสร้างแผนอ่าน 7 วันที่นำไปทำได้จริงให้หน่อย` : `My TCAS Fortune reflection suggested this focus: ${reading.focus_today}. Please create a practical 7-day study plan.`;
     byId('ask-handoff').href = `../ask?prompt=${encodeURIComponent(plan)}`;
   }
-  byId('fortune-lang').addEventListener('click', () => { lang = lang === 'th' ? 'en' : 'th'; localStorage.setItem('litalk-lang', lang); applyLanguage(); });
+  byId('fortune-lang').addEventListener('click', async () => {
+    const refreshReading = currentReading && !byId('fortune-result').hidden;
+    lang = lang === 'th' ? 'en' : 'th';
+    localStorage.setItem('litalk-lang', lang);
+    applyLanguage();
+    if (refreshReading) await requestReading();
+  });
   document.querySelector('[data-next="question"]').addEventListener('click', () => showStep('question'));
   byId('custom-question').addEventListener('input', (event) => text(byId('question-count'), event.target.value.length));
-  byId('choose-cards').addEventListener('click', () => { if (!category) { text(byId('question-error'), lang === 'th' ? 'กรุณาเลือกหัวข้อก่อน' : 'Please choose a topic first.'); return; } selected = []; revealed = new Set(); deck = shuffledDeck(); renderDeck(); showStep('cards'); });
+  byId('choose-cards').addEventListener('click', () => { if (!category) { text(byId('question-error'), lang === 'th' ? 'กรุณาเลือกหัวข้อก่อน' : 'Please choose a topic first.'); return; } selected = []; revealed = new Set(); currentReading = null; deck = shuffledDeck(); renderDeck(); showStep('cards'); });
   byId('confirm-cards').addEventListener('click', () => { if (selected.length !== 3) return; revealed = new Set(); renderRevealCards(); showStep('reveal'); });
   byId('read-fortune').addEventListener('click', requestReading); byId('retry-reading').addEventListener('click', requestReading);
-  byId('read-again').addEventListener('click', () => { category = ''; selected = []; revealed = new Set(); deck = shuffledDeck(); byId('custom-question').value = ''; text(byId('question-count'), '0'); renderQuestions(); showStep('question'); });
-  byId('share-reading').addEventListener('click', async () => { const data = { title: 'TCAS Fortune · LITALK', text: lang === 'th' ? 'ฉันเปิดไพ่ TCAS กับ LITALK แล้ว ✨' : 'I opened my TCAS Fortune with LITALK ✨', url: 'https://litalkeducation.com/tcas-fortune/' }; if (navigator.share) await navigator.share(data).catch(() => {}); else await navigator.clipboard.writeText(`${data.text} ${data.url}`); });
+  byId('read-again').addEventListener('click', () => { category = ''; selected = []; revealed = new Set(); currentReading = null; deck = shuffledDeck(); byId('custom-question').value = ''; text(byId('question-count'), '0'); renderQuestions(); showStep('question'); });
+  byId('share-reading').addEventListener('click', async () => {
+    const data = { title: 'TCAS Fortune · LITALK', text: lang === 'th' ? 'ฉันเปิดไพ่ TCAS กับ LITALK แล้ว ✨' : 'I opened my TCAS Fortune with LITALK ✨', url: 'https://litalkeducation.com/tcas-fortune/' };
+    if (navigator.share) { await navigator.share(data).catch(() => {}); return; }
+    const copied = await copyText(`${data.text} ${data.url}`);
+    if (!copied) text(byId('share-reading'), lang === 'th' ? 'คัดลอกลิงก์ไม่สำเร็จ' : 'Could not copy link');
+  });
   applyLanguage();
 }());
