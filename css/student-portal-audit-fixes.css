@@ -1,0 +1,58 @@
+/* Student Portal post-redesign audit fixes
+   Contrast and overlay guards for dark mode and mobile Safari. */
+
+/* Keep all elevated portal surfaces on the same dark palette. */
+html[data-theme="dark"] body[data-service-surface*="portal"] :is(
+  .profile-modal,.idcard-modal,.ai-chat-panel,.menu-dropdown-panel,
+  .payment-card,.timeline-card,.next-class-card,.pending-payment-item,
+  .file-item,.teacher-card,.pp-card,.pp-plan,.learn-card,.learn-question
+){background-color:#181818!important;color:#f3f3f1!important;border-color:#2d2d2a!important}
+
+html[data-theme="dark"] body[data-service-surface*="portal"] :is(
+  .profile-modal-header,.profile-modal-footer,.idcard-modal-header,.idcard-modal-footer,
+  .ai-chat-panel__header,.ai-chat-panel__form
+){border-color:#2d2d2a!important}
+
+html[data-theme="dark"] body[data-service-surface*="portal"] :is(
+  .profile-field-readonly,.ai-chat-msg--assistant,.ai-chat-panel__input,
+  .payment-method-badge,.next-class-date-badge,.empty-state
+){background-color:#202020!important;color:#f3f3f1!important;border-color:#2d2d2a!important}
+
+/* Explicit text contrast: legacy rules sometimes preserve light-theme colors. */
+html[data-theme="dark"] body[data-service-surface*="portal"] :is(
+  .timeline-feedback,.payment-card-amount,.payment-amount,.file-name,
+  .teacher-name,.profile-modal-header h3,.idcard-modal-header h3,
+  .menu-dropdown-item,.pp-plan__price,.pp-benefit__txt strong,
+  .next-class-title,.pending-payment-desc
+){color:#f3f3f1!important}
+
+html[data-theme="dark"] body[data-service-surface*="portal"] :is(
+  .timeline-date,.payment-card-date,.file-sub,.teacher-title,
+  .pp-card__note,.pp-plan__period,.pp-benefit__txt span,
+  .next-class-time,.idcard-field-value
+){color:#aaa9a4!important}
+
+/* Prevent white page-head/welcome surfaces from ever returning in dark mode. */
+html[data-theme="dark"] body[data-service-surface*="portal"] :is(.welcome-hero,.page-head){
+  background:#181818!important;
+  color:#f3f3f1!important;
+  border:1px solid #2d2d2a!important;
+}
+html[data-theme="dark"] body[data-service-surface*="portal"] :is(.welcome-hero,.page-head) :is(h1,h2,h3,strong){color:#f3f3f1!important}
+html[data-theme="dark"] body[data-service-surface*="portal"] :is(.welcome-hero,.page-head) :is(p,.hero-nickname){color:#aaa9a4!important}
+
+/* Dialogs should remain readable above the fixed bottom navigation. */
+@media(max-width:768px){
+  body[data-service-surface*="portal"] :is(.profile-modal-overlay,.idcard-modal-overlay){
+    padding:calc(12px + env(safe-area-inset-top)) 12px calc(76px + env(safe-area-inset-bottom))!important;
+  }
+  body[data-service-surface*="portal"] :is(.profile-modal,.idcard-modal){max-height:100%!important}
+  body[data-service-surface*="portal"] .menu-dropdown-panel{max-width:calc(100vw - 28px)!important}
+}
+
+/* Payment cards: keep long amounts/methods from colliding on narrow phones. */
+@media(max-width:430px){
+  body[data-service-surface*="portal"] .payment-card-top{align-items:flex-start!important}
+  body[data-service-surface*="portal"] .payment-card-amount{font-size:17px!important;max-width:42%;overflow-wrap:anywhere!important}
+  body[data-service-surface*="portal"] .payment-card-bottom{align-items:flex-start!important}
+}
