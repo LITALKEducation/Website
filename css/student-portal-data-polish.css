@@ -1,0 +1,55 @@
+/* Portal data views: schedules, study logs, payments and next-class actions. */
+body[data-service-surface*="portal"] .next-class-card{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important;padding:14px!important;border:1px solid var(--portal-line,#e5e5e0)!important;border-radius:12px!important;background:var(--portal-surface,#fff)!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .next-class-date-badge{width:44px!important;height:50px!important;border-radius:9px!important;background:var(--portal-surface-2,#f2f2ef)!important;color:var(--portal-text,#171717)!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .next-class-day{font-size:18px!important;line-height:1!important}
+body[data-service-surface*="portal"] .next-class-month{font-size:9px!important;color:var(--portal-muted,#6f6f6a)!important}
+body[data-service-surface*="portal"] .next-class-title{font-size:12.5px!important;font-weight:700!important}
+body[data-service-surface*="portal"] .next-class-time{font-size:10.5px!important;color:var(--portal-muted,#6f6f6a)!important}
+body[data-service-surface*="portal"] .next-class-relative{font-size:9.5px!important;border-radius:999px!important;padding:2px 6px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] :where(.btn-join-class,.btn-add-calendar){min-height:38px!important;padding:7px 11px!important;border-radius:9px!important;font-size:11px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .btn-join-class{background:var(--portal-text,#171717)!important;color:var(--portal-surface,#fff)!important}
+body[data-service-surface*="portal"] .btn-add-calendar{background:var(--portal-surface,#fff)!important;color:var(--portal-muted,#6f6f6a)!important;border:1px solid var(--portal-line,#e5e5e0)!important}
+
+body[data-service-surface*="portal"] .pending-payments-section{border-color:#e8d5c8!important;background:var(--portal-surface,#fff)!important}
+body[data-service-surface*="portal"] .pending-payment-item{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:11px 0!important;border-bottom:1px solid var(--portal-line,#e5e5e0)!important;background:transparent!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .pending-payment-item:last-child{border-bottom:0!important;padding-bottom:0!important}
+body[data-service-surface*="portal"] .pending-payment-desc{font-size:11.5px!important;color:var(--portal-muted,#6f6f6a)!important}
+body[data-service-surface*="portal"] .pending-payment-amount{font-size:14px!important;font-weight:700!important;color:var(--portal-text,#171717)!important}
+body[data-service-surface*="portal"] .btn-pay-now{min-height:38px!important;padding:7px 11px!important;border-radius:9px!important;font-size:11px!important;box-shadow:none!important}
+
+body[data-service-surface*="portal"] .table-wrapper{overflow:auto!important;border:1px solid var(--portal-line,#e5e5e0)!important;border-radius:11px!important;background:var(--portal-surface,#fff)!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .payment-table{margin:0!important}
+body[data-service-surface*="portal"] .payment-table thead{background:var(--portal-surface-2,#f2f2ef)!important}
+body[data-service-surface*="portal"] .payment-table tr.newest-highlight{background:transparent!important}
+body[data-service-surface*="portal"] .payment-method-badge{padding:3px 7px!important;border-radius:999px!important;font-size:9.5px!important;background:var(--portal-surface-2,#f2f2ef)!important;color:var(--portal-muted,#6f6f6a)!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .payment-amount{font-size:12px!important;font-weight:700!important}
+body[data-service-surface*="portal"] .btn-table-action{min-height:32px!important;padding:5px 8px!important;border-radius:8px!important;font-size:10px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .latest-badge{padding:2px 6px!important;border-radius:999px!important;font-size:8.5px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .payment-card-list{gap:8px!important}
+body[data-service-surface*="portal"] .payment-card{padding:12px!important;border:1px solid var(--portal-line,#e5e5e0)!important;border-radius:11px!important;background:var(--portal-surface,#fff)!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .payment-card.newest-highlight{border-color:var(--portal-line,#e5e5e0)!important;background:var(--portal-surface,#fff)!important}
+body[data-service-surface*="portal"] .payment-card-date{font-size:10.5px!important;color:var(--portal-muted,#6f6f6a)!important}
+body[data-service-surface*="portal"] .payment-card-amount{font-size:14px!important;font-weight:700!important}
+
+body[data-service-surface*="portal"] .timeline-container{margin-top:8px!important}
+body[data-service-surface*="portal"] .timeline-month-header{margin:18px 0 8px!important;padding:0!important;border:0!important;font-size:11px!important;font-weight:700!important;color:var(--portal-muted,#6f6f6a)!important;background:transparent!important}
+body[data-service-surface*="portal"] .timeline-month-count{font-size:9px!important;font-weight:600!important;color:var(--portal-muted,#6f6f6a)!important}
+body[data-service-surface*="portal"] .timeline-item{gap:10px!important;padding-bottom:10px!important}
+body[data-service-surface*="portal"] .timeline-item::before{background:var(--portal-line,#e5e5e0)!important}
+body[data-service-surface*="portal"] .timeline-badge{width:28px!important;height:28px!important;flex-basis:28px!important;border-radius:9px!important;background:var(--portal-surface-2,#f2f2ef)!important;color:var(--portal-muted,#6f6f6a)!important;box-shadow:none!important;font-size:10px!important}
+body[data-service-surface*="portal"] .timeline-card{padding:13px!important;border:1px solid var(--portal-line,#e5e5e0)!important;border-radius:11px!important;background:var(--portal-surface,#fff)!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .timeline-card.newest-highlight{border-color:var(--portal-line,#e5e5e0)!important;background:var(--portal-surface,#fff)!important}
+body[data-service-surface*="portal"] .timeline-header{gap:8px!important;margin-bottom:8px!important}
+body[data-service-surface*="portal"] .timeline-date{font-size:10.5px!important;color:var(--portal-muted,#6f6f6a)!important}
+body[data-service-surface*="portal"] .status-badge{padding:2px 6px!important;border-radius:999px!important;font-size:8.5px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .timeline-feedback{font-size:12px!important;line-height:1.65!important;color:var(--portal-text,#171717)!important}
+body[data-service-surface*="portal"] .timeline-feedback :where(p,ul,ol){margin:.55em 0!important}
+body[data-service-surface*="portal"] .timeline-footer{margin-top:9px!important}
+body[data-service-surface*="portal"] :where(.timeline-video-btn,.timeline-video-none,.read-more-btn){min-height:32px!important;padding:5px 8px!important;border-radius:8px!important;font-size:10px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .section-footer-link{margin-top:12px!important;padding-top:11px!important;border-top:1px solid var(--portal-line,#e5e5e0)!important}
+body[data-service-surface*="portal"] .section-footer-link a{font-size:10.5px!important;color:var(--portal-muted,#6f6f6a)!important}
+body[data-service-surface*="portal"] .empty-state{padding:30px 16px!important;border:1px dashed var(--portal-line,#e5e5e0)!important;border-radius:11px!important;background:transparent!important;color:var(--portal-muted,#6f6f6a)!important}
+body[data-service-surface*="portal"] .empty-state i{font-size:18px!important;margin-bottom:7px!important;opacity:.55!important}
+body[data-service-surface*="portal"] .empty-state p{font-size:11.5px!important;margin:0!important}
+
+@media(max-width:760px){body[data-service-surface*="portal"] .next-class-card{grid-template-columns:auto minmax(0,1fr)!important}body[data-service-surface*="portal"] .next-class-actions{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important}body[data-service-surface*="portal"] .pending-payment-item{align-items:flex-start!important}body[data-service-surface*="portal"] .timeline-badge{display:none!important}body[data-service-surface*="portal"] .timeline-item{display:block!important}body[data-service-surface*="portal"] .timeline-card{width:100%!important}}
