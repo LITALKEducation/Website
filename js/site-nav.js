@@ -6,88 +6,13 @@
   const oldHeader = document.querySelector('header');
   if (!oldHeader || document.body?.dataset?.serviceSurface === 'portal') return;
 
-  /* Keep the mobile navigation appearance identical on every public surface.
-     This intentionally lives with the shared navigation runtime so editorial
-     and standalone pages cannot fall back to an older full-width mobile bar. */
-  if (!document.getElementById('litalk-shared-nav-style')) {
-    const style = document.createElement('style');
-    style.id = 'litalk-shared-nav-style';
-    style.textContent = `
-      @media (max-width: 768px) {
-        .nav {
-          top: 14px;
-          left: 18px;
-          right: 18px;
-          width: auto;
-          border: 1px solid var(--nav-border);
-          border-radius: 999px;
-          background: var(--nav-bg);
-          box-shadow: 0 8px 30px rgba(0,0,0,.10);
-          overflow: visible;
-        }
-        .nav.scrolled {
-          border-bottom-color: var(--nav-border);
-          box-shadow: 0 10px 34px rgba(0,0,0,.14);
-        }
-        .nav > .container {
-          padding-left: 22px;
-          padding-right: 18px;
-        }
-        .nav__inner {
-          height: 66px;
-        }
-        .nav__logo img {
-          height: 27px;
-          width: auto;
-        }
-        .nav__links,
-        .nav__inner > .nav__actions {
-          display: none;
-        }
-        .nav__hamburger {
-          display: flex;
-          width: 44px;
-          min-width: 44px;
-          height: 44px;
-          min-height: 44px;
-          align-items: center;
-          justify-content: center;
-          padding: 8px;
-          gap: 5px;
-        }
-        .nav__hamburger span {
-          width: 26px;
-        }
-        .nav__drawer {
-          top: calc(100% + 10px);
-          left: 0;
-          right: 0;
-          border: 1px solid var(--nav-border);
-          border-radius: 24px;
-          background: var(--clr-bg);
-          overflow: hidden;
-          box-shadow: var(--shadow-md);
-        }
-      }
-      @media (max-width: 420px) {
-        .nav {
-          left: 12px;
-          right: 12px;
-          top: 10px;
-        }
-        .nav > .container {
-          padding-left: 18px;
-          padding-right: 12px;
-        }
-        .nav__inner {
-          height: 62px;
-        }
-        .nav__logo img {
-          height: 25px;
-        }
-      }
-    `;
-    document.head.appendChild(style);
+  /* menu.css is the single stylesheet for every public navigation shell. */
+  if (!document.querySelector('link[data-litalk-menu]')) {
+    const menuStyles = document.createElement('link');
+    menuStyles.rel = 'stylesheet';
+    menuStyles.href = '/css/menu.css?v=20260826a';
+    menuStyles.dataset.litalkMenu = 'shared';
+    document.head.appendChild(menuStyles);
   }
 
   /* Temporary compatibility bridge for feature code that still owns an
