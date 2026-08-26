@@ -12,6 +12,13 @@
 (function bootstrapPublicUiStandards() {
   const surfaces = (document.body?.getAttribute('data-service-surface') || '')
     .split(',').map((value) => value.trim()).filter(Boolean);
+  if (surfaces.includes('ask') && !document.querySelector('link[data-litalk-ask-consent]')) {
+    const consentStyles = document.createElement('link');
+    consentStyles.rel = 'stylesheet';
+    consentStyles.href = '/css/ask-consent.css?v=20260826a';
+    consentStyles.dataset.litalkAskConsent = 'shared';
+    document.head.appendChild(consentStyles);
+  }
   if (surfaces.includes('portal') || window.LITALK_UI) return;
   if (document.querySelector('script[data-litalk-site-nav]')) return;
   const script = document.createElement('script');
