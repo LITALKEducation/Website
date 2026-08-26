@@ -1,0 +1,84 @@
+name: Frontend preflight
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'Debug/**'
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            echo "Checking $file"
+            node --check "$file"
+          done < <(find js -type f -name '*.js' -print0)
+
+      - name: Check HTML IDs and local script/style assets
+        shell: python
+        run: |
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          import sys
+
+          root = Path('.')
+          errors = []
+
+          class Audit(HTMLParser):
+              def __init__(self, path):
+                  super().__init__(convert_charrefs=True)
+                  self.path = path
+                  self.ids = set()
+
+              def handle_starttag(self, tag, attrs):
+                  attrs = dict(attrs)
+                  element_id = attrs.get('id')
+                  if element_id:
+                      if element_id in self.ids:
+                          errors.append(f'{self.path}: duplicate id #{element_id}')
+                      self.ids.add(element_id)
+
+                  if tag == 'script':
+                      self.check_asset(attrs.get('src'))
+                  elif tag == 'link' and attrs.get('rel') == 'stylesheet':
+                      self.check_asset(attrs.get('href'))
+
+              def check_asset(self, raw):
+                  if not raw or raw.startswith(('http://', 'https://', '//', 'data:')):
+                      return
+                  path = urlsplit(raw).path
+                  if not path or path.startswith('#'):
+                      return
+                  candidate = root / path.lstrip('/') if path.startswith('/') else self.path.parent / path
+                  if candidate.suffix.lower() not in {'.js', '.css'}:
+                      return
+                  if not candidate.exists():
+                      errors.append(f'{self.path}: missing local asset {raw} -> {candidate}')
+
+          for page in root.rglob('*.html'):
+              parser = Audit(page)
+              try:
+                  parser.feed(page.read_text(encoding='utf-8-sig'))
+              except Exception as exc:
+                  errors.append(f'{page}: HTML parse failed: {exc}')
+
+          if errors:
+              print('\n'.join(errors))
+              sys.exit(1)
+          print('HTML IDs and local JS/CSS references look valid.')
