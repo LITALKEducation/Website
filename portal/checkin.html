@@ -144,7 +144,8 @@
     </div>
 
     <script>
-        const dataApiUrl = 'https://istudent.litalkeducation.com';
+        // Check-in is an application API, so it belongs on the general API domain.
+        const dataApiUrl = 'https://api.litalkeducation.com';
 
         function escapeHtml(str) {
             return String(str ?? '').replace(/[&<>"']/g, (ch) => ({
@@ -172,7 +173,7 @@
                 <div class="checkin-detail">${escapeHtml(message)}</div>
                 <div class="checkin-actions">
                     <a class="btn btn-primary" href="https://lin.ee/n4zLBXa" target="_blank" rel="noopener"><i class="fab fa-line"></i> ติดต่อแอดมินทาง LINE</a>
-                    <a class="btn btn-danger" href="student">ไปที่พอร์ทัลนักเรียน</a>
+                    <a class="btn btn-danger" href="/portal/student/"><i class="fas fa-gauge-high"></i> ไปที่พอร์ทัลนักเรียน</a>
                 </div>`);
         }
 
@@ -193,7 +194,7 @@
                     ${data.already ? `<br><span style="color: var(--text-muted); font-size: 12.5px;">${alreadyNote}</span>` : ''}
                 </div>
                 <div class="checkin-actions">
-                    <a class="btn btn-primary" href="student"><i class="fas fa-gauge-high"></i> ไปที่พอร์ทัลนักเรียน</a>
+                    <a class="btn btn-primary" href="/portal/student/"><i class="fas fa-gauge-high"></i> ไปที่พอร์ทัลนักเรียน</a>
                 </div>`);
         }
 
