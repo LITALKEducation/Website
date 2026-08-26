@@ -6,6 +6,21 @@
  */
 'use strict';
 
+/* Public-site bootstrap: service-notice.js is already loaded across the
+   marketing/public surface, so it is the single entry point for the shared
+   navigation/language standard. Portal pages are intentionally excluded. */
+(function bootstrapPublicUiStandards() {
+  const surfaces = (document.body?.getAttribute('data-service-surface') || '')
+    .split(',').map((value) => value.trim()).filter(Boolean);
+  if (surfaces.includes('portal') || window.LITALK_UI) return;
+  if (document.querySelector('script[data-litalk-site-nav]')) return;
+  const script = document.createElement('script');
+  script.src = '/js/site-nav.js?v=20260826c';
+  script.defer = true;
+  script.dataset.litalkSiteNav = '1';
+  document.head.appendChild(script);
+})();
+
 window.litalkService = (function initServiceNotices() {
   const API = 'https://istudent.litalkeducation.com';
   const BYPASS_KEY = 'litalk_service_bypass';
