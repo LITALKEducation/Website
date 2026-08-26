@@ -1,39 +1,37 @@
-/* LITALK Student Portal — minimal readability layer
-   Shared across portal pages. Intentionally conservative: improves hierarchy,
-   density, touch targets and responsiveness without changing application logic. */
-:root{--portal-page:#f7f7f5;--portal-surface:#fff;--portal-surface-2:#f2f2ef;--portal-text:#171717;--portal-muted:#6f6f6a;--portal-line:#e5e5e0;--portal-radius:14px;--portal-radius-sm:10px;--portal-shadow:0 1px 2px rgba(0,0,0,.035);--portal-content:1040px}
-html{background:var(--portal-page)}
-body{background:var(--portal-page);color:var(--portal-text);font-size:15px;line-height:1.55;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
-body :where(h1,h2,h3,h4,p){text-wrap:pretty}
-body :where(h1,h2,h3,h4){letter-spacing:-.025em;color:var(--portal-text)}
-body :where(h1){font-size:clamp(27px,4vw,38px);line-height:1.12}
-body :where(h2){font-size:clamp(20px,2.4vw,26px);line-height:1.2}
-body :where(h3){font-size:16px;line-height:1.3}
-body :where(p,small,.muted,.subtitle,.description){color:var(--portal-muted)}
-body :where(button,a,input,select,textarea){font:inherit}
-body :where(button,a){-webkit-tap-highlight-color:transparent}
-body :where(button,input,select,textarea){border-radius:var(--portal-radius-sm)}
-body :where(input,select,textarea){min-height:44px;border:1px solid var(--portal-line);background:var(--portal-surface);color:var(--portal-text);padding:10px 12px;box-shadow:none}
-body :where(input,select,textarea):focus{outline:2px solid rgba(23,23,23,.13);outline-offset:1px;border-color:#bdbdb7}
-body :where(button,.btn,[role=button]){min-height:40px}
-body :where(.container,.page-container,.portal-container,.student-container,.content-container,main>section){max-width:var(--portal-content)}
-body :where(.card,.panel,.box,.tile,.section-card,.stat-card,.info-card){border:1px solid var(--portal-line);border-radius:var(--portal-radius);background:var(--portal-surface);box-shadow:var(--portal-shadow)}
-body :where(.card,.panel,.section-card,.info-card){padding:18px}
-body :where(.badge,.pill,.tag){border-radius:999px;font-size:12px;font-weight:600}
-body :where(table){border-collapse:separate;border-spacing:0;width:100%;font-size:14px}
-body :where(th){color:var(--portal-muted);font-size:12px;font-weight:600;text-align:left}
-body :where(th,td){padding:12px;border-bottom:1px solid var(--portal-line)}
-body :where(tr:last-child td){border-bottom:0}
-body :where(.empty-state,.loading-state,.error-state){padding:36px 20px;text-align:center;border-radius:var(--portal-radius)}
-body :where(.empty-state i,.loading-state i,.error-state i){font-size:20px;margin-bottom:10px}
-/* Reduce decorative noise from older portal styles. */
-body :where(.card,.panel,.box,.tile,.section-card,.stat-card,.info-card){backdrop-filter:none;-webkit-backdrop-filter:none}
-body :where(.hero,.banner,.welcome,.profile-hero){box-shadow:none}
-/* Consistent readable rhythm */
-body :where(main,.main,.content,.page-content,.portal-content){line-height:1.55}
-body :where(.section-title,.card-title){margin-bottom:10px}
-body :where(.grid,.cards,.stats-grid,.quick-grid){gap:12px}
-/* Mobile: one clear reading column and comfortable touch targets. */
-@media(max-width:760px){body{font-size:14px}body :where(.container,.page-container,.portal-container,.student-container,.content-container){width:100%;padding-left:16px;padding-right:16px}body :where(.grid,.cards,.stats-grid,.quick-grid){grid-template-columns:1fr!important}body :where(.card,.panel,.section-card,.info-card){padding:15px}body :where(button,.btn,[role=button]){min-height:44px}body :where(table){font-size:13px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-@media(prefers-color-scheme:dark){:root{--portal-page:#111;--portal-surface:#181818;--portal-surface-2:#202020;--portal-text:#f3f3f1;--portal-muted:#aaa9a4;--portal-line:#2d2d2a;--portal-shadow:none}html,body{background:var(--portal-page);color:var(--portal-text)}body :where(input,select,textarea){background:var(--portal-surface);color:var(--portal-text)}}
+/* LITALK Student Portal — minimal readability layer. Loaded through fonts.css and scoped to portal surfaces. */
+body[data-service-surface="portal"]{--portal-page:#f7f7f5;--portal-surface:#fff;--portal-text:#171717;--portal-muted:#6f6f6a;--portal-line:#e5e5e0;--portal-radius:14px;--portal-shadow:0 1px 2px rgba(0,0,0,.035);--portal-content:1040px;background:var(--portal-page);color:var(--portal-text);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body[data-service-surface="portal"] :where(h1,h2,h3,h4){letter-spacing:-.025em;color:var(--portal-text)}
+body[data-service-surface="portal"] :where(h1){font-size:clamp(27px,4vw,36px);line-height:1.12}
+body[data-service-surface="portal"] :where(h2){font-size:clamp(19px,2.4vw,24px);line-height:1.2}
+body[data-service-surface="portal"] :where(h3){font-size:16px;line-height:1.3}
+body[data-service-surface="portal"] :where(p,small,.muted,.subtitle,.description){color:var(--portal-muted)}
+body[data-service-surface="portal"] :where(button,a,input,select,textarea){font:inherit}
+body[data-service-surface="portal"] :where(input,select,textarea){min-height:44px;border:1px solid var(--portal-line);border-radius:10px;background:var(--portal-surface);color:var(--portal-text);padding:10px 12px;box-shadow:none}
+body[data-service-surface="portal"] :where(input,select,textarea):focus{outline:2px solid rgba(23,23,23,.13);outline-offset:1px;border-color:#bdbdb7}
+body[data-service-surface="portal"] :where(button,.btn,[role=button]){min-height:40px}
+body[data-service-surface="portal"] :where(.dashboard-content,.container,.page-container,.portal-container,.student-container,.content-container){max-width:var(--portal-content);margin-inline:auto}
+body[data-service-surface="portal"] :where(.card,.panel,.box,.tile,.section-card,.stat-card,.info-card,.content-section){border:1px solid var(--portal-line);border-radius:var(--portal-radius);background:var(--portal-surface);box-shadow:var(--portal-shadow);backdrop-filter:none;-webkit-backdrop-filter:none}
+body[data-service-surface="portal"] :where(.badge,.pill,.tag){border-radius:999px;font-size:12px;font-weight:600}
+body[data-service-surface="portal"] :where(table){border-collapse:separate;border-spacing:0;width:100%;font-size:14px}
+body[data-service-surface="portal"] :where(th){color:var(--portal-muted);font-size:12px;font-weight:600;text-align:left}
+body[data-service-surface="portal"] :where(th,td){padding:12px;border-bottom:1px solid var(--portal-line)}
+body[data-service-surface="portal"] .welcome-hero{background:transparent!important;border:0!important;box-shadow:none!important;padding:20px 0 16px!important;min-height:0!important}
+body[data-service-surface="portal"] .welcome-hero-decor{display:none!important}
+body[data-service-surface="portal"] .hero-avatar,body[data-service-surface="portal"] .hero-avatar-fallback{width:52px!important;height:52px!important}
+body[data-service-surface="portal"] .hero-text h1{font-size:clamp(23px,3vw,30px)!important;margin-bottom:8px!important}
+body[data-service-surface="portal"] .hero-chips,body[data-service-surface="portal"] .hero-actions{gap:8px!important}
+body[data-service-surface="portal"] .hero-action-btn{min-height:38px!important;border-radius:10px!important;box-shadow:none!important}
+body[data-service-surface="portal"] .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px!important;margin-block:10px 22px!important}
+body[data-service-surface="portal"] .stat-card{padding:14px!important;min-height:92px!important;box-shadow:none!important}
+body[data-service-surface="portal"] .stat-icon-wrapper{width:34px!important;height:34px!important;border-radius:9px!important}
+body[data-service-surface="portal"] .stat-label{font-size:11px!important;color:var(--portal-muted)!important}
+body[data-service-surface="portal"] .stat-value{font-size:16px!important;margin-top:3px!important}
+body[data-service-surface="portal"] .content-section{padding:18px!important;margin-bottom:14px!important;box-shadow:none!important}
+body[data-service-surface="portal"] .section-title{margin-bottom:12px!important;font-size:18px!important}
+body[data-service-surface="portal"] .navbar{box-shadow:none!important;border-bottom:1px solid var(--portal-line)!important}
+body[data-service-surface="portal"] .portal-tabs{gap:4px!important;padding:6px!important;border:1px solid var(--portal-line)!important;border-radius:12px!important;background:var(--portal-surface)!important;box-shadow:none!important}
+body[data-service-surface="portal"] .portal-tab{min-height:38px!important;padding:8px 11px!important;border-radius:8px!important;font-size:13px!important}
+@media(max-width:760px){body[data-service-surface="portal"]{font-size:14px}body[data-service-surface="portal"] :where(.dashboard-content,.container,.page-container,.portal-container,.student-container,.content-container){width:100%;padding-left:16px!important;padding-right:16px!important}body[data-service-surface="portal"] .portal-tabs{display:none!important}body[data-service-surface="portal"] .welcome-hero{display:grid!important;grid-template-columns:44px 1fr!important;gap:10px!important;padding-top:16px!important}body[data-service-surface="portal"] .hero-profile{grid-column:1;grid-row:1}body[data-service-surface="portal"] .hero-text{grid-column:2;grid-row:1}body[data-service-surface="portal"] .hero-actions{grid-column:1/-1;grid-row:2;justify-content:flex-start!important}body[data-service-surface="portal"] .hero-avatar,body[data-service-surface="portal"] .hero-avatar-fallback{width:44px!important;height:44px!important}body[data-service-surface="portal"] .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}body[data-service-surface="portal"] :where(.grid,.cards,.quick-grid){grid-template-columns:1fr!important}body[data-service-surface="portal"] :where(button,.btn,[role=button]){min-height:44px}}
+@media(max-width:430px){body[data-service-surface="portal"] .stats-grid{grid-template-columns:1fr!important}body[data-service-surface="portal"] .stat-card{min-height:74px!important}}
+@media(prefers-reduced-motion:reduce){body[data-service-surface="portal"] *,body[data-service-surface="portal"] *::before,body[data-service-surface="portal"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+html[data-theme="dark"] body[data-service-surface="portal"]{--portal-page:#111;--portal-surface:#181818;--portal-text:#f3f3f1;--portal-muted:#aaa9a4;--portal-line:#2d2d2a;--portal-shadow:none}
