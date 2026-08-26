@@ -9,7 +9,7 @@
   if (!document.querySelector('link[data-litalk-menu]')) {
     const menuStyles = document.createElement('link');
     menuStyles.rel = 'stylesheet';
-    menuStyles.href = '/css/menu.css?v=20260826b';
+    menuStyles.href = '/css/menu.css?v=20260826c';
     menuStyles.dataset.litalkMenu = 'shared';
     document.head.appendChild(menuStyles);
   }
@@ -33,8 +33,7 @@
             : path.startsWith('/blog') ? 'blog'
               : '';
 
-  const learningActive = ['courses', 'plus', 'programs'].includes(active);
-  const resourcesActive = ['ask', 'blog'].includes(active);
+  const learningActive = ['courses', 'plus', 'programs', 'ask'].includes(active);
 
   const langToggle = `
     <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
@@ -56,11 +55,7 @@
     menuItem('courses', '/courses', 'fa-laptop', 'Online Learning', 'เรียนออนไลน์', 'Self-paced lessons and courses', 'บทเรียนและคอร์สเรียนด้วยตนเอง'),
     menuItem('programs', '/programs', 'fa-comments', '1-on-1 Tutoring', 'เรียนตัวต่อตัว', 'Personal English tutoring', 'เรียนภาษาอังกฤษแบบส่วนตัว'),
     menuItem('plus', '/plus', 'fa-plus', 'LITALK+', 'LITALK+', 'Premium learning membership', 'สมาชิกการเรียนรู้แบบพรีเมียม'),
-  ].join('');
-
-  const resourceItems = [
     menuItem('ask', '/ask', 'fa-wand-magic-sparkles', 'Ask LITALK', 'ถาม LITALK', 'Ask English questions with AI', 'ถามคำถามภาษาอังกฤษด้วย AI'),
-    menuItem('blog', '/blog', 'fa-newspaper', 'Blog', 'บทความ', 'Articles, guides and newsroom', 'บทความ คู่มือ และข่าวสาร'),
   ].join('');
 
   const desktopGroup = (id, en, th, isActive, items) => `
@@ -81,9 +76,7 @@
         <span data-en="${en}" data-th="${th}">${en}</span>
         <i class="fas fa-chevron-down" aria-hidden="true"></i>
       </button>
-      <div class="nav-mobile-group__panel${isActive ? ' open' : ''}" id="mobile-group-${id}">
-        ${items}
-      </div>
+      <div class="nav-mobile-group__panel${isActive ? ' open' : ''}" id="mobile-group-${id}">${items}</div>
     </div>`;
 
   const studentLogin = `
@@ -100,13 +93,14 @@
   const header = document.createElement('header');
   header.setAttribute('role', 'banner');
   header.innerHTML = `
+    <div class="nav__backdrop" aria-hidden="true"></div>
     <nav class="nav" id="main-nav" aria-label="Main navigation">
       <div class="container"><div class="nav__inner">
         <a href="/" class="nav__logo" aria-label="LITALK Home"><img src="/img/LITALK-Black.png" alt="LITALK Education" class="theme-invertable" width="170" height="28"></a>
         <ul class="nav__links" role="list">
           ${desktopGroup('learning', 'Learning', 'การเรียน', learningActive, learningItems)}
           <li><a href="/about" class="nav__link${active === 'about' ? ' nav__link--active' : ''}" data-en="About" data-th="เกี่ยวกับเรา"${active === 'about' ? ' aria-current="page"' : ''}>About</a></li>
-          ${desktopGroup('resources', 'Resources', 'แหล่งเรียนรู้', resourcesActive, resourceItems)}
+          <li><a href="/blog" class="nav__link${active === 'blog' ? ' nav__link--active' : ''}" data-en="Blog" data-th="บทความ"${active === 'blog' ? ' aria-current="page"' : ''}>Blog</a></li>
         </ul>
         <div class="nav__actions">
           ${langToggle}
@@ -123,12 +117,10 @@
           mobileItem('courses', '/courses', 'Online Learning', 'เรียนออนไลน์'),
           mobileItem('programs', '/programs', '1-on-1 Tutoring', 'เรียนตัวต่อตัว'),
           mobileItem('plus', '/plus', 'LITALK+', 'LITALK+'),
+          mobileItem('ask', '/ask', 'Ask LITALK', 'ถาม LITALK'),
         ].join(''))}
         <a href="/about" class="nav__link${active === 'about' ? ' nav__link--active' : ''}" data-en="About" data-th="เกี่ยวกับเรา"${active === 'about' ? ' aria-current="page"' : ''}>About</a>
-        ${mobileGroup('resources', 'Resources', 'แหล่งเรียนรู้', resourcesActive, [
-          mobileItem('ask', '/ask', 'Ask LITALK', 'ถาม LITALK'),
-          mobileItem('blog', '/blog', 'Blog', 'บทความ'),
-        ].join(''))}
+        <a href="/blog" class="nav__link${active === 'blog' ? ' nav__link--active' : ''}" data-en="Blog" data-th="บทความ"${active === 'blog' ? ' aria-current="page"' : ''}>Blog</a>
         <div class="nav__actions">
           ${langToggle}
           <a href="/#contact" class="btn btn--primary btn--sm nav__drawer-cta" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
@@ -142,6 +134,7 @@
   const nav = header.querySelector('#main-nav');
   const hamburger = header.querySelector('#hamburger');
   const drawer = header.querySelector('#mobile-drawer');
+  const backdrop = header.querySelector('.nav__backdrop');
 
   const closeDesktopMenus = (except = null) => {
     header.querySelectorAll('.nav-menu.open').forEach((menu) => {
@@ -175,7 +168,9 @@
   function closeDrawer() {
     hamburger.classList.remove('open');
     drawer.classList.remove('open');
+    backdrop.classList.remove('open');
     hamburger.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-drawer-open');
     document.body.style.overflow = '';
   }
 
@@ -183,9 +178,12 @@
     event.stopPropagation();
     const open = hamburger.classList.toggle('open');
     drawer.classList.toggle('open', open);
+    backdrop.classList.toggle('open', open);
     hamburger.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('nav-drawer-open', open);
     document.body.style.overflow = open ? 'hidden' : '';
   });
+  backdrop.addEventListener('click', closeDrawer);
   drawer.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeDrawer));
 
   document.addEventListener('click', (event) => {
