@@ -1,37 +1,170 @@
-/* LITALK Student Portal — minimal readability layer. Loaded through fonts.css and scoped to portal surfaces. */
-body[data-service-surface="portal"]{--portal-page:#f7f7f5;--portal-surface:#fff;--portal-text:#171717;--portal-muted:#6f6f6a;--portal-line:#e5e5e0;--portal-radius:14px;--portal-shadow:0 1px 2px rgba(0,0,0,.035);--portal-content:1040px;background:var(--portal-page);color:var(--portal-text);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
-body[data-service-surface="portal"] :where(h1,h2,h3,h4){letter-spacing:-.025em;color:var(--portal-text)}
-body[data-service-surface="portal"] :where(h1){font-size:clamp(27px,4vw,36px);line-height:1.12}
-body[data-service-surface="portal"] :where(h2){font-size:clamp(19px,2.4vw,24px);line-height:1.2}
-body[data-service-surface="portal"] :where(h3){font-size:16px;line-height:1.3}
-body[data-service-surface="portal"] :where(p,small,.muted,.subtitle,.description){color:var(--portal-muted)}
-body[data-service-surface="portal"] :where(button,a,input,select,textarea){font:inherit}
-body[data-service-surface="portal"] :where(input,select,textarea){min-height:44px;border:1px solid var(--portal-line);border-radius:10px;background:var(--portal-surface);color:var(--portal-text);padding:10px 12px;box-shadow:none}
-body[data-service-surface="portal"] :where(input,select,textarea):focus{outline:2px solid rgba(23,23,23,.13);outline-offset:1px;border-color:#bdbdb7}
-body[data-service-surface="portal"] :where(button,.btn,[role=button]){min-height:40px}
-body[data-service-surface="portal"] :where(.dashboard-content,.container,.page-container,.portal-container,.student-container,.content-container){max-width:var(--portal-content);margin-inline:auto}
-body[data-service-surface="portal"] :where(.card,.panel,.box,.tile,.section-card,.stat-card,.info-card,.content-section){border:1px solid var(--portal-line);border-radius:var(--portal-radius);background:var(--portal-surface);box-shadow:var(--portal-shadow);backdrop-filter:none;-webkit-backdrop-filter:none}
-body[data-service-surface="portal"] :where(.badge,.pill,.tag){border-radius:999px;font-size:12px;font-weight:600}
-body[data-service-surface="portal"] :where(table){border-collapse:separate;border-spacing:0;width:100%;font-size:14px}
-body[data-service-surface="portal"] :where(th){color:var(--portal-muted);font-size:12px;font-weight:600;text-align:left}
-body[data-service-surface="portal"] :where(th,td){padding:12px;border-bottom:1px solid var(--portal-line)}
-body[data-service-surface="portal"] .welcome-hero{background:transparent!important;border:0!important;box-shadow:none!important;padding:20px 0 16px!important;min-height:0!important}
-body[data-service-surface="portal"] .welcome-hero-decor{display:none!important}
-body[data-service-surface="portal"] .hero-avatar,body[data-service-surface="portal"] .hero-avatar-fallback{width:52px!important;height:52px!important}
-body[data-service-surface="portal"] .hero-text h1{font-size:clamp(23px,3vw,30px)!important;margin-bottom:8px!important}
-body[data-service-surface="portal"] .hero-chips,body[data-service-surface="portal"] .hero-actions{gap:8px!important}
-body[data-service-surface="portal"] .hero-action-btn{min-height:38px!important;border-radius:10px!important;box-shadow:none!important}
-body[data-service-surface="portal"] .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px!important;margin-block:10px 22px!important}
-body[data-service-surface="portal"] .stat-card{padding:14px!important;min-height:92px!important;box-shadow:none!important}
-body[data-service-surface="portal"] .stat-icon-wrapper{width:34px!important;height:34px!important;border-radius:9px!important}
-body[data-service-surface="portal"] .stat-label{font-size:11px!important;color:var(--portal-muted)!important}
-body[data-service-surface="portal"] .stat-value{font-size:16px!important;margin-top:3px!important}
-body[data-service-surface="portal"] .content-section{padding:18px!important;margin-bottom:14px!important;box-shadow:none!important}
-body[data-service-surface="portal"] .section-title{margin-bottom:12px!important;font-size:18px!important}
-body[data-service-surface="portal"] .navbar{box-shadow:none!important;border-bottom:1px solid var(--portal-line)!important}
-body[data-service-surface="portal"] .portal-tabs{gap:4px!important;padding:6px!important;border:1px solid var(--portal-line)!important;border-radius:12px!important;background:var(--portal-surface)!important;box-shadow:none!important}
-body[data-service-surface="portal"] .portal-tab{min-height:38px!important;padding:8px 11px!important;border-radius:8px!important;font-size:13px!important}
-@media(max-width:760px){body[data-service-surface="portal"]{font-size:14px}body[data-service-surface="portal"] :where(.dashboard-content,.container,.page-container,.portal-container,.student-container,.content-container){width:100%;padding-left:16px!important;padding-right:16px!important}body[data-service-surface="portal"] .portal-tabs{display:none!important}body[data-service-surface="portal"] .welcome-hero{display:grid!important;grid-template-columns:44px 1fr!important;gap:10px!important;padding-top:16px!important}body[data-service-surface="portal"] .hero-profile{grid-column:1;grid-row:1}body[data-service-surface="portal"] .hero-text{grid-column:2;grid-row:1}body[data-service-surface="portal"] .hero-actions{grid-column:1/-1;grid-row:2;justify-content:flex-start!important}body[data-service-surface="portal"] .hero-avatar,body[data-service-surface="portal"] .hero-avatar-fallback{width:44px!important;height:44px!important}body[data-service-surface="portal"] .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}body[data-service-surface="portal"] :where(.grid,.cards,.quick-grid){grid-template-columns:1fr!important}body[data-service-surface="portal"] :where(button,.btn,[role=button]){min-height:44px}}
-@media(max-width:430px){body[data-service-surface="portal"] .stats-grid{grid-template-columns:1fr!important}body[data-service-surface="portal"] .stat-card{min-height:74px!important}}
-@media(prefers-reduced-motion:reduce){body[data-service-surface="portal"] *,body[data-service-surface="portal"] *::before,body[data-service-surface="portal"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-html[data-theme="dark"] body[data-service-surface="portal"]{--portal-page:#111;--portal-surface:#181818;--portal-text:#f3f3f1;--portal-muted:#aaa9a4;--portal-line:#2d2d2a;--portal-shadow:none}
+/* LITALK Student Portal — minimal, readable and orderly UI layer
+   Loaded before the legacy portal stylesheet, so intentionally scoped
+   !important overrides are used only on portal/learning/check-in surfaces. */
+
+:root{--portal-page:#f7f7f5;--portal-surface:#fff;--portal-surface-2:#f2f2ef;--portal-text:#171717;--portal-muted:#6f6f6a;--portal-line:#e5e5e0;--portal-radius:14px;--portal-radius-sm:10px;--portal-content:1040px;--portal-accent:#ff5a1f}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]){background:var(--portal-page)!important;color:var(--portal-text)!important;font-size:15px!important;line-height:1.55!important;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) :where(h1,h2,h3,h4,p){text-wrap:pretty}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) :where(h1,h2,h3,h4){letter-spacing:-.025em!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) :where(button,a,input,select,textarea){font:inherit}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) :where(button,a){-webkit-tap-highlight-color:transparent}
+
+/* Shell and navigation */
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .navbar{background:color-mix(in srgb,var(--portal-surface) 94%,transparent)!important;border-bottom:1px solid var(--portal-line)!important;box-shadow:none!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .nav-container{max-width:var(--portal-content)!important;min-height:60px!important;padding:0 20px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .nav-brand .logo-img{height:24px!important;width:auto!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .nav-brand-text{font-size:12px!important;font-weight:600!important;color:var(--portal-muted)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) :where(.theme-toggle-btn,.btn-edit-profile-header,.btn-logout-header){min-height:38px!important;border-radius:9px!important;box-shadow:none!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .btn-logout-header{font-size:12px!important;padding:0 12px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .nav-drawer{background:var(--portal-surface)!important;border-color:var(--portal-line)!important;box-shadow:0 18px 50px rgba(0,0,0,.12)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) :where(.drawer-link,.drawer-action-btn){min-height:44px!important;border-radius:9px!important;font-size:14px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .drawer-link.active{background:var(--portal-surface-2)!important;color:var(--portal-text)!important}
+
+/* Main layout */
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .dashboard-content{width:min(100% - 40px,var(--portal-content))!important;max-width:var(--portal-content)!important;margin:0 auto!important;padding-top:24px!important;padding-bottom:56px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .portal-tabs{display:flex!important;align-items:center!important;gap:4px!important;margin:0 0 26px!important;padding:4px!important;border:1px solid var(--portal-line)!important;border-radius:12px!important;background:var(--portal-surface)!important;box-shadow:none!important;overflow-x:auto!important;scrollbar-width:none}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .portal-tabs::-webkit-scrollbar{display:none}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .portal-tab{min-height:36px!important;padding:7px 11px!important;border-radius:8px!important;color:var(--portal-muted)!important;font-size:12px!important;font-weight:600!important;white-space:nowrap!important;box-shadow:none!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .portal-tab i{font-size:11px!important;opacity:.8}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .portal-tab.active{background:var(--portal-surface-2)!important;color:var(--portal-text)!important}
+
+/* Page headers */
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:24px!important;margin:0 0 28px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head-main{gap:12px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head-icon{width:34px!important;height:34px!important;flex:0 0 34px!important;border-radius:10px!important;background:var(--portal-surface-2)!important;color:var(--portal-text)!important;box-shadow:none!important;font-size:13px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head-text h1{margin:0!important;font-size:clamp(25px,3vw,32px)!important;line-height:1.15!important;font-weight:720!important;color:var(--portal-text)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head-text p{max-width:620px!important;margin:6px 0 0!important;color:var(--portal-muted)!important;font-size:13px!important;line-height:1.55!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head-side{gap:8px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) :where(.page-head-chip,.btn-back-overview){min-height:36px!important;border:1px solid var(--portal-line)!important;border-radius:9px!important;background:var(--portal-surface)!important;color:var(--portal-muted)!important;box-shadow:none!important;font-size:11px!important;font-weight:600!important}
+
+/* Overview */
+body[data-service-surface*="portal"] .welcome-hero{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;gap:14px!important;min-height:0!important;margin:0 0 14px!important;padding:18px!important;border:1px solid var(--portal-line)!important;border-radius:var(--portal-radius)!important;background:var(--portal-surface)!important;box-shadow:none!important;overflow:visible!important}
+body[data-service-surface*="portal"] .welcome-hero-decor{display:none!important}
+body[data-service-surface*="portal"] :where(.hero-avatar,.hero-avatar-fallback){width:48px!important;height:48px!important;flex-basis:48px!important;border-radius:50%!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .hero-text h1{margin:0!important;font-size:20px!important;line-height:1.25!important;font-weight:700!important}
+body[data-service-surface*="portal"] .hero-chips{gap:5px!important;margin-top:6px!important}
+body[data-service-surface*="portal"] :where(.student-id-badge,.hero-course-chip,.membership-badge){min-height:24px!important;padding:3px 8px!important;border-radius:999px!important;font-size:10px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .hero-actions{gap:6px!important}
+body[data-service-surface*="portal"] .hero-action-btn{min-height:36px!important;padding:7px 11px!important;border-radius:9px!important;font-size:11px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;margin:0 0 24px!important}
+body[data-service-surface*="portal"] .stat-card{min-height:0!important;padding:14px!important;gap:10px!important;border:1px solid var(--portal-line)!important;border-radius:12px!important;background:var(--portal-surface)!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .stat-icon-wrapper{width:30px!important;height:30px!important;flex-basis:30px!important;border-radius:9px!important;font-size:11px!important;background:var(--portal-surface-2)!important;color:var(--portal-text)!important}
+body[data-service-surface*="portal"] .stat-label{font-size:10px!important;color:var(--portal-muted)!important}
+body[data-service-surface*="portal"] .stat-value{margin-top:2px!important;font-size:15px!important;line-height:1.25!important;font-weight:700!important;color:var(--portal-text)!important}
+
+/* Shared sections */
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .content-section{margin:0 0 14px!important;padding:18px!important;border:1px solid var(--portal-line)!important;border-radius:var(--portal-radius)!important;background:var(--portal-surface)!important;box-shadow:none!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .section-title{margin:0 0 4px!important;font-size:15px!important;line-height:1.35!important;font-weight:700!important;color:var(--portal-text)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .section-title i{width:18px!important;color:var(--portal-muted)!important;font-size:12px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .section-sub{margin:0 0 14px!important;font-size:12px!important;line-height:1.5!important;color:var(--portal-muted)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) :where(.skeleton-card,.payment-card,.study-log-card){border:1px solid var(--portal-line)!important;border-radius:12px!important;background:var(--portal-surface)!important;box-shadow:none!important}
+
+/* LITALK+ */
+body[data-service-surface*="portal"] .pp-plans{gap:10px!important}
+body[data-service-surface*="portal"] :where(.pp-plan,.pp-benefit){border:1px solid var(--portal-line)!important;border-radius:12px!important;background:var(--portal-surface)!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .pp-benefits{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;padding:0!important;margin:0!important;list-style:none!important}
+body[data-service-surface*="portal"] .pp-benefit{padding:13px!important;gap:10px!important}
+body[data-service-surface*="portal"] .pp-benefit__ic{width:30px!important;height:30px!important;flex-basis:30px!important;border-radius:9px!important;background:var(--portal-surface-2)!important;color:var(--portal-text)!important;font-size:11px!important}
+body[data-service-surface*="portal"] .pp-benefit__txt strong{font-size:12px!important}
+body[data-service-surface*="portal"] .pp-benefit__txt span{font-size:10.5px!important;line-height:1.45!important;color:var(--portal-muted)!important}
+
+/* Learning & quiz */
+body[data-service-surface*="learning"] .learn-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))!important;gap:10px!important}
+body[data-service-surface*="learning"] .learn-card{border:1px solid var(--portal-line)!important;border-radius:12px!important;background:var(--portal-surface)!important;box-shadow:none!important;transform:none!important}
+body[data-service-surface*="learning"] .learn-card:hover{box-shadow:none!important;transform:none!important;border-color:#cfcfc8!important}
+body[data-service-surface*="learning"] .learn-card--course{border-top:1px solid var(--portal-line)!important}
+body[data-service-surface*="learning"] .learn-card__body{padding:14px 14px 7px!important}
+body[data-service-surface*="learning"] .learn-card__foot{padding:11px 14px!important;border-color:var(--portal-line)!important}
+body[data-service-surface*="learning"] .learn-card__title{font-size:14px!important;line-height:1.35!important}
+body[data-service-surface*="learning"] .learn-card__desc{font-size:11.5px!important;line-height:1.5!important;color:var(--portal-muted)!important}
+body[data-service-surface*="learning"] .learn-card__meta{gap:8px!important;font-size:10.5px!important;color:var(--portal-muted)!important}
+body[data-service-surface*="learning"] :where(.learn-chip,.learn-card__soon,.learn-soon__badge){box-shadow:none!important}
+body[data-service-surface*="learning"] :where(.btn-learn-primary,.btn-learn-ghost){min-height:40px!important;padding:8px 13px!important;border-radius:9px!important;font-size:12px!important;box-shadow:none!important}
+body[data-service-surface*="learning"] .learn-detail__title{font-size:24px!important;line-height:1.2!important}
+body[data-service-surface*="learning"] .learn-detail__desc{font-size:13px!important;line-height:1.55!important;color:var(--portal-muted)!important}
+body[data-service-surface*="learning"] .learn-lesson__content{max-width:700px!important;font-size:16px!important;line-height:1.8!important}
+body[data-service-surface*="learning"] .learn-question{border:1px solid var(--portal-line)!important;border-radius:12px!important;padding:14px!important;box-shadow:none!important}
+body[data-service-surface*="learning"] .learn-option{min-height:42px!important;padding:8px 10px!important;border-radius:9px!important}
+body[data-service-surface*="learning"] .learn-result{border-radius:12px!important;padding:22px 16px!important}
+body[data-service-surface*="learning"] .learn-empty{padding:42px 18px!important}
+
+/* Online study */
+body[data-service-surface*="learning"] .sd-hello{font-size:16px!important;margin:2px 0 16px!important}
+body[data-service-surface*="learning"] .sd-section-title{font-size:15px!important;margin:24px 0 9px!important;gap:7px!important}
+body[data-service-surface*="learning"] .sd-section-title i{color:var(--portal-muted)!important;font-size:12px!important}
+body[data-service-surface*="learning"] .sd-section-sub{font-size:11.5px!important;margin:-3px 0 12px!important;color:var(--portal-muted)!important}
+body[data-service-surface*="learning"] .sd-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))!important;gap:10px!important}
+body[data-service-surface*="learning"] :where(.sd-card,.sd-rec,.sd-todo,.sd-profile,.sd-receipt,.sd-setting,.sd-menu-item,.sd-step){border:1px solid var(--portal-line)!important;border-radius:12px!important;background:var(--portal-surface)!important;box-shadow:none!important}
+body[data-service-surface*="learning"] .sd-card{padding:14px!important}
+body[data-service-surface*="learning"] .sd-bar{height:5px!important;margin:9px 0!important}
+body[data-service-surface*="learning"] .sd-bar span{background:var(--portal-text)!important}
+body[data-service-surface*="learning"] :where(.sd-card__title,.sd-rec__title,.sd-todo__title,.sd-setting__title,.sd-menu-item__title){font-size:12.5px!important}
+body[data-service-surface*="learning"] :where(.sd-card__meta,.sd-rec__desc,.sd-todo__meta,.sd-setting__sub,.sd-menu-item__sub,.sd-receipt__meta){font-size:10.5px!important;color:var(--portal-muted)!important}
+body[data-service-surface*="learning"] .sd-btn{min-height:38px!important;border-radius:9px!important;padding:7px 12px!important;font-size:11.5px!important;box-shadow:none!important}
+body[data-service-surface*="learning"] .sd-btn:not(.sd-btn--danger):not(.sd-btn--ghost){background:var(--portal-text)!important;color:var(--portal-surface)!important}
+body[data-service-surface*="learning"] .sd-profile{padding:16px!important;gap:14px!important}
+body[data-service-surface*="learning"] .sd-avatar{width:56px!important;height:56px!important;flex-basis:56px!important}
+body[data-service-surface*="learning"] .sd-profile__name{font-size:17px!important}
+body[data-service-surface*="learning"] .sd-promo{padding:22px!important;border:1px solid var(--portal-line)!important;border-radius:14px!important;background:var(--portal-surface)!important;box-shadow:none!important}
+body[data-service-surface*="learning"] .sd-promo__title{font-size:22px!important}
+body[data-service-surface*="learning"] .sd-promo__sub{font-size:12px!important;color:var(--portal-muted)!important}
+
+/* Login / LINE entry */
+body[data-service-surface*="portal"] :where(.login-wrapper,.login-form-container,.login-select-card,.liff-card){box-shadow:none!important}
+body[data-service-surface*="portal"] .login-select-page{padding:24px!important}
+body[data-service-surface*="portal"] .login-select-card{max-width:400px!important}
+body[data-service-surface*="portal"] .login-select-logo{width:46px!important;height:46px!important;margin-bottom:18px!important;border-radius:11px!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .login-select-title{font-size:18px!important;font-weight:700!important}
+body[data-service-surface*="portal"] .login-select-sub{font-size:12px!important;line-height:1.5!important;margin-bottom:20px!important}
+body[data-service-surface*="portal"] .login-select-options{gap:8px!important}
+body[data-service-surface*="portal"] .login-option{min-height:56px!important;padding:11px 14px!important;border-radius:11px!important;box-shadow:none!important;transform:none!important}
+body[data-service-surface*="portal"] .login-option:hover{transform:none!important;box-shadow:none!important}
+body[data-service-surface*="portal"] .login-option__label{font-size:13px!important}
+body[data-service-surface*="portal"] .login-option__desc{font-size:10.5px!important}
+
+/* Check-in */
+body[data-service-surface*="checkin"] .checkin-page{min-height:100dvh!important;padding:20px!important}
+body[data-service-surface*="checkin"] .checkin-card{max-width:390px!important;padding:28px 22px!important;border:1px solid var(--portal-line)!important;border-radius:14px!important;background:var(--portal-surface)!important;box-shadow:none!important}
+body[data-service-surface*="checkin"] .checkin-card .logo-img{height:22px!important;margin-bottom:20px!important}
+body[data-service-surface*="checkin"] .checkin-icon{width:52px!important;height:52px!important;font-size:22px!important;margin-bottom:14px!important}
+body[data-service-surface*="checkin"] .checkin-title{font-size:18px!important;line-height:1.3!important;margin-bottom:6px!important}
+body[data-service-surface*="checkin"] .checkin-detail{font-size:12.5px!important;line-height:1.6!important;margin-bottom:16px!important}
+body[data-service-surface*="checkin"] .checkin-form{gap:9px!important}
+body[data-service-surface*="checkin"] .checkin-form input{min-height:46px!important;border-radius:9px!important}
+body[data-service-surface*="checkin"] .checkin-actions :where(.btn,button),body[data-service-surface*="checkin"] .checkin-form button{min-height:44px!important;border-radius:9px!important;box-shadow:none!important}
+
+/* Common controls */
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) :where(input,select,textarea){min-height:44px!important;border:1px solid var(--portal-line)!important;border-radius:9px!important;background:var(--portal-surface)!important;color:var(--portal-text)!important;box-shadow:none!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) :where(input,select,textarea):focus{outline:2px solid color-mix(in srgb,var(--portal-text) 13%,transparent)!important;outline-offset:1px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) table{width:100%!important;border-collapse:separate!important;border-spacing:0!important;font-size:12px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) :where(th,td){padding:10px 11px!important;border-bottom:1px solid var(--portal-line)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) th{font-size:10px!important;color:var(--portal-muted)!important;font-weight:650!important}
+
+/* Footer and mobile nav */
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .dashboard-footer{border-top:1px solid var(--portal-line)!important;background:transparent!important;color:var(--portal-muted)!important;box-shadow:none!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .footer-content{font-size:10px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .bottom-nav{background:color-mix(in srgb,var(--portal-surface) 95%,transparent)!important;border-top:1px solid var(--portal-line)!important;box-shadow:none!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .bottom-nav-item{color:var(--portal-muted)!important;font-size:9.5px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .bottom-nav-item.active{color:var(--portal-text)!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .fab{box-shadow:none!important}
+
+@media(max-width:760px){
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]){font-size:14px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .nav-container{padding:0 14px!important;min-height:54px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .dashboard-content{width:100%!important;padding:18px 14px 96px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .portal-tabs{display:none!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head{display:block!important;margin-bottom:20px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head-side{margin-top:12px!important;justify-content:flex-start!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .page-head-text h1{font-size:24px!important}
+:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"]) .content-section{padding:15px!important;margin-bottom:10px!important}
+body[data-service-surface*="portal"] .welcome-hero{grid-template-columns:auto minmax(0,1fr)!important;padding:14px!important}
+body[data-service-surface*="portal"] .hero-actions{grid-column:1/-1!important;justify-content:flex-start!important;margin-top:2px!important}
+body[data-service-surface*="portal"] .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+body[data-service-surface*="portal"] .pp-benefits{grid-template-columns:1fr!important}
+body[data-service-surface*="learning"] :where(.learn-grid,.sd-grid){grid-template-columns:1fr!important}
+body[data-service-surface*="learning"] .learn-question__body,body[data-service-surface*="learning"] .learn-question__feedback{margin-left:0!important}
+body[data-service-surface*="learning"] .sd-profile{align-items:flex-start!important}
+}
+@media(max-width:430px){body[data-service-surface*="portal"] .stats-grid{grid-template-columns:1fr!important}}
+@media(prefers-reduced-motion:reduce){:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) *,:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) *::before,:is(body[data-service-surface*="portal"],body[data-service-surface*="learning"],body[data-service-surface*="checkin"]) *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+html[data-theme="dark"]{--portal-page:#111;--portal-surface:#181818;--portal-surface-2:#202020;--portal-text:#f3f3f1;--portal-muted:#aaa9a4;--portal-line:#2d2d2a}
