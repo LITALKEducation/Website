@@ -3,13 +3,14 @@
 (function initSiteStandards() {
   const LANG_KEY = 'litalk-lang';
   const VALID_LANGS = new Set(['en', 'th']);
+  const surfaces = (document.body?.dataset?.serviceSurface || '').split(',').map((value) => value.trim()).filter(Boolean);
   const oldHeader = document.querySelector('header');
-  if (!oldHeader || document.body?.dataset?.serviceSurface === 'portal') return;
+  if (!oldHeader || surfaces.includes('portal')) return;
 
   if (!document.querySelector('link[data-litalk-menu]')) {
     const menuStyles = document.createElement('link');
     menuStyles.rel = 'stylesheet';
-    menuStyles.href = '/css/menu.css?v=20260826c';
+    menuStyles.href = '/css/menu.css?v=20260826d';
     menuStyles.dataset.litalkMenu = 'shared';
     document.head.appendChild(menuStyles);
   }
@@ -220,8 +221,12 @@
 
   function normalizeLang(value) { return VALID_LANGS.has(value) ? value : 'en'; }
   function getLang() {
-    try { return normalizeLang(document.documentElement.dataset.lang || localStorage.getItem(LANG_KEY) || 'en'); }
-    catch (_error) { return normalizeLang(document.documentElement.dataset.lang || 'en'); }
+    try {
+      const stored = localStorage.getItem(LANG_KEY);
+      return normalizeLang(stored || document.documentElement.dataset.lang || 'en');
+    } catch (_error) {
+      return normalizeLang(document.documentElement.dataset.lang || 'en');
+    }
   }
   function updateToggleVisuals(lang) {
     document.querySelectorAll('.lang-toggle:not(.lang-toggle--bridge)').forEach((toggle) => {
