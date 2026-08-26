@@ -1,0 +1,386 @@
+/* Ask LITALK — typography, spacing and responsive polish */
+
+/* Never let the global website chrome leak into the standalone Ask app. */
+body.ask-app > header,
+body.ask-app > footer,
+body.ask-app #main-nav,
+body.ask-app .nav,
+body.ask-app .footer { display: none !important; }
+
+:root {
+  --ask-sidebar: 248px;
+  --ask-topbar: 58px;
+}
+
+body.ask-app {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.ask-sidebar {
+  padding: 10px;
+}
+
+.ask-sidebar__head {
+  height: 46px;
+  padding: 0 4px 6px;
+}
+
+.ask-sidebar__brand {
+  gap: 8px;
+}
+
+.ask-sidebar__brand-mark {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--ask-surface-soft);
+  font-size: 11px;
+}
+
+.ask-sidebar__brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.ask-new-chat {
+  min-height: 40px;
+  margin: 4px 0 8px;
+  padding: 0 11px;
+  gap: 10px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.ask-sidebar__nav {
+  gap: 1px;
+  margin-bottom: 12px;
+}
+
+.ask-sidebar__link {
+  min-height: 36px;
+  gap: 10px;
+  padding: 0 11px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 540;
+}
+
+.ask-sidebar__link i,
+.ask-new-chat i {
+  width: 16px;
+  font-size: 12px;
+}
+
+.ask-sidebar__section-title {
+  padding: 8px 11px 6px;
+  font-size: 9.5px;
+  letter-spacing: .095em;
+}
+
+.ask-history__item {
+  padding: 8px 9px;
+  border-radius: 9px;
+}
+
+.ask-history__q {
+  font-size: 12px;
+}
+
+.ask-history__meta {
+  font-size: 9px;
+}
+
+.ask-sidebar__bottom-links {
+  gap: 8px;
+  padding: 8px 4px 10px;
+}
+
+.ask-sidebar__exit {
+  font-size: 11.5px;
+}
+
+.ask-account {
+  padding-top: 8px;
+}
+
+.ask-account__text {
+  padding: 2px 8px 7px;
+  font-size: 10.5px;
+}
+
+.ask-account__btn {
+  min-height: 36px;
+  font-size: 11.5px;
+}
+
+.ask-topbar {
+  padding: 0 18px;
+}
+
+.ask-model {
+  min-height: 34px;
+  padding: 0 8px;
+  font-size: 13.5px;
+}
+
+.ask-model__badge {
+  font-size: 10px;
+}
+
+.ask-stage {
+  width: min(100%, 780px);
+  padding: 0 28px 148px;
+}
+
+.ask-welcome {
+  padding: 42px 0 30px;
+}
+
+.ask-welcome__mark {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 18px;
+  border-radius: 13px;
+  font-size: 15px;
+  box-shadow: none;
+}
+
+.ask-welcome h1 {
+  max-width: 620px;
+  font-size: clamp(29px, 3.25vw, 38px);
+  font-weight: 700;
+  letter-spacing: -.04em;
+  line-height: 1.08;
+}
+
+.ask-welcome__sub {
+  max-width: 560px;
+  margin-top: 12px;
+  font-size: 13.5px;
+  line-height: 1.58;
+}
+
+.ask-starters {
+  width: min(100%, 650px);
+  margin-top: 26px;
+  gap: 8px;
+}
+
+.ask-starter {
+  min-height: 64px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 13px;
+}
+
+.ask-starter__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 11px;
+}
+
+.ask-starter strong {
+  font-size: 12.5px;
+  line-height: 1.3;
+}
+
+.ask-starter small {
+  margin-top: 2px;
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.ask-stage.has-thread .ask-thread {
+  gap: 20px;
+  padding: 30px 0 26px;
+}
+
+.ask-msg {
+  gap: 11px;
+}
+
+.ask-msg__avatar {
+  flex-basis: 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  font-size: 10px;
+}
+
+.ask-msg__who {
+  margin-bottom: 4px;
+  font-size: 11.5px;
+}
+
+.ask-msg__body {
+  font-size: 14px;
+  line-height: 1.68;
+}
+
+.ask-msg--user .ask-msg__body {
+  padding: 9px 13px;
+  border-radius: 16px;
+  line-height: 1.5;
+}
+
+.ask-composer-dock {
+  padding: 30px 22px max(10px, env(safe-area-inset-bottom));
+}
+
+.ask-composer-wrap {
+  width: min(100%, 760px);
+}
+
+.ask-composer__box {
+  min-height: 54px;
+  padding: 8px 9px;
+  border-radius: 19px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.07);
+}
+
+.ask-composer__input {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.ask-disclaimer {
+  margin-top: 7px;
+  font-size: 9.5px;
+  line-height: 1.4;
+}
+
+/* Tablet landscape / iPad-sized layouts */
+@media (min-width: 768px) and (max-width: 1180px) {
+  :root {
+    --ask-sidebar: 224px;
+    --ask-topbar: 54px;
+  }
+
+  .ask-stage {
+    width: min(100%, 700px);
+    padding-inline: 24px;
+  }
+
+  .ask-welcome {
+    padding-top: 34px;
+  }
+
+  .ask-welcome h1 {
+    max-width: 560px;
+    font-size: clamp(28px, 3.2vw, 34px);
+  }
+
+  .ask-welcome__sub {
+    max-width: 500px;
+    font-size: 12.5px;
+  }
+
+  .ask-starters {
+    width: min(100%, 600px);
+  }
+
+  .ask-starter {
+    min-height: 60px;
+  }
+
+  .ask-composer-wrap {
+    width: min(100%, 700px);
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --ask-topbar: 52px;
+  }
+
+  .ask-topbar {
+    padding: 0 10px;
+  }
+
+  .ask-model {
+    font-size: 13px;
+  }
+
+  .ask-model__badge {
+    display: none;
+  }
+
+  .ask-stage {
+    padding: 0 16px 132px;
+  }
+
+  .ask-welcome {
+    padding: 34px 0 22px;
+  }
+
+  .ask-welcome__mark {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 16px;
+  }
+
+  .ask-welcome h1 {
+    max-width: 420px;
+    font-size: clamp(27px, 8vw, 33px);
+  }
+
+  .ask-welcome__sub {
+    max-width: 430px;
+    font-size: 13px;
+  }
+
+  .ask-starters {
+    grid-template-columns: 1fr;
+    margin-top: 22px;
+  }
+
+  .ask-starter {
+    min-height: 58px;
+  }
+
+  .ask-composer-dock {
+    padding: 24px 10px max(8px, env(safe-area-inset-bottom));
+  }
+
+  .ask-composer__box {
+    border-radius: 18px;
+  }
+
+  .ask-disclaimer {
+    padding-inline: 4px;
+    font-size: 9px;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 768px) {
+  .ask-welcome {
+    padding-top: 24px;
+    padding-bottom: 20px;
+  }
+
+  .ask-welcome__mark {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 12px;
+  }
+
+  .ask-welcome h1 {
+    font-size: 29px;
+  }
+
+  .ask-starters {
+    margin-top: 18px;
+  }
+
+  .ask-starter {
+    min-height: 54px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+}
