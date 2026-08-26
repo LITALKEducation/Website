@@ -7,7 +7,7 @@
   <meta name="description" content="Current service status and maintenance notices for LITALK Education.">
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
-  <link rel="stylesheet" href="css/status.css?v=20260826a">
+  <link rel="stylesheet" href="css/status.css?v=20260826b">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
@@ -36,7 +36,17 @@
       <div class="status-section-head"><h2 id="incidents-title" data-en="Current notices" data-th="ประกาศปัจจุบัน">Current notices</h2></div>
       <div id="status-incidents" class="status-incidents"></div>
     </section>
+
+    <section class="status-section status-history-section" aria-labelledby="history-title">
+      <div class="status-section-head status-history-head">
+        <div>
+          <h2 id="history-title" data-en="Updates & history" data-th="อัปเดตและประวัติสถานะ">Updates & history</h2>
+          <p data-en="Recent service updates, maintenance and resolved incidents." data-th="รายการอัปเดต การปิดปรับปรุง และเหตุการณ์ที่ได้รับการแก้ไขล่าสุด">Recent service updates, maintenance and resolved incidents.</p>
+        </div>
+      </div>
+      <div id="status-history" class="status-history" aria-live="polite"></div>
+    </section>
   </main>
-  <script src="js/status.js?v=20260826a" defer></script>
+  <script src="js/status.js?v=20260826b" defer></script>
 </body>
 </html>
