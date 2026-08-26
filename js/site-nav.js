@@ -3,7 +3,7 @@
   const oldHeader=document.querySelector('header');
   if(!oldHeader||document.body?.dataset?.serviceSurface==='portal')return;
   const fortuneLang=document.getElementById('fortune-lang');
-  if(fortuneLang){const holder=document.createElement('div');holder.hidden=true;holder.setAttribute('aria-hidden','true');holder.appendChild(fortuneLang);document.body.appendChild(holder);}
+  if(fortuneLang){fortuneLang.className='lang-toggle';const holder=document.createElement('div');holder.hidden=true;holder.setAttribute('aria-hidden','true');holder.appendChild(fortuneLang);document.body.appendChild(holder);}
   const path=location.pathname.replace(/\/+$/,'')||'/';
   const active=path.startsWith('/courses')?'courses':path.startsWith('/plus')?'plus':path.startsWith('/programs')?'programs':path.startsWith('/about')?'about':path.startsWith('/ask')?'ask':path.startsWith('/blog')?'blog':'';
   const desktop=(key,href,en,th)=>`<li><a href="${href}" class="nav__link${active===key?' nav__link--active':''}" data-en="${en}" data-th="${th}">${en}</a></li>`;
