@@ -35,6 +35,8 @@
   let selected = [];
   let revealed = new Set();
   let currentReading = null;
+  let readingRequestId = 0;
+  let activeReadingController = null;
 
   const byId = (id) => document.getElementById(id);
   const text = (node, value) => { node.textContent = value == null ? '' : String(value); };
@@ -170,17 +172,31 @@
   }
   async function requestReading() {
     if (selected.length !== 3 || revealed.size !== 3) return;
+    const requestId = ++readingRequestId;
+    const requestLang = lang;
+    if (activeReadingController) activeReadingController.abort();
+    const controller = new AbortController();
+    activeReadingController = controller;
     showStep('result'); byId('fortune-loading').hidden = false; byId('fortune-error').hidden = true; byId('fortune-result').hidden = true;
-    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), 30000);
     try {
-      const payload = { questionType: category, question: byId('custom-question').value.trim(), language: lang, cards: selected.map((card, index) => ({ id: card.id, position: POSITIONS[index].id })) };
+      const payload = { questionType: category, question: byId('custom-question').value.trim(), language: requestLang, cards: selected.map((card, index) => ({ id: card.id, position: POSITIONS[index].id })) };
       const response = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify(payload) });
       const data = await response.json().catch(() => ({}));
+      if (requestId !== readingRequestId || requestLang !== lang) return;
       if (!response.ok) throw new Error(data.error || 'network');
       if (!isValidReading(data)) throw new Error('invalid_response');
       currentReading = data;
       renderResult(data);
-    } catch (error) { byId('fortune-loading').hidden = true; byId('fortune-error').hidden = false; text(byId('error-title'), lang === 'th' ? 'ยังอ่านคำแนะนำไม่ได้' : 'Guidance is not available yet'); text(byId('error-copy'), errorCopy(error.message)); } finally { clearTimeout(timeout); }
+    } catch (error) {
+      if (requestId !== readingRequestId || requestLang !== lang) return;
+      byId('fortune-loading').hidden = true; byId('fortune-error').hidden = false;
+      text(byId('error-title'), lang === 'th' ? 'ยังอ่านคำแนะนำไม่ได้' : 'Guidance is not available yet');
+      text(byId('error-copy'), errorCopy(error.message));
+    } finally {
+      clearTimeout(timeout);
+      if (activeReadingController === controller) activeReadingController = null;
+    }
   }
   function renderResult(reading) {
     byId('fortune-loading').hidden = true; byId('fortune-result').hidden = false;
@@ -194,7 +210,7 @@
     byId('ask-handoff').href = `../ask?prompt=${encodeURIComponent(plan)}`;
   }
   byId('fortune-lang').addEventListener('click', async () => {
-    const refreshReading = currentReading && !byId('fortune-result').hidden;
+    const refreshReading = !byId('step-result').hidden && selected.length === 3 && revealed.size === 3;
     lang = lang === 'th' ? 'en' : 'th';
     localStorage.setItem('litalk-lang', lang);
     applyLanguage();
