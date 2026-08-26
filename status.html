@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LITALK Status</title>
+  <meta name="description" content="Current service status and maintenance notices for LITALK Education.">
+  <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
+  <link rel="stylesheet" href="css/fonts.css?v=20260714h">
+  <link rel="stylesheet" href="css/status.css?v=20260826a">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <main class="status-page">
+    <header class="status-header">
+      <a href="/" class="status-brand" aria-label="Back to LITALK"><img src="img/LITALK-Black.png" alt="LITALK Education"></a>
+      <button class="status-lang" type="button" id="status-lang">EN / ไทย</button>
+    </header>
+
+    <section class="status-hero">
+      <p class="status-eyebrow">LITALK Status</p>
+      <h1 data-en="Service status" data-th="สถานะระบบ">Service status</h1>
+      <div class="status-summary" id="status-summary" role="status" aria-live="polite">
+        <span class="status-dot"></span>
+        <strong id="status-summary-title" data-en="Checking services…" data-th="กำลังตรวจสอบระบบ…">Checking services…</strong>
+      </div>
+      <p class="status-updated" id="status-updated"></p>
+    </section>
+
+    <section class="status-section" aria-labelledby="services-title">
+      <div class="status-section-head"><h2 id="services-title" data-en="Services" data-th="บริการ">Services</h2></div>
+      <div class="status-services" id="status-services"></div>
+    </section>
+
+    <section class="status-section" aria-labelledby="incidents-title">
+      <div class="status-section-head"><h2 id="incidents-title" data-en="Current notices" data-th="ประกาศปัจจุบัน">Current notices</h2></div>
+      <div id="status-incidents" class="status-incidents"></div>
+    </section>
+  </main>
+  <script src="js/status.js?v=20260826a" defer></script>
+</body>
+</html>
