@@ -47,8 +47,16 @@
   }
 
   document.addEventListener('litalk:langchange', refreshDynamicCourseContent);
-  document.addEventListener('DOMContentLoaded', () => {
-    queueMicrotask(() => normalizeRoutes());
-    setTimeout(() => normalizeRoutes(), 0);
-  });
+
+  function observeDynamicRoutes() {
+    normalizeRoutes();
+    const roots = [document.getElementById('course-grid'), document.getElementById('course-detail-inner')].filter(Boolean);
+    roots.forEach((root) => {
+      const observer = new MutationObserver(() => normalizeRoutes(root));
+      observer.observe(root, { childList: true, subtree: true });
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observeDynamicRoutes, { once: true });
+  else observeDynamicRoutes();
 }());
