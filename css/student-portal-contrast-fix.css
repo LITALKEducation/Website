@@ -1,0 +1,101 @@
+/* Student Portal contrast hotfix
+   Keeps identity/page-header cards readable in both themes even when legacy
+   hero styles are present. This file is loaded last by fonts.css. */
+
+:root[data-theme="light"]{
+  --portal-message-bg:#171717;
+  --portal-message-text:#ffffff;
+  --portal-message-muted:#d1d1d1;
+  --portal-message-chip:rgba(255,255,255,.10);
+  --portal-message-border:rgba(255,255,255,.14);
+}
+
+:root[data-theme="dark"]{
+  --portal-message-bg:#181818;
+  --portal-message-text:#f5f5f3;
+  --portal-message-muted:#aaa9a4;
+  --portal-message-chip:#232323;
+  --portal-message-border:#30302e;
+}
+
+body[data-service-surface*="portal"] .welcome-hero,
+body[data-service-surface*="portal"] .page-head,
+body[data-service-surface*="learning"] .page-head{
+  background:var(--portal-message-bg)!important;
+  color:var(--portal-message-text)!important;
+  border:1px solid var(--portal-message-border)!important;
+  box-shadow:none!important;
+}
+
+body[data-service-surface*="portal"] .welcome-hero::before,
+body[data-service-surface*="portal"] .welcome-hero::after,
+body[data-service-surface*="portal"] .page-head::before,
+body[data-service-surface*="portal"] .page-head::after,
+body[data-service-surface*="learning"] .page-head::before,
+body[data-service-surface*="learning"] .page-head::after{
+  display:none!important;
+}
+
+body[data-service-surface*="portal"] .welcome-hero :where(.hero-profile,.hero-text,.hero-actions,.hero-chips),
+body[data-service-surface*="portal"] .page-head :where(.page-head-main,.page-head-text,.page-head-side),
+body[data-service-surface*="learning"] .page-head :where(.page-head-main,.page-head-text,.page-head-side){
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+}
+
+body[data-service-surface*="portal"] .hero-text h1,
+body[data-service-surface*="portal"] .hero-text h1 *,
+body[data-service-surface*="portal"] .page-head-text h1,
+body[data-service-surface*="learning"] .page-head-text h1{
+  color:var(--portal-message-text)!important;
+}
+
+body[data-service-surface*="portal"] .hero-nickname,
+body[data-service-surface*="portal"] .page-head-text p,
+body[data-service-surface*="learning"] .page-head-text p{
+  color:var(--portal-message-muted)!important;
+}
+
+body[data-service-surface*="portal"] :where(.student-id-badge,.hero-course-chip,.membership-badge,.page-head-chip,.btn-back-overview),
+body[data-service-surface*="learning"] :where(.page-head-chip,.btn-back-overview){
+  background:var(--portal-message-chip)!important;
+  border-color:var(--portal-message-border)!important;
+  color:var(--portal-message-text)!important;
+}
+
+body[data-service-surface*="portal"] .hero-avatar-fallback,
+body[data-service-surface*="portal"] .page-head-icon,
+body[data-service-surface*="learning"] .page-head-icon{
+  background:var(--portal-message-chip)!important;
+  border-color:var(--portal-message-border)!important;
+  color:var(--portal-message-text)!important;
+}
+
+body[data-service-surface*="portal"] .hero-action-btn{
+  background:var(--portal-message-chip)!important;
+  border-color:var(--portal-message-border)!important;
+  color:var(--portal-message-text)!important;
+}
+
+body[data-service-surface*="portal"] .hero-action-btn.primary{
+  background:var(--portal-message-text)!important;
+  border-color:var(--portal-message-text)!important;
+  color:var(--portal-message-bg)!important;
+}
+
+/* The redesign treats these as compact information headers, never an empty
+   billboard. Guard against stale legacy min-heights on mobile Safari. */
+@media(max-width:768px){
+  body[data-service-surface*="portal"] .welcome-hero{
+    min-height:0!important;
+    height:auto!important;
+    padding:16px!important;
+  }
+  body[data-service-surface*="portal"] .page-head,
+  body[data-service-surface*="learning"] .page-head{
+    min-height:0!important;
+    height:auto!important;
+    padding:16px!important;
+  }
+}
