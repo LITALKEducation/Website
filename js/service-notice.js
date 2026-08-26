@@ -1,28 +1,32 @@
 /**
- * LITALK Education — service-notice.js
- *
- * Shows the scheduled service notices an admin sets in the admin panel, and
- * enforces the blocking ones on the client. Loaded on every public page.
+ * LITALK Education — service notices and public UI bootstrap.
  */
 'use strict';
 
-/* Public-site bootstrap: service-notice.js is already loaded across the
-   marketing/public surface, so it is the single entry point for the shared
-   navigation/language standard. Portal pages are intentionally excluded. */
 (function bootstrapPublicUiStandards() {
   const surfaces = (document.body?.getAttribute('data-service-surface') || '')
     .split(',').map((value) => value.trim()).filter(Boolean);
+
   if (surfaces.includes('ask') && !document.querySelector('link[data-litalk-ask-consent]')) {
-    const consentStyles = document.createElement('link');
-    consentStyles.rel = 'stylesheet';
-    consentStyles.href = '/css/ask-consent.css?v=20260826a';
-    consentStyles.dataset.litalkAskConsent = 'shared';
-    document.head.appendChild(consentStyles);
+    const styles = document.createElement('link');
+    styles.rel = 'stylesheet';
+    styles.href = '/css/ask-consent.css?v=20260826b';
+    styles.dataset.litalkAskConsent = 'shared';
+    document.head.appendChild(styles);
   }
+
+  if (location.pathname.startsWith('/courses') && !document.querySelector('script[data-litalk-course-fixes]')) {
+    const courseFixes = document.createElement('script');
+    courseFixes.src = '/js/course-production-fixes.js?v=20260826a';
+    courseFixes.defer = true;
+    courseFixes.dataset.litalkCourseFixes = '1';
+    document.head.appendChild(courseFixes);
+  }
+
   if (surfaces.includes('portal') || window.LITALK_UI) return;
   if (document.querySelector('script[data-litalk-site-nav]')) return;
   const script = document.createElement('script');
-  script.src = '/js/site-nav.js?v=20260826c';
+  script.src = '/js/site-nav.js?v=20260826e';
   script.defer = true;
   script.dataset.litalkSiteNav = '1';
   document.head.appendChild(script);
@@ -49,7 +53,6 @@ window.litalkService = (function initServiceNotices() {
       custom: { title: 'Service notice', body: '' },
       blockedFallback: 'This part of LITALK is temporarily unavailable. Please try again later.',
       dismiss: 'Got it', until: 'Expected back', from: 'Starts',
-      previewing: 'Admin preview — notices are hidden for you on this browser.',
     },
     th: {
       opening_soon: { title: 'กำลังจะเปิดเร็ว ๆ นี้', body: 'ส่วนนี้ของ LITALK ยังไม่เปิดให้บริการ เรากำลังเก็บรายละเอียดขั้นสุดท้ายอยู่' },
@@ -59,35 +62,35 @@ window.litalkService = (function initServiceNotices() {
       custom: { title: 'ประกาศจากระบบ', body: '' },
       blockedFallback: 'ส่วนนี้ของ LITALK ปิดให้บริการชั่วคราว กรุณาลองใหม่อีกครั้งภายหลัง',
       dismiss: 'รับทราบ', until: 'คาดว่าจะกลับมา', from: 'เริ่ม',
-      previewing: 'โหมดพรีวิวสำหรับแอดมิน — ประกาศถูกซ่อนไว้เฉพาะเบราว์เซอร์นี้',
     },
   };
 
   const t = () => COPY[lang()] || COPY.en;
-  function surfaces() {
-    const raw = document.body.getAttribute('data-service-surface') || '';
-    return raw.split(',').map((s) => s.trim()).filter(Boolean);
-  }
+  const surfaces = () => (document.body.getAttribute('data-service-surface') || '')
+    .split(',').map((value) => value.trim()).filter(Boolean);
 
   function bypassToken() {
     const fromUrl = new URLSearchParams(location.search).get('bypass');
     if (fromUrl) {
-      try { sessionStorage.setItem(BYPASS_KEY, fromUrl); } catch (_) { /* private mode */ }
+      try { sessionStorage.setItem(BYPASS_KEY, fromUrl); } catch (_) {}
       return fromUrl;
     }
     try { return sessionStorage.getItem(BYPASS_KEY) || ''; } catch (_) { return ''; }
   }
 
-  const dismissKey = (n) => `${n.id}:${n.announceFrom || ''}:${n.startsAt || ''}:${n.endsAt || ''}`;
+  const dismissKey = (notice) => `${notice.id}:${notice.announceFrom || ''}:${notice.startsAt || ''}:${notice.endsAt || ''}`;
   function dismissed() {
-    try { return JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]'); } catch (_) { return []; }
+    try {
+      const value = JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]');
+      return Array.isArray(value) ? value : [];
+    } catch (_) { return []; }
   }
   function remember(notice) {
     try {
       const all = dismissed();
       all.push(dismissKey(notice));
       localStorage.setItem(DISMISSED_KEY, JSON.stringify(all.slice(-40)));
-    } catch (_) { /* show again next time */ }
+    } catch (_) {}
   }
 
   function copyFor(notice) {
@@ -98,11 +101,12 @@ window.litalkService = (function initServiceNotices() {
       body: (th ? notice.bodyTh : notice.bodyEn) || preset.body,
     };
   }
+
   function formatTime(value) {
     if (!value) return '';
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return '';
-    return d.toLocaleString(lang() === 'th' ? 'th-TH' : 'en-GB', {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toLocaleString(lang() === 'th' ? 'th-TH' : 'en-GB', {
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
     });
   }
@@ -116,18 +120,24 @@ window.litalkService = (function initServiceNotices() {
 
     const icon = document.createElement('div');
     icon.className = 'svc-card__icon';
-    icon.innerHTML = `<i class="fas ${blocking ? 'fa-circle-pause' : 'fa-bullhorn'}"></i>`;
+    const iconGlyph = document.createElement('i');
+    iconGlyph.className = `fas ${blocking ? 'fa-circle-pause' : 'fa-bullhorn'}`;
+    icon.appendChild(iconGlyph);
     card.appendChild(icon);
 
-    const h = document.createElement('h2');
-    h.className = 'svc-card__title'; h.textContent = title; card.appendChild(h);
+    const heading = document.createElement('h2');
+    heading.className = 'svc-card__title';
+    heading.textContent = title;
+    card.appendChild(heading);
+
     if (body) {
-      const p = document.createElement('p');
-      p.className = 'svc-card__body'; p.textContent = body; card.appendChild(p);
+      const paragraph = document.createElement('p');
+      paragraph.className = 'svc-card__body';
+      paragraph.textContent = body;
+      card.appendChild(paragraph);
     }
 
-    const when = blocking ? notice.endsAt : notice.startsAt;
-    const formatted = formatTime(when);
+    const formatted = formatTime(blocking ? notice.endsAt : notice.startsAt);
     if (formatted) {
       const meta = document.createElement('p');
       meta.className = 'svc-card__meta';
@@ -136,74 +146,79 @@ window.litalkService = (function initServiceNotices() {
     }
 
     if (!blocking && notice.dismissible) {
-      const btn = document.createElement('button');
-      btn.type = 'button'; btn.className = 'svc-card__btn'; btn.textContent = t().dismiss;
-      btn.addEventListener('click', () => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'svc-card__btn';
+      button.textContent = t().dismiss;
+      button.addEventListener('click', () => {
         remember(notice);
-        const layer = card.closest('.svc-layer');
-        if (layer) layer.remove();
-        document.body.classList.remove('svc-locked');
+        card.closest('.svc-layer')?.remove();
       });
-      card.appendChild(btn);
+      card.appendChild(button);
     }
     return card;
   }
 
   function show(notice, blocking) {
+    document.querySelectorAll('.svc-layer').forEach((layer) => layer.remove());
     const layer = document.createElement('div');
     layer.className = `svc-layer${blocking ? ' svc-layer--blocking' : ''}`;
     layer.appendChild(buildCard(notice, blocking));
     document.body.appendChild(layer);
-    if (blocking) document.body.classList.add('svc-locked');
+    document.body.classList.toggle('svc-locked', blocking);
   }
 
   function apply() {
     const mine = surfaces();
     if (!mine.length) return;
-    const relevant = state.notices.filter((n) => Array.isArray(n.surfaces) && n.surfaces.some((s) => mine.includes(s)));
-    const blocking = relevant.find((n) => n.phase === 'blocking');
+    const relevant = state.notices.filter((notice) => Array.isArray(notice.surfaces)
+      && notice.surfaces.some((surface) => mine.includes(surface)));
+    const blocking = relevant.find((notice) => notice.phase === 'blocking');
     if (blocking) {
       show(blocking, true);
       document.dispatchEvent(new CustomEvent('litalk:serviceblocked', { detail: { notice: blocking } }));
       return;
     }
+    document.body.classList.remove('svc-locked');
     const seen = dismissed();
-    const announcement = relevant.find((n) => n.phase === 'announcement' && !seen.includes(dismissKey(n)));
+    const announcement = relevant.find((notice) => notice.phase === 'announcement' && !seen.includes(dismissKey(notice)));
     if (announcement) show(announcement, false);
   }
 
   async function load() {
     const token = bypassToken();
-    const url = `${API}/service-status${token ? `?bypass=${encodeURIComponent(token)}` : ''}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timer);
-      const data = await res.json();
+      const url = `${API}/service-status${token ? `?bypass=${encodeURIComponent(token)}` : ''}`;
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) throw new Error(`service-status ${response.status}`);
+      const data = await response.json();
       state.notices = Array.isArray(data.notices) ? data.notices : [];
       state.bypass = Boolean(data.bypass);
     } catch (_) {
       state.notices = [];
+    } finally {
+      clearTimeout(timer);
     }
     state.ready = true;
     apply();
     document.dispatchEvent(new CustomEvent('litalk:serviceready', { detail: state }));
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once: true });
   else load();
 
   return {
-    blocked(surface) { return state.notices.some((n) => n.phase === 'blocking' && n.surfaces.includes(surface)); },
+    blocked(surface) {
+      return state.notices.some((notice) => notice.phase === 'blocking'
+        && Array.isArray(notice.surfaces) && notice.surfaces.includes(surface));
+    },
     get ready() { return state.ready; },
     get notices() { return state.notices.slice(); },
   };
 })();
 
-/* Cross-page fixes kept here because this file is loaded on all public and
-   portal surfaces, including the editorial blog pages that do not load the
-   shared Markdown bundle. */
 (function installCrossPageFixesWhenReady() {
   function install() {
     if (typeof window.renderPortalDataError === 'function' && !window.renderPortalDataError.__litalkHardened) {
@@ -213,10 +228,10 @@ window.litalkService = (function initServiceNotices() {
       window.renderPortalDataError = wrapped;
     }
 
-    if (typeof window.resolveAuthedStudentId === 'function' &&
-        typeof window.getPortalToken === 'function' &&
-        typeof window.resolveStudentIdFromToken === 'function' &&
-        !window.resolveAuthedStudentId.__litalkHardened) {
+    if (typeof window.resolveAuthedStudentId === 'function'
+        && typeof window.getPortalToken === 'function'
+        && typeof window.resolveStudentIdFromToken === 'function'
+        && !window.resolveAuthedStudentId.__litalkHardened) {
       const originalResolve = window.resolveAuthedStudentId;
       const originalWhoami = window.resolveStudentIdFromToken;
       const hardened = async function () {
@@ -241,6 +256,7 @@ window.litalkService = (function initServiceNotices() {
           hamburger.classList.remove('open');
           drawer.classList.remove('open');
           hamburger.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('nav-drawer-open');
           document.body.style.overflow = '';
         }
       }, { passive: true });
@@ -277,6 +293,6 @@ window.litalkService = (function initServiceNotices() {
     }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
   else install();
 })();
