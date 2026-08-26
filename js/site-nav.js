@@ -6,18 +6,14 @@
   const oldHeader = document.querySelector('header');
   if (!oldHeader || document.body?.dataset?.serviceSurface === 'portal') return;
 
-  /* menu.css is the single stylesheet for every public navigation shell. */
   if (!document.querySelector('link[data-litalk-menu]')) {
     const menuStyles = document.createElement('link');
     menuStyles.rel = 'stylesheet';
-    menuStyles.href = '/css/menu.css?v=20260826a';
+    menuStyles.href = '/css/menu.css?v=20260826b';
     menuStyles.dataset.litalkMenu = 'shared';
     document.head.appendChild(menuStyles);
   }
 
-  /* Temporary compatibility bridge for feature code that still owns an
-     internal language handler. It is never shown to users; all visible
-     controls use the shared .lang-toggle component. */
   const legacyFortuneLang = document.getElementById('fortune-lang');
   if (legacyFortuneLang) {
     legacyFortuneLang.className = 'lang-toggle lang-toggle--bridge';
@@ -37,10 +33,8 @@
             : path.startsWith('/blog') ? 'blog'
               : '';
 
-  const desktopLink = (key, href, en, th) =>
-    `<li><a href="${href}" class="nav__link${active === key ? ' nav__link--active' : ''}" data-en="${en}" data-th="${th}"${active === key ? ' aria-current="page"' : ''}>${en}</a></li>`;
-  const mobileLink = (key, href, en, th) =>
-    `<a href="${href}" class="nav__link${active === key ? ' nav__link--active' : ''}" data-en="${en}" data-th="${th}"${active === key ? ' aria-current="page"' : ''}>${en}</a>`;
+  const learningActive = ['courses', 'plus', 'programs'].includes(active);
+  const resourcesActive = ['ask', 'blog'].includes(active);
 
   const langToggle = `
     <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
@@ -48,6 +42,49 @@
       <span class="lang-toggle__opt active" data-opt="en">EN</span>
       <span class="lang-toggle__opt" data-opt="th">ไทย</span>
     </button>`;
+
+  const menuItem = (key, href, icon, en, th, subEn, subTh) => `
+    <a href="${href}" class="nav-menu__item${active === key ? ' is-active' : ''}" role="menuitem"${active === key ? ' aria-current="page"' : ''}>
+      <span class="nav-menu__icon" aria-hidden="true"><i class="fas ${icon}"></i></span>
+      <span class="nav-menu__copy">
+        <strong data-en="${en}" data-th="${th}">${en}</strong>
+        <small data-en="${subEn}" data-th="${subTh}">${subEn}</small>
+      </span>
+    </a>`;
+
+  const learningItems = [
+    menuItem('courses', '/courses', 'fa-laptop', 'Online Learning', 'เรียนออนไลน์', 'Self-paced lessons and courses', 'บทเรียนและคอร์สเรียนด้วยตนเอง'),
+    menuItem('programs', '/programs', 'fa-comments', '1-on-1 Tutoring', 'เรียนตัวต่อตัว', 'Personal English tutoring', 'เรียนภาษาอังกฤษแบบส่วนตัว'),
+    menuItem('plus', '/plus', 'fa-plus', 'LITALK+', 'LITALK+', 'Premium learning membership', 'สมาชิกการเรียนรู้แบบพรีเมียม'),
+  ].join('');
+
+  const resourceItems = [
+    menuItem('ask', '/ask', 'fa-wand-magic-sparkles', 'Ask LITALK', 'ถาม LITALK', 'Ask English questions with AI', 'ถามคำถามภาษาอังกฤษด้วย AI'),
+    menuItem('blog', '/blog', 'fa-newspaper', 'Blog', 'บทความ', 'Articles, guides and newsroom', 'บทความ คู่มือ และข่าวสาร'),
+  ].join('');
+
+  const desktopGroup = (id, en, th, isActive, items) => `
+    <li class="nav-menu${isActive ? ' nav-menu--active' : ''}">
+      <button class="nav-menu__trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="nav-menu-${id}">
+        <span data-en="${en}" data-th="${th}">${en}</span>
+        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+      </button>
+      <div class="nav-menu__panel" id="nav-menu-${id}" role="menu" aria-label="${en}">${items}</div>
+    </li>`;
+
+  const mobileItem = (key, href, en, th) => `
+    <a href="${href}" class="nav-mobile-group__link${active === key ? ' is-active' : ''}"${active === key ? ' aria-current="page"' : ''} data-en="${en}" data-th="${th}">${en}</a>`;
+
+  const mobileGroup = (id, en, th, isActive, items) => `
+    <div class="nav-mobile-group${isActive ? ' is-active' : ''}">
+      <button class="nav-mobile-group__trigger" type="button" aria-expanded="${isActive ? 'true' : 'false'}" aria-controls="mobile-group-${id}">
+        <span data-en="${en}" data-th="${th}">${en}</span>
+        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+      </button>
+      <div class="nav-mobile-group__panel${isActive ? ' open' : ''}" id="mobile-group-${id}">
+        ${items}
+      </div>
+    </div>`;
 
   const studentLogin = `
     <a href="/portal/student" class="login-menu__item" role="menuitem">
@@ -67,12 +104,9 @@
       <div class="container"><div class="nav__inner">
         <a href="/" class="nav__logo" aria-label="LITALK Home"><img src="/img/LITALK-Black.png" alt="LITALK Education" class="theme-invertable" width="170" height="28"></a>
         <ul class="nav__links" role="list">
-          ${desktopLink('courses', '/courses', 'Online Learning', 'เรียนออนไลน์')}
-          ${desktopLink('plus', '/plus', 'LITALK+', 'LITALK+')}
-          ${desktopLink('programs', '/programs', '1-on-1 Tutoring', 'เรียนตัวต่อตัว')}
-          ${desktopLink('about', '/about', 'About', 'เกี่ยวกับเรา')}
-          ${desktopLink('ask', '/ask', 'Ask', 'ถามศัพท์')}
-          ${desktopLink('blog', '/blog', 'Blog', 'บทความ')}
+          ${desktopGroup('learning', 'Learning', 'การเรียน', learningActive, learningItems)}
+          <li><a href="/about" class="nav__link${active === 'about' ? ' nav__link--active' : ''}" data-en="About" data-th="เกี่ยวกับเรา"${active === 'about' ? ' aria-current="page"' : ''}>About</a></li>
+          ${desktopGroup('resources', 'Resources', 'แหล่งเรียนรู้', resourcesActive, resourceItems)}
         </ul>
         <div class="nav__actions">
           ${langToggle}
@@ -85,12 +119,16 @@
         <button class="nav__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-drawer"><span></span><span></span><span></span></button>
       </div></div>
       <div class="nav__drawer" id="mobile-drawer" role="navigation" aria-label="Mobile navigation">
-        ${mobileLink('courses', '/courses', 'Online Learning', 'เรียนออนไลน์')}
-        ${mobileLink('plus', '/plus', 'LITALK+', 'LITALK+')}
-        ${mobileLink('programs', '/programs', '1-on-1 Tutoring', 'เรียนตัวต่อตัว')}
-        ${mobileLink('about', '/about', 'About', 'เกี่ยวกับเรา')}
-        ${mobileLink('ask', '/ask', 'Ask', 'ถามศัพท์')}
-        ${mobileLink('blog', '/blog', 'Blog', 'บทความ')}
+        ${mobileGroup('learning', 'Learning', 'การเรียน', learningActive, [
+          mobileItem('courses', '/courses', 'Online Learning', 'เรียนออนไลน์'),
+          mobileItem('programs', '/programs', '1-on-1 Tutoring', 'เรียนตัวต่อตัว'),
+          mobileItem('plus', '/plus', 'LITALK+', 'LITALK+'),
+        ].join(''))}
+        <a href="/about" class="nav__link${active === 'about' ? ' nav__link--active' : ''}" data-en="About" data-th="เกี่ยวกับเรา"${active === 'about' ? ' aria-current="page"' : ''}>About</a>
+        ${mobileGroup('resources', 'Resources', 'แหล่งเรียนรู้', resourcesActive, [
+          mobileItem('ask', '/ask', 'Ask LITALK', 'ถาม LITALK'),
+          mobileItem('blog', '/blog', 'Blog', 'บทความ'),
+        ].join(''))}
         <div class="nav__actions">
           ${langToggle}
           <a href="/#contact" class="btn btn--primary btn--sm nav__drawer-cta" data-en="Start Learning" data-th="เริ่มเรียน">Start Learning</a>
@@ -104,6 +142,35 @@
   const nav = header.querySelector('#main-nav');
   const hamburger = header.querySelector('#hamburger');
   const drawer = header.querySelector('#mobile-drawer');
+
+  const closeDesktopMenus = (except = null) => {
+    header.querySelectorAll('.nav-menu.open').forEach((menu) => {
+      if (menu === except) return;
+      menu.classList.remove('open');
+      menu.querySelector('.nav-menu__trigger')?.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  header.querySelectorAll('.nav-menu').forEach((menu) => {
+    const trigger = menu.querySelector('.nav-menu__trigger');
+    trigger?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const opening = !menu.classList.contains('open');
+      closeDesktopMenus(menu);
+      menu.classList.toggle('open', opening);
+      trigger.setAttribute('aria-expanded', String(opening));
+    });
+  });
+
+  header.querySelectorAll('.nav-mobile-group').forEach((group) => {
+    const trigger = group.querySelector('.nav-mobile-group__trigger');
+    const panel = group.querySelector('.nav-mobile-group__panel');
+    trigger?.addEventListener('click', () => {
+      const opening = !panel.classList.contains('open');
+      panel.classList.toggle('open', opening);
+      trigger.setAttribute('aria-expanded', String(opening));
+    });
+  });
 
   function closeDrawer() {
     hamburger.classList.remove('open');
@@ -120,11 +187,16 @@
     document.body.style.overflow = open ? 'hidden' : '';
   });
   drawer.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeDrawer));
+
   document.addEventListener('click', (event) => {
+    closeDesktopMenus();
     if (!hamburger.contains(event.target) && !drawer.contains(event.target)) closeDrawer();
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeDrawer();
+    if (event.key === 'Escape') {
+      closeDesktopMenus();
+      closeDrawer();
+    }
   });
   addEventListener('resize', () => { if (innerWidth > 768) closeDrawer(); }, { passive: true });
 
@@ -136,6 +208,7 @@
     const button = menu.querySelector('.login-menu__btn');
     button?.addEventListener('click', (event) => {
       event.stopPropagation();
+      closeDesktopMenus();
       const open = menu.classList.toggle('open');
       button.setAttribute('aria-expanded', String(open));
     });
@@ -145,23 +218,12 @@
         button?.setAttribute('aria-expanded', 'false');
       }
     });
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        menu.classList.remove('open');
-        button?.setAttribute('aria-expanded', 'false');
-      }
-    });
   });
 
-  function normalizeLang(value) {
-    return VALID_LANGS.has(value) ? value : 'en';
-  }
+  function normalizeLang(value) { return VALID_LANGS.has(value) ? value : 'en'; }
   function getLang() {
-    try {
-      return normalizeLang(document.documentElement.dataset.lang || localStorage.getItem(LANG_KEY) || 'en');
-    } catch (_error) {
-      return normalizeLang(document.documentElement.dataset.lang || 'en');
-    }
+    try { return normalizeLang(document.documentElement.dataset.lang || localStorage.getItem(LANG_KEY) || 'en'); }
+    catch (_error) { return normalizeLang(document.documentElement.dataset.lang || 'en'); }
   }
   function updateToggleVisuals(lang) {
     document.querySelectorAll('.lang-toggle:not(.lang-toggle--bridge)').forEach((toggle) => {
@@ -191,7 +253,7 @@
 
   window.litalkGetLang = getLang;
   window.litalkSetLang = setLang;
-  window.LITALK_UI = Object.freeze({ getLang, setLang, closeDrawer });
+  window.LITALK_UI = Object.freeze({ getLang, setLang, closeDrawer, closeDesktopMenus });
 
   header.querySelectorAll('.lang-toggle').forEach((toggle) => {
     toggle.addEventListener('click', () => {
