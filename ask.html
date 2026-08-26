@@ -17,7 +17,7 @@
   <link rel="icon" href="img/LITALK-Icon.png" type="image/png">
   <link rel="stylesheet" href="css/fonts.css?v=20260714h">
   <link rel="stylesheet" href="css/style.css?v=20260823d">
-  <link rel="stylesheet" href="css/ask.css?v=20260826a">
+  <link rel="stylesheet" href="css/ask.css?v=20260826b">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
 </head>
@@ -25,12 +25,12 @@
   <a href="#ask-main" class="skip-link" data-en="Skip to chat" data-th="ข้ามไปยังแชท">Skip to chat</a>
 
   <div class="ask-app-shell">
-    <aside class="ask-sidebar" id="ask-sidebar" aria-label="Ask LITALK navigation">
+    <aside class="ask-sidebar" id="ask-sidebar" aria-label="Ask LITALK chat navigation">
       <div class="ask-sidebar__head">
-        <a href="/" class="ask-sidebar__brand" aria-label="LITALK Education home">
-          <img src="img/LITALK-Black.png" class="theme-invertable" alt="LITALK Education" width="116" height="20">
-          <span class="ask-sidebar__brand-label">AI</span>
-        </a>
+        <div class="ask-sidebar__brand" aria-label="Ask LITALK">
+          <span class="ask-sidebar__brand-mark" aria-hidden="true"><i class="fas fa-sparkles"></i></span>
+          <span class="ask-sidebar__brand-name">Ask LITALK</span>
+        </div>
         <button type="button" class="ask-icon-btn" id="ask-sidebar-close" aria-label="Close sidebar" title="Close sidebar">
           <i class="fas fa-sidebar" aria-hidden="true"></i>
         </button>
@@ -41,19 +41,27 @@
         <span data-en="New chat" data-th="แชทใหม่">New chat</span>
       </button>
 
-      <nav class="ask-sidebar__nav" aria-label="LITALK links">
-        <a href="/" class="ask-sidebar__link">
-          <i class="fas fa-house" aria-hidden="true"></i>
-          <span data-en="LITALK Home" data-th="หน้าแรก LITALK">LITALK Home</span>
-        </a>
-        <a href="courses" class="ask-sidebar__link">
-          <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-          <span data-en="Online Learning" data-th="เรียนออนไลน์">Online Learning</span>
-        </a>
-        <a href="blog" class="ask-sidebar__link">
-          <i class="fas fa-newspaper" aria-hidden="true"></i>
-          <span data-en="Learning articles" data-th="บทความการเรียนรู้">Learning articles</span>
-        </a>
+      <nav class="ask-sidebar__nav" aria-label="Chat tools">
+        <button type="button" class="ask-sidebar__link" id="ask-sidebar-history">
+          <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+          <span data-en="Chat history" data-th="ประวัติแชท">Chat history</span>
+        </button>
+        <button type="button" class="ask-sidebar__link" data-ask-prompt="Explain this topic to me clearly and step by step: ">
+          <i class="fas fa-lightbulb" aria-hidden="true"></i>
+          <span data-en="Explain" data-th="อธิบาย">Explain</span>
+        </button>
+        <button type="button" class="ask-sidebar__link" data-ask-prompt="Practice an English conversation with me. Choose a realistic situation and correct me naturally after each reply.">
+          <i class="fas fa-comments" aria-hidden="true"></i>
+          <span data-en="Practice" data-th="ฝึกสนทนา">Practice</span>
+        </button>
+        <button type="button" class="ask-sidebar__link" data-ask-prompt="Create a short English quiz for me about: ">
+          <i class="fas fa-list-check" aria-hidden="true"></i>
+          <span data-en="Quiz" data-th="แบบทดสอบ">Quiz</span>
+        </button>
+        <button type="button" class="ask-sidebar__link" data-ask-prompt="Translate this naturally and explain the wording choices: ">
+          <i class="fas fa-language" aria-hidden="true"></i>
+          <span data-en="Translate" data-th="แปลภาษา">Translate</span>
+        </button>
       </nav>
 
       <div class="ask-history-wrap">
@@ -66,6 +74,18 @@
           <div class="ask-history__list" id="ask-history-list"></div>
           <p class="ask-history__note" data-en="Chats are kept for six months, then deleted automatically." data-th="แชทจะถูกเก็บไว้ 6 เดือน จากนั้นระบบจะลบให้อัตโนมัติ">Chats are kept for six months, then deleted automatically.</p>
         </div>
+      </div>
+
+      <div class="ask-sidebar__bottom-links">
+        <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
+          <span class="lang-toggle__thumb" aria-hidden="true"></span>
+          <span class="lang-toggle__opt active" data-opt="en">EN</span>
+          <span class="lang-toggle__opt" data-opt="th">ไทย</span>
+        </button>
+        <a href="/" class="ask-sidebar__exit">
+          <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+          <span data-en="Back to LITALK" data-th="กลับไป LITALK">Back to LITALK</span>
+        </a>
       </div>
 
       <div class="ask-account" id="ask-account" hidden>
@@ -89,11 +109,7 @@
           </div>
         </div>
         <div class="ask-topbar__right">
-          <button class="lang-toggle" data-active="en" type="button" aria-label="Switch language / เปลี่ยนภาษา" title="EN / ไทย">
-            <span class="lang-toggle__thumb" aria-hidden="true"></span>
-            <span class="lang-toggle__opt active" data-opt="en">EN</span>
-            <span class="lang-toggle__opt" data-opt="th">ไทย</span>
-          </button>
+          <button type="button" class="ask-icon-btn" id="ask-topbar-new-chat" aria-label="New chat" title="New chat"><i class="fas fa-pen-to-square"></i></button>
         </div>
       </header>
 
@@ -181,6 +197,6 @@
   <script src="js/service-notice.js?v=20260727h" defer></script>
   <script src="js/markdown.js?v=20260727g" defer></script>
   <script src="js/main.js?v=20260727g" defer></script>
-  <script src="js/ask.js?v=20260826a" defer></script>
+  <script src="js/ask.js?v=20260826b" defer></script>
 </body>
 </html>
