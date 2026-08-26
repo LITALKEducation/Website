@@ -1,101 +1,37 @@
 /**
- * LITALK Education — ask.js
- * The /ask page: an English vocabulary tutor.
- *
- * The composer follows the shadcn @blocks-so/ai-01 block — one centred pill
- * holding the input and its controls in a single grid, restructuring from
- * [leading | input | trailing] to stacked [input / footer] once the text
- * outgrows a line, with the send button appearing only when there is
- * something to send. Reimplemented in plain JS/CSS: this site has no React
- * or Tailwind, and a build pipeline for one page would cost more than the
- * block is worth.
- *
- * Shares the visitor id and terms consent with the floating assistant via
- * window.litalkChat (defined in main.js, which loads first) — accepting the
- * terms in either place covers both.
+ * Ask LITALK — immersive AI learning workspace.
+ * Keeps the existing chat API, consent model, Auth0 session, saved history,
+ * visitor id and shared Markdown renderer while presenting them as a modern
+ * full-page AI conversation experience.
  */
-
 'use strict';
 
 (function initAskPage() {
   const form = document.getElementById('ask-form');
-  if (!form) return; // not the /ask page
+  if (!form) return;
 
   const chat = window.litalkChat;
+  if (!chat) return;
+
+  const body = document.body;
   const stage = document.getElementById('ask-stage');
+  const workspace = document.getElementById('ask-workspace');
   const box = document.getElementById('ask-composer-box');
   const thread = document.getElementById('ask-thread');
   const input = document.getElementById('ask-input');
-  // Educational hand-offs (for example TCAS Fortune) may prefill a draft.
-  // The visitor still reviews and explicitly sends it; nothing is submitted
-  // automatically, and the query parameter is not persisted by this page.
-  const handoffPrompt = new URLSearchParams(window.location.search).get('prompt');
-  if (handoffPrompt && handoffPrompt.length <= 500) input.value = handoffPrompt;
   const sendBtn = document.getElementById('ask-send');
   const suggestBtn = document.getElementById('ask-suggest-btn');
   const menu = document.getElementById('ask-menu');
+  const newChatBtn = document.getElementById('ask-new-chat');
+  const sidebar = document.getElementById('ask-sidebar');
+  const sidebarToggle = document.getElementById('ask-sidebar-toggle');
+  const sidebarClose = document.getElementById('ask-sidebar-close');
+  const sidebarBackdrop = document.getElementById('ask-sidebar-backdrop');
+
   const consent = document.getElementById('ask-consent');
   const consentAccept = document.getElementById('ask-consent-accept');
   const consentSignInRow = document.getElementById('ask-consent-signin-row');
   const consentSignIn = document.getElementById('ask-consent-signin');
-
-  const STRINGS = {
-    en: { pending: 'Looking it up...', genericError: 'Something went wrong. Please try again.', connError: "Couldn't reach the assistant. Please try again.", lilly: 'Nong Lilly' },
-    th: { pending: 'กำลังค้นหา...', genericError: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง', connError: 'เชื่อมต่อระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', lilly: 'น้องลิลลี่' },
-  };
-  const lang = () => (typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en');
-  const t = (key) => (STRINGS[lang()] || STRINGS.en)[key];
-
-  let conversationId = null;
-  let busy = false;
-  // The in-progress typewriter, so a new question can cut the previous
-  // answer short instead of leaving two replies animating at once.
-  let typing = null;
-
-  /* ---- Composer shape -------------------------------------------------- *
-   * Same trigger as the block: expand once the text can no longer sit
-   * comfortably on one line, measured by length or an explicit newline. */
-  const EXPAND_AT = 100;
-
-  function syncComposer() {
-    const value = input.value;
-    box.classList.toggle('is-expanded', value.length > EXPAND_AT || value.includes('\n'));
-    sendBtn.hidden = !value.trim() || busy;
-
-    input.style.height = 'auto';
-    input.style.height = `${input.scrollHeight}px`;
-  }
-
-  // Clicking anywhere in the pill focuses the input, which is what the
-  // block's `cursor: text` on the container implies.
-  box.addEventListener('mousedown', (event) => {
-    if (event.target.closest('button, a')) return;
-    event.preventDefault();
-    input.focus();
-  });
-
-
-  /* ---- Optional sign-in ------------------------------------------------ *
-   * A LITALK student signing in with their @litalkeducation.com account has
-   * their questions filed under their student id, so they can read them back
-   * here or from the portal. Everyone else keeps using the page anonymously:
-   * it is also for people deciding whether to enrol, and a sign-in wall would
-   * turn them away.
-   *
-   * Same Auth0 client settings as the portal (js/student-portal.js) so one
-   * session covers both — signing in there signs you in here. */
-  const AUDIENCE = 'https://admin.litalkeducation.com/files-api';
-  const auth0Client =
-    typeof auth0 !== 'undefined'
-      ? new auth0.Auth0Client({
-          domain: 'auth.litalkeducation.com',
-          clientId: 'NmKUxriv62IDG9yQQ3CZqkVp2ujkjdbp',
-          useRefreshTokens: true,
-          useRefreshTokensFallback: true,
-          cacheLocation: 'localstorage',
-          authorizationParams: { redirect_uri: window.location.href.split('?')[0], audience: AUDIENCE },
-        })
-      : null;
 
   const account = document.getElementById('ask-account');
   const accountText = document.getElementById('ask-account-text');
@@ -105,14 +41,134 @@
   const historyList = document.getElementById('ask-history-list');
   const historyClose = document.getElementById('ask-history-close');
 
+  const STRINGS = {
+    en: {
+      pending: 'Thinking…',
+      genericError: 'Something went wrong. Please try again.',
+      connError: "I couldn't reach Ask LITALK. Please try again.",
+      assistant: 'Ask LITALK',
+      loading: 'Loading chats…',
+      noHistory: 'No saved chats yet.',
+      historyError: "Couldn't load your chats.",
+      signedIn: 'Chats saved to',
+      signedOut: 'Sign in to keep your chats across devices',
+    },
+    th: {
+      pending: 'กำลังคิด…',
+      genericError: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+      connError: 'เชื่อมต่อ Ask LITALK ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+      assistant: 'Ask LITALK',
+      loading: 'กำลังโหลดแชท…',
+      noHistory: 'ยังไม่มีแชทที่บันทึกไว้',
+      historyError: 'โหลดประวัติแชทไม่สำเร็จ',
+      signedIn: 'บันทึกแชทในบัญชี',
+      signedOut: 'เข้าสู่ระบบเพื่อเก็บแชทไว้ใช้ต่อบนอุปกรณ์อื่น',
+    },
+  };
+
+  const lang = () => (typeof window.litalkGetLang === 'function' ? window.litalkGetLang() : 'en');
+  const t = (key) => (STRINGS[lang()] || STRINGS.en)[key];
+  const renderMarkdown = (text) => (typeof window.litalkMarkdown === 'function' ? window.litalkMarkdown(text) : text);
+
+  let conversationId = null;
+  let busy = false;
+  let typing = null;
   let authToken = null;
   let studentId = null;
 
-  // Auth0's silent auth can hang rather than reject in in-app browsers that
-  // restrict storage — the portal hit this too. Race it so a stuck call
-  // leaves the page anonymous instead of never resolving.
+  const handoffPrompt = new URLSearchParams(window.location.search).get('prompt');
+  if (handoffPrompt && handoffPrompt.length <= 1000) input.value = handoffPrompt;
+
+  function openSidebar() {
+    body.classList.add('ask-sidebar-open');
+    if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeSidebar() {
+    body.classList.remove('ask-sidebar-open');
+    if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  if (sidebarToggle) sidebarToggle.addEventListener('click', openSidebar);
+  if (sidebarClose) sidebarClose.addEventListener('click', closeSidebar);
+  if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && body.classList.contains('ask-sidebar-open')) closeSidebar();
+  });
+
+  function syncComposer() {
+    const value = input.value;
+    const expanded = value.length > 95 || value.includes('\n');
+    box.classList.toggle('is-expanded', expanded);
+    sendBtn.hidden = !value.trim() || busy;
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, 190)}px`;
+  }
+
+  box.addEventListener('mousedown', (event) => {
+    if (event.target.closest('button, a')) return;
+    event.preventDefault();
+    input.focus();
+  });
+
+  function startNewChat(options = {}) {
+    if (typing) {
+      typing.finish();
+      typing = null;
+    }
+    conversationId = null;
+    thread.textContent = '';
+    stage.classList.remove('has-thread');
+    input.value = '';
+    syncComposer();
+    closeMenu();
+    closeSidebar();
+    if (options.focus !== false) input.focus();
+    if (workspace) workspace.scrollTo({ top: 0, behavior: options.instant ? 'auto' : 'smooth' });
+  }
+
+  if (newChatBtn) newChatBtn.addEventListener('click', () => startNewChat());
+
+  /* Auth0 — same session as the student portal. */
+  const AUDIENCE = 'https://admin.litalkeducation.com/files-api';
+  const auth0Client = typeof auth0 !== 'undefined'
+    ? new auth0.Auth0Client({
+        domain: 'auth.litalkeducation.com',
+        clientId: 'NmKUxriv62IDG9yQQ3CZqkVp2ujkjdbp',
+        useRefreshTokens: true,
+        useRefreshTokensFallback: true,
+        cacheLocation: 'localstorage',
+        authorizationParams: {
+          redirect_uri: window.location.href.split('?')[0],
+          audience: AUDIENCE,
+        },
+      })
+    : null;
+
   function withTimeout(promise, ms) {
-    return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))]);
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+    ]);
+  }
+
+  function syncAccount() {
+    if (!account || !auth0Client) return;
+    const gated = consent && !consent.hidden;
+    account.hidden = gated;
+    if (consentSignInRow) consentSignInRow.hidden = Boolean(studentId);
+
+    const signedIn = Boolean(studentId);
+    if (signInBtn) signInBtn.hidden = signedIn;
+    if (historyBtn) historyBtn.hidden = !signedIn;
+    if (historyPanel) historyPanel.hidden = !signedIn;
+
+    if (accountText) {
+      accountText.textContent = signedIn
+        ? `${t('signedIn')} ${studentId}`
+        : t('signedOut');
+    }
   }
 
   async function restoreSession() {
@@ -125,119 +181,111 @@
       authToken = await withTimeout(auth0Client.getTokenSilently(), 6000);
       const user = await auth0Client.getUser().catch(() => null);
       studentId = user && user.email ? user.email.split('@')[0] : null;
-    } catch (err) {
+    } catch (error) {
       authToken = null;
       studentId = null;
     }
-    // A signed-in student accepted the AI Chat Terms when they registered,
-    // and the server no longer asks them for consent — so drop the gate if
-    // it went up before the session resolved.
+
     if (studentId && consent && !consent.hidden) hideConsent();
     syncAccount();
+    if (studentId) openHistory({ quiet: true });
   }
 
-  function syncAccount() {
-    if (!auth0Client) return; // SDK blocked — leave the strip hidden entirely
-    // The gate covers this area, so while it is up the sign-in offer lives
-    // inside the gate instead. Showing both would put an unclickable button
-    // underneath an overlay.
-    const gated = consent && !consent.hidden;
-    account.hidden = gated;
-    if (consentSignInRow) consentSignInRow.hidden = Boolean(studentId);
-    const signedIn = Boolean(studentId);
-    signInBtn.hidden = signedIn;
-    historyBtn.hidden = !signedIn;
-    accountText.textContent = signedIn
-      ? (lang() === 'th' ? `บันทึกไว้ในบัญชี ${studentId}` : `Saving to ${studentId}`)
-      : (lang() === 'th' ? 'เข้าสู่ระบบเพื่อเก็บคำถามไว้ดูภายหลัง' : 'Sign in to keep your questions');
-  }
-
-  const signIn = () => {
+  function signIn() {
     if (auth0Client) auth0Client.loginWithRedirect();
-  };
+  }
+
   if (signInBtn) signInBtn.addEventListener('click', signIn);
   if (consentSignIn) consentSignIn.addEventListener('click', signIn);
 
-  /* ---- Saved questions -------------------------------------------------- */
-  async function openHistory() {
+  async function openHistory({ quiet = false } = {}) {
+    if (!historyPanel || !historyList || !studentId || !authToken) return;
     historyPanel.hidden = false;
-    historyList.textContent = lang() === 'th' ? 'กำลังโหลด...' : 'Loading...';
+    historyList.textContent = t('loading');
+
     try {
-      const res = await fetch(`${chat.API}/portal/${encodeURIComponent(studentId)}/chats?scope=vocab`, {
+      const response = await fetch(`${chat.API}/portal/${encodeURIComponent(studentId)}/chats?scope=vocab`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      const data = await res.json().catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
       const rows = data.conversations || [];
       historyList.textContent = '';
+
       if (!rows.length) {
-        historyList.textContent = lang() === 'th' ? 'ยังไม่มีคำถามที่บันทึกไว้' : 'No saved questions yet.';
+        const empty = document.createElement('div');
+        empty.className = 'ask-history__note';
+        empty.textContent = t('noHistory');
+        historyList.appendChild(empty);
         return;
       }
+
       rows.forEach((row) => {
         const item = document.createElement('button');
         item.type = 'button';
         item.className = 'ask-history__item';
-        const q = document.createElement('span');
-        q.className = 'ask-history__q';
-        q.textContent = row.firstMessage || '—';
+
+        const question = document.createElement('span');
+        question.className = 'ask-history__q';
+        question.textContent = row.firstMessage || '—';
+
         const meta = document.createElement('span');
         meta.className = 'ask-history__meta';
-        meta.textContent = `${String(row.startedAt || '').slice(0, 16)} · ${row.messages}`;
-        item.append(q, meta);
+        const date = String(row.startedAt || '').slice(0, 10);
+        const messages = Number(row.messages || 0);
+        meta.textContent = [date, messages ? `${messages} messages` : ''].filter(Boolean).join(' · ');
+
+        item.append(question, meta);
         item.addEventListener('click', () => loadConversation(row.conversationId));
         historyList.appendChild(item);
       });
-    } catch (err) {
-      historyList.textContent = lang() === 'th' ? 'โหลดไม่สำเร็จ' : "Couldn't load your questions.";
+    } catch (error) {
+      historyList.textContent = t('historyError');
+      if (!quiet) console.warn('Ask LITALK history failed to load');
     }
   }
 
   async function loadConversation(id) {
+    if (!studentId || !authToken || !id) return;
     try {
-      const res = await fetch(`${chat.API}/portal/${encodeURIComponent(studentId)}/chats/${encodeURIComponent(id)}`, {
+      const response = await fetch(`${chat.API}/portal/${encodeURIComponent(studentId)}/chats/${encodeURIComponent(id)}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.messages) return;
-      // Replaying a past conversation replaces the thread and resumes it, so
-      // a follow-up question continues where it left off.
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !Array.isArray(data.messages)) return;
+
       if (typing) typing.finish();
       thread.textContent = '';
+      stage.classList.add('has-thread');
       conversationId = id;
-      data.messages.forEach((m) => appendMessage(m.role === 'user' ? 'user' : 'assistant', m.content, { instant: true }));
-      historyPanel.hidden = true;
-    } catch (err) {
-      /* leave the panel open so they can try another one */
+      data.messages.forEach((message) => {
+        appendMessage(message.role === 'user' ? 'user' : 'assistant', message.content, { instant: true, noScroll: true });
+      });
+      closeSidebar();
+      requestAnimationFrame(() => {
+        if (workspace) workspace.scrollTop = workspace.scrollHeight;
+        input.focus();
+      });
+    } catch (error) {
+      /* Keep history available so another conversation can be selected. */
     }
   }
 
-  if (historyBtn) historyBtn.addEventListener('click', openHistory);
+  if (historyBtn) historyBtn.addEventListener('click', () => openHistory());
   if (historyClose) historyClose.addEventListener('click', () => { historyPanel.hidden = true; });
 
-  document.addEventListener('litalk:langchange', syncAccount);
-  restoreSession();
-
-  /* ---- Terms gate ------------------------------------------------------ */
+  /* Consent gate shared with the floating LITALK assistant. */
   function showConsent() {
     if (!consent) return;
     consent.hidden = false;
-    syncAccount();
-    // inert, not just disabled: the composer must also drop out of the tab
-    // order so the gate can't be skipped with a keyboard.
     form.setAttribute('inert', '');
     closeMenu();
-    // On a phone the gate is a real dialog over the page, so the page behind
-    // it must not scroll. Harmless on desktop, where it is an inline panel.
-    document.body.classList.add('ask-gated');
-    // Move focus into the dialog, or a keyboard user is left on the inert
-    // composer with nothing to tab to.
+    syncAccount();
     if (consentAccept) consentAccept.focus({ preventScroll: true });
   }
 
   function hideConsent() {
     if (consent) consent.hidden = true;
     form.removeAttribute('inert');
-    document.body.classList.remove('ask-gated');
     syncAccount();
     input.focus();
   }
@@ -250,44 +298,47 @@
     });
   }
 
-  /* ---- Suggestion menu -------------------------------------------------- */
+  /* Prompt tools */
   function openMenu() {
+    if (!menu || !suggestBtn) return;
     menu.hidden = false;
     suggestBtn.setAttribute('aria-expanded', 'true');
   }
 
   function closeMenu() {
+    if (!menu || !suggestBtn) return;
     menu.hidden = true;
     suggestBtn.setAttribute('aria-expanded', 'false');
   }
 
-  suggestBtn.addEventListener('click', (event) => {
-    event.stopPropagation();
-    if (menu.hidden) openMenu();
-    else closeMenu();
-  });
+  if (suggestBtn) {
+    suggestBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (menu.hidden) openMenu(); else closeMenu();
+    });
+  }
 
   document.addEventListener('click', (event) => {
-    if (!menu.hidden && !menu.contains(event.target) && event.target !== suggestBtn) closeMenu();
+    if (menu && !menu.hidden && !menu.contains(event.target) && event.target !== suggestBtn) closeMenu();
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !menu.hidden) {
+    if (event.key === 'Escape' && menu && !menu.hidden) {
       closeMenu();
       suggestBtn.focus();
     }
   });
 
-  menu.querySelectorAll('.ask-menu__item').forEach((item) => {
-    item.addEventListener('click', () => {
-      closeMenu();
-      // Fills the composer rather than sending straight away, so the visitor
-      // can see the shape of a good question and edit it before asking.
-      input.value = item.getAttribute('data-q') || '';
-      input.focus();
-      syncComposer();
+  if (menu) {
+    menu.querySelectorAll('.ask-menu__item').forEach((item) => {
+      item.addEventListener('click', () => {
+        closeMenu();
+        input.value = item.getAttribute('data-q') || '';
+        syncComposer();
+        input.focus();
+      });
     });
-  });
+  }
 
   document.querySelectorAll('[data-ask-prompt]').forEach((item) => {
     item.addEventListener('click', () => {
@@ -297,52 +348,67 @@
     });
   });
 
-  // Markdown rendering lives in js/markdown.js, shared with the /ask page
-  // and the student portal so all three render the same subset.
-  const renderMarkdown = (text) => window.litalkMarkdown(text);
+  function scrollToLatest(behavior = 'smooth') {
+    if (!workspace) return;
+    requestAnimationFrame(() => workspace.scrollTo({ top: workspace.scrollHeight, behavior }));
+  }
 
-  /* ---- Thread ---------------------------------------------------------- */
-  function appendMessage(role, text, options) {
+  function appendMessage(role, text, options = {}) {
     stage.classList.add('has-thread');
+
     const row = document.createElement('div');
     row.className = `ask-msg ask-msg--${role}`;
 
     if (role !== 'user') {
+      const avatar = document.createElement('div');
+      avatar.className = 'ask-msg__avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+      const icon = document.createElement('i');
+      icon.className = role === 'error' ? 'fas fa-triangle-exclamation' : 'fas fa-sparkles';
+      avatar.appendChild(icon);
+      row.appendChild(avatar);
+    }
+
+    const content = document.createElement('div');
+    content.className = 'ask-msg__content';
+
+    if (role !== 'user') {
       const who = document.createElement('div');
       who.className = 'ask-msg__who';
-      who.textContent = t('lilly');
-      row.appendChild(who);
+      who.textContent = t('assistant');
+      content.appendChild(who);
     }
 
-    const body = document.createElement('div');
-    body.className = 'ask-msg__body';
-    row.appendChild(body);
+    const messageBody = document.createElement('div');
+    messageBody.className = 'ask-msg__body';
+    content.appendChild(messageBody);
+    row.appendChild(content);
     thread.appendChild(row);
 
-    if (role === 'assistant' && options && options.instant) {
-      // Replayed from history — it isn't arriving now, so typing it out
-      // would misrepresent an old answer as a fresh one.
-      body.innerHTML = renderMarkdown(text);
-    } else if (role === 'assistant') {
-      // Typed out rather than dropped in whole — see litalkTypewriter.
-      typing = window.litalkTypewriter(body, renderMarkdown(text), {
-        onTick: () => row.scrollIntoView({ block: 'nearest' }),
-        onDone: () => {
-          typing = null;
-        },
+    if (role === 'assistant' && options.instant) {
+      messageBody.innerHTML = renderMarkdown(text);
+    } else if (role === 'assistant' && typeof window.litalkTypewriter === 'function') {
+      typing = window.litalkTypewriter(messageBody, renderMarkdown(text), {
+        onTick: () => scrollToLatest('auto'),
+        onDone: () => { typing = null; },
       });
+    } else if (role === 'assistant') {
+      messageBody.innerHTML = renderMarkdown(text);
     } else {
-      body.textContent = text;
+      messageBody.textContent = text;
     }
 
-    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (!options.noScroll) scrollToLatest(role === 'pending' ? 'auto' : 'smooth');
     return row;
   }
 
-  /* ---- Send ------------------------------------------------------------ */
   async function ask(message) {
     if (busy || !message) return;
-    if (typing) typing.finish();
+    if (typing) {
+      typing.finish();
+      typing = null;
+    }
+
     appendMessage('user', message);
     input.value = '';
     busy = true;
@@ -350,7 +416,7 @@
     const pending = appendMessage('pending', t('pending'));
 
     try {
-      const res = await fetch(`${chat.API}/chat/ask`, {
+      const response = await fetch(`${chat.API}/chat/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -364,11 +430,11 @@
           termsVersion: chat.hasConsent() ? chat.TERMS_VERSION : undefined,
         }),
       });
-      const data = await res.json().catch(() => ({}));
+
+      const data = await response.json().catch(() => ({}));
       pending.remove();
-      if (!res.ok || data.status === 'error') {
-        // Terms revised (or never recorded server-side): re-prompt rather
-        // than showing an error the reader can't act on.
+
+      if (!response.ok || data.status === 'error') {
         if (data.needsConsent) {
           localStorage.removeItem(chat.CONSENT_KEY);
           showConsent();
@@ -377,9 +443,11 @@
         appendMessage('error', data.message || t('genericError'));
         return;
       }
-      conversationId = data.conversationId;
+
+      conversationId = data.conversationId || conversationId;
       appendMessage('assistant', data.reply || '');
-    } catch (err) {
+      if (studentId) openHistory({ quiet: true });
+    } catch (error) {
       pending.remove();
       appendMessage('error', t('connError'));
     } finally {
@@ -395,29 +463,25 @@
   });
 
   input.addEventListener('input', syncComposer);
-
-  // Enter sends, Shift+Enter makes a new line — the convention every chat
-  // input on this site already follows.
   input.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
       event.preventDefault();
       form.requestSubmit();
     }
   });
 
-  // The "Nong Lilly" byline is rendered text, so it has to be re-rendered
-  // when the site language changes rather than swapped by the data-en sweep.
   document.addEventListener('litalk:langchange', () => {
-    thread.querySelectorAll('.ask-msg__who').forEach((el) => {
-      el.textContent = t('lilly');
+    thread.querySelectorAll('.ask-msg__who').forEach((element) => {
+      element.textContent = t('assistant');
     });
+    syncAccount();
+    if (studentId) openHistory({ quiet: true });
   });
 
-  // The overlay covers the page, but the composer must also stop accepting
-  // input behind it — otherwise a keyboard user can still type and send.
   document.addEventListener('litalk:serviceblocked', () => {
     form.setAttribute('inert', '');
   });
 
   syncComposer();
+  restoreSession();
 })();
