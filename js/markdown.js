@@ -22,6 +22,10 @@
   const safeUrl = (value, image) => {
     const v = String(value || '').trim();
     if (!v) return false;
+    // Browsers strip ASCII tabs/newlines/control characters while resolving
+    // URLs. Reject them before scheme validation so values such as
+    // "java\nscript:" cannot be normalized back into javascript: on click.
+    if (/[\u0000-\u001F\u007F]/.test(v)) return false;
     if (!/^[a-z][a-z0-9+.-]*:/i.test(v)) return true;
     if (image) return /^https?:/i.test(v) || /^data:image\/(png|jpe?g|gif|webp|avif);base64,/i.test(v);
     return /^(https?:|mailto:|tel:)/i.test(v);
@@ -200,7 +204,7 @@
         closeAll();
         const header = splitRow(trimmed);
         const align = alignments(lines[++i]);
-        const cell = (value, index, tag) => `<${tag}${align[index] ? ` style="text-align:${align[index]}"` : ''}>${inline(value)}</${tag}>`;
+        const cell = (value, index, tag) => `<${tag}${align[index] ? ` align="${align[index]}"` : ''}>${inline(value)}</${tag}>`;
         const body = [];
         while (i + 1 < lines.length && lines[i + 1].includes('|') && lines[i + 1].trim()) body.push(splitRow(lines[++i]));
         out.push(`<div class="md-table-wrap"><table><thead><tr>${header.map((v,n) => cell(v,n,'th')).join('')}</tr></thead><tbody>${body.map((r) => `<tr>${r.map((v,n) => cell(v,n,'td')).join('')}</tr>`).join('')}</tbody></table></div>`);
@@ -220,7 +224,7 @@
         if (current && lists.length === depth + 1 && current.tag !== tag) {
           if (current.liOpen) out.push('</li>');
           const old = lists.pop();
-          out.push(`</${old.tag}>`); // fixed: never stringify the list-state object
+          out.push(`</${old.tag}>`);
         }
         while (lists.length < depth + 1) {
           out.push(`<${tag}>`);
@@ -315,7 +319,6 @@
   };
 
   function installRuntimeFixes() {
-    // Do not display temporary server-side auth diagnostics to end users.
     if (typeof window.renderPortalDataError === 'function' && !window.renderPortalDataError.__litalkHardened) {
       const originalError = window.renderPortalDataError;
       const wrapped = function (message) { return originalError(message, null); };
@@ -323,9 +326,6 @@
       window.renderPortalDataError = wrapped;
     }
 
-    // Avoid the legacy email-local-part identity guess when /whoami cannot
-    // resolve the authenticated account. On success call the original resolver
-    // so it still populates its private portalAuthToken cache for downloads.
     if (typeof window.resolveAuthedStudentId === 'function' &&
         typeof window.getPortalToken === 'function' &&
         typeof window.resolveStudentIdFromToken === 'function' &&
@@ -337,8 +337,6 @@
         if (!token) return null;
         const id = await originalWhoami(token);
         if (!id) return null;
-        // Make the second whoami call inside the original deterministic, while
-        // retaining the original function's private token/account setup.
         window.resolveStudentIdFromToken = async () => id;
         try { return await originalResolve(); }
         finally { window.resolveStudentIdFromToken = originalWhoami; }
@@ -347,7 +345,6 @@
       window.resolveAuthedStudentId = hardened;
     }
 
-    // Public mobile drawer: rotating/resizing to desktop must release scroll.
     const hamburger = document.getElementById('hamburger');
     const drawer = document.getElementById('mobile-drawer');
     if (hamburger && drawer && !hamburger.dataset.resizeGuard) {
@@ -362,8 +359,6 @@
       }, { passive: true });
     }
 
-    // The newsletter has no backend endpoint yet. Prevent the old handler from
-    // claiming a successful subscription and state the real availability.
     const newsletter = document.getElementById('newsletter-form');
     if (newsletter && !newsletter.dataset.realSubmitGuard) {
       newsletter.dataset.realSubmitGuard = '1';
@@ -387,7 +382,6 @@
       }, true);
     }
 
-    // Repository accessibility baseline is >=44px for coarse pointers.
     if (!document.getElementById('litalk-runtime-fixes-style')) {
       const style = document.createElement('style');
       style.id = 'litalk-runtime-fixes-style';
