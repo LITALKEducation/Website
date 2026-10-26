@@ -7,13 +7,6 @@
   const surfaces = (document.body?.getAttribute('data-service-surface') || '')
     .split(',').map((value) => value.trim()).filter(Boolean);
 
-  if (surfaces.includes('ask') && !document.querySelector('link[data-litalk-ask-consent]')) {
-    const styles = document.createElement('link');
-    styles.rel = 'stylesheet';
-    styles.href = '/css/ask-consent.css?v=20260826b';
-    styles.dataset.litalkAskConsent = 'shared';
-    document.head.appendChild(styles);
-  }
 
   if (location.pathname.startsWith('/courses') && !document.querySelector('script[data-litalk-course-fixes]')) {
     const courseFixes = document.createElement('script');
